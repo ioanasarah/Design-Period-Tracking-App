@@ -28,12 +28,14 @@ class DatePickerExample extends StatefulWidget {
 class _DatePickerExampleState extends State<DatePickerExample> {
   DateTime? selectedDate;
 
+  DateTime now = new DateTime.now();
+
   Future<void> _selectDate() async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: DateTime(2021, 7, 25),
-      firstDate: DateTime(2021),
-      lastDate: DateTime(2022),
+      initialDate: DateTime(now.year, now.month, now.day),
+      firstDate: DateTime(1999),
+      lastDate: DateTime(now.year, now.month, now.day),
     );
 
     setState(() {
@@ -52,8 +54,42 @@ class _DatePickerExampleState extends State<DatePickerExample> {
               ? '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}'
               : 'No date selected',
         ),
-        OutlinedButton(onPressed: _selectDate, child: const Text('Select Date')),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            OutlinedButton(onPressed: _selectDate, child: const Text('Select Date')),
+            OutlinedButton(
+              onPressed: () {
+                Navigator.push(
+                context,
+              MaterialPageRoute(
+                builder: (context) => const PlaceholderPage(),
+      ),
+    );
+  },
+  child: const Text("Submit"),
+),
+          ],
+        ),
+        
       ],
+      
+    );
+  }
+}
+
+class PlaceholderPage extends StatelessWidget {
+  const PlaceholderPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Placeholder'),
+      ),
+      body: const Center(
+        child: Text('Next page placeholder'),
+      ),
     );
   }
 }
