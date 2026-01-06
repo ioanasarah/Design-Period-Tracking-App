@@ -1,7 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'dart:convert';
+
 
 /// Flutter code sample for basic [showDatePicker].
+
+//load JSON file
+Future<List<Map<String, dynamic>>> loadCycleData() async {
+  final jsonString = await rootBundle.loadString('assets/phase_info.json');
+  final List<dynamic> jsonList = json.decode(jsonString);
+  return jsonList.cast<Map<String, dynamic>>();
+}
+
 
 void main() {
   runApp(
@@ -71,13 +82,17 @@ class _DatePickerExampleState extends State<DatePickerExample> {
             ),
             SelectButton(
               label: 'Submit',
-              onPressed: () {
+              onPressed: () async { // async pentru await
                 if (selectedDate == null) return;
-                context.read<Calculate>().calculateNextPeriod(selectedDate!);
-                context.read<Calculate>().calculateDayOfCycle(selectedDate!);
+                
+                final calc = context.read<Calculate>();
+                calc.calculateNextPeriod(selectedDate!);
+                calc.calculateDayOfCycle(selectedDate!);
+                await calc.calculatePhase();
+
                 Navigator.push(
                 context,
-              MaterialPageRoute(
+                MaterialPageRoute(
                 builder: (context) => const PlaceholderPage(),
       ),
     );
@@ -135,6 +150,7 @@ class SelectButton extends StatelessWidget {
 class Calculate extends ChangeNotifier {
   DateTime? nextPeriodDate;
   int? difference;
+  String? phase;
   void calculateNextPeriod(DateTime lastPeriodDate) {
     nextPeriodDate = lastPeriodDate.add(const Duration(days: 28));
     notifyListeners();}
@@ -142,6 +158,16 @@ class Calculate extends ChangeNotifier {
   void calculateDayOfCycle(DateTime lastPeriodDate) {
     final today = DateTime.now();
     difference = today.difference(lastPeriodDate).inDays;
+    notifyListeners();
+  }
+  Future <void> calculatePhase() async {
+    if (difference == null) return;
+    final cycleData = await loadCycleData();
+    final entry = cycleData.firstWhere(
+      (e) => e["Day of cycle"] == difference,
+      orElse: () => {"Phase": "Unknown"},
+    );
+    phase = entry["Phase"];
     notifyListeners();
   }
   }
@@ -154,31 +180,37 @@ class PlaceholderPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final nextPeriodDate = context.watch<Calculate>().nextPeriodDate;
     final difference = context.watch<Calculate>().difference;
+    final phase = context.watch<Calculate>().phase;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Placeholder'),
       ),
-      body: Column(
-        children: [Text(
-          nextPeriodDate != null
-            ? 'Your next period is expected on: ${nextPeriodDate!.day}/${nextPeriodDate!.month}/${nextPeriodDate!.year}'
-            : 'Next period date not calculated yet.',
-        //child: ButtonWidget(),
-        //child: Text('Next page placeholder'),
-      ),
-      Text(difference != null
-            ? 'Days since last period: $difference'
-            : 'Day of cycle not calculated yet.',
-        ),
-      ],
+      body: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [Text(
+              nextPeriodDate != null
+                ? 'Your next period is expected on: ${nextPeriodDate!.day}/${nextPeriodDate!.month}/${nextPeriodDate!.year}'
+                : 'Next period date not calculated yet.',
+            //child: ButtonWidget(),
+            //child: Text('Next page placeholder'),
+          ),
+          Text(difference != null
+                ? 'Days since last period: $difference'
+                : 'Day of cycle not calculated yet.',
+            ),
+            Text(phase != null ? 'Current phase: $phase' : 'Phase not calculated yet.'
+            ),
+          ],
+          ),
+        ],
       ),
   
     );
   }
 }
-
-
-
 
 class ButtonWidget extends StatelessWidget {
           @override
