@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 /// Flutter code sample for basic [showDatePicker].
 
-void main() => runApp(const LogPage());
-
+void main() {
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => Calculate(),
+      child: const LogPage(),
+    ),
+  );
+}
 // whole first page
 class LogPage extends StatelessWidget {
   const LogPage({super.key});
@@ -65,6 +72,8 @@ class _DatePickerExampleState extends State<DatePickerExample> {
             SelectButton(
               label: 'Submit',
               onPressed: () {
+                if (selectedDate == null) return;
+                context.read<Calculate>().calculateNextPeriod(selectedDate!);
                 Navigator.push(
                 context,
               MaterialPageRoute(
@@ -83,6 +92,9 @@ class _DatePickerExampleState extends State<DatePickerExample> {
   }
 }
 
+
+
+// design + functionality for Select Date and Submit buttons 
 class SelectButton extends StatelessWidget {
   final String label; // 
   final VoidCallback onPressed;
@@ -119,22 +131,44 @@ class SelectButton extends StatelessWidget {
 }
 
 
+class Calculate extends ChangeNotifier {
+  DateTime? nextPeriodDate;
+  void calculateNextPeriod(DateTime lastPeriodDate) {
+    // Logic to calculate the next period date
+    nextPeriodDate = lastPeriodDate.add(const Duration(days: 28));
+    // Notify listeners or update state as needed
+    notifyListeners();
+  }
+
+}
+
+
 class PlaceholderPage extends StatelessWidget {
   const PlaceholderPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final nextPeriodDate = context.watch<Calculate>().nextPeriodDate;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Placeholder'),
       ),
       body: Center(
-        child: ButtonWidget()
-        //Text('Next page placeholder'),
+        child: Text(
+          nextPeriodDate != null
+            ? 'Your next period is expected on: ${nextPeriodDate!.day}/${nextPeriodDate!.month}/${nextPeriodDate!.year}'
+            : 'Next period date not calculated yet.',
+        //child: ButtonWidget(),
+        //child: Text('Next page placeholder'),
       ),
+      
+      ),
+  
     );
   }
 }
+
+
 
 
 class ButtonWidget extends StatelessWidget {
