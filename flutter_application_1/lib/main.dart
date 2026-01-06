@@ -58,8 +58,12 @@ class _DatePickerExampleState extends State<DatePickerExample> {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            OutlinedButton(onPressed: _selectDate, child: const Text('Select Date')),
-            OutlinedButton(
+            SelectButton(
+              label: 'Select Date',
+              onPressed: _selectDate,
+            ),
+            SelectButton(
+              label: 'Submit',
               onPressed: () {
                 Navigator.push(
                 context,
@@ -68,7 +72,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
       ),
     );
   },
-  child: const Text("Submit"),
+  //child: const Text("Submit"),
 ),
           ],
         ),
@@ -78,6 +82,42 @@ class _DatePickerExampleState extends State<DatePickerExample> {
     );
   }
 }
+
+class SelectButton extends StatelessWidget {
+  final String label; // 
+  final VoidCallback onPressed;
+
+  const SelectButton({
+    super.key,
+    required this.label, // cand chemi functia ai nevoie de asta neaparat
+    required this.onPressed,
+  });
+  @override
+  Widget build(BuildContext context) {
+    return InkWell (
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(100), // design
+      child:Container(
+        decoration: BoxDecoration( // design
+          color: Color.fromRGBO(164, 80, 80, 1), // design
+          borderRadius: BorderRadius.circular(100), // design
+        ),
+          padding: const EdgeInsets.symmetric( // design
+            horizontal: 16, // design
+            vertical: 10,),
+          child: Center(
+            child: Text(label, // do not change label pls
+          style: const TextStyle( // design
+            color: Colors.white,// design
+            fontSize: 14,// design
+          ),
+          ),
+          ),
+        ),
+    );
+  }
+}
+
 
 class PlaceholderPage extends StatelessWidget {
   const PlaceholderPage({super.key});
