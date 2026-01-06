@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 /// Flutter code sample for basic [showDatePicker].
 
-void main() => runApp(const DatePickerApp());
+void main() => runApp(const LogPage());
 
-
-class DatePickerApp extends StatelessWidget {
-  const DatePickerApp({super.key});
+// whole first page
+class LogPage extends StatelessWidget {
+  const LogPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +18,7 @@ class DatePickerApp extends StatelessWidget {
     );
   }
 }
-
+//calendar
 class DatePickerExample extends StatefulWidget {
   const DatePickerExample({super.key});
 
