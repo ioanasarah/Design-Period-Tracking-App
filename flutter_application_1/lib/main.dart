@@ -74,6 +74,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
               onPressed: () {
                 if (selectedDate == null) return;
                 context.read<Calculate>().calculateNextPeriod(selectedDate!);
+                context.read<Calculate>().calculateDayOfCycle(selectedDate!);
                 Navigator.push(
                 context,
               MaterialPageRoute(
@@ -133,14 +134,19 @@ class SelectButton extends StatelessWidget {
 
 class Calculate extends ChangeNotifier {
   DateTime? nextPeriodDate;
+  int? difference;
   void calculateNextPeriod(DateTime lastPeriodDate) {
-    // Logic to calculate the next period date
     nextPeriodDate = lastPeriodDate.add(const Duration(days: 28));
-    // Notify listeners or update state as needed
+    notifyListeners();}
+  
+  void calculateDayOfCycle(DateTime lastPeriodDate) {
+    final today = DateTime.now();
+    difference = today.difference(lastPeriodDate).inDays;
+   // print(difference);
     notifyListeners();
   }
+  }
 
-}
 
 
 class PlaceholderPage extends StatelessWidget {
@@ -149,19 +155,24 @@ class PlaceholderPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final nextPeriodDate = context.watch<Calculate>().nextPeriodDate;
+    final difference = context.watch<Calculate>().difference;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Placeholder'),
       ),
-      body: Center(
-        child: Text(
+      body: Column(
+        children: [Text(
           nextPeriodDate != null
             ? 'Your next period is expected on: ${nextPeriodDate!.day}/${nextPeriodDate!.month}/${nextPeriodDate!.year}'
             : 'Next period date not calculated yet.',
         //child: ButtonWidget(),
         //child: Text('Next page placeholder'),
       ),
-      
+      Text(difference != null
+            ? 'Days since last period: $difference'
+            : 'Day of cycle not calculated yet.',
+        ),
+      ],
       ),
   
     );
