@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 
 void main() => runApp(const DatePickerApp());
 
-// incercam git
 
 class DatePickerApp extends StatelessWidget {
   const DatePickerApp({super.key});
