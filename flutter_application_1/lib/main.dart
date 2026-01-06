@@ -142,11 +142,9 @@ class Calculate extends ChangeNotifier {
   void calculateDayOfCycle(DateTime lastPeriodDate) {
     final today = DateTime.now();
     difference = today.difference(lastPeriodDate).inDays;
-   // print(difference);
     notifyListeners();
   }
   }
-
 
 
 class PlaceholderPage extends StatelessWidget {
