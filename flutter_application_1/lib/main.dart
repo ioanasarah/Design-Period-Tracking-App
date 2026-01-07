@@ -7,31 +7,30 @@ void main() {
   runApp(
     ChangeNotifierProvider(
       create: (_) => Calculate(),
-      child: const LogPage(),
-      const BottomNavigationBarExampleApp(),
+      child: const MyApp(),
     ),
   );
 }
 
-/// Flutter code sample for basic [showDatePicker]
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: const BottomNavigationBarExample(),
+    );
+  }
+}
+
 
 //load JSON file
-
 Future<List<Map<String, dynamic>>> loadCycleData() async {
   final jsonString = await rootBundle.loadString('assets/phase_info.json');
   final List<dynamic> jsonList = json.decode(jsonString);
   return jsonList.cast<Map<String, dynamic>>();
 }
 
-class BottomNavigationBarExampleApp extends StatelessWidget {
-  const BottomNavigationBarExampleApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-   // return const MaterialApp(home: BottomNavigationBarExample());
-    return const MaterialApp(home: LogPage());
-  }
-}
 
 class BottomNavigationBarExample extends StatefulWidget {
   const BottomNavigationBarExample({super.key});
@@ -39,13 +38,17 @@ class BottomNavigationBarExample extends StatefulWidget {
   @override
   State<BottomNavigationBarExample> createState() => _BottomNavigationBarExampleState();
 }
+class _BottomNavigationBarExampleState
+    extends State<BottomNavigationBarExample> {
 
-class _BottomNavigationBarExampleState extends State<BottomNavigationBarExample> {
   int _selectedIndex = 0;
-  static const TextStyle optionStyle = TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
-  static const List<Widget> _widgetOptions = <Widget>[
-    LogPage(),
-    Placeholder(),
+
+  // Top-level pages only
+  final List<Widget> _pages = const [
+    LogPage(),          // Date selection
+    PlaceholderPage(),  // Day info
+    Center(child: Text('Insights')),
+    Center(child: Text('Settings')),
   ];
 
   void _onItemTapped(int index) {
@@ -57,38 +60,34 @@ class _BottomNavigationBarExampleState extends State<BottomNavigationBarExample>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      //appBar: AppBar(title: const Text('BottomNavigationBar Sample')),
-      body: Center(child: _widgetOptions.elementAt(_selectedIndex)),
+      body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed,
+        items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-            backgroundColor: Colors.red,
+            icon: Icon(Icons.calendar_today),
+            label: 'Log',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.business),
-            label: 'Business',
-            backgroundColor: Colors.green,
-          // ),
-          // BottomNavigationBarItem(
-          //   icon: Icon(Icons.school),
-          //   label: 'School',
-          //   backgroundColor: Colors.purple,
-          // ),
-          // BottomNavigationBarItem(
-          //   icon: Icon(Icons.settings),
-          //   label: 'Settings',
-          //   backgroundColor: Colors.pink,
-          // ),
+            icon: Icon(Icons.info),
+            label: 'Day Info',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.insights),
+            label: 'Insights',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Settings',
+          ),
         ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.amber[800],
-        onTap: _onItemTapped,
       ),
     );
   }
 }
+
 
 
 // whole first page
