@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: const BottomNavigationBarExample(),
+      home: const NavigationBar(),
     );
   }
 }
@@ -32,19 +32,18 @@ Future<List<Map<String, dynamic>>> loadCycleData() async {
   return jsonList.cast<Map<String, dynamic>>();
 }
 
-
-class BottomNavigationBarExample extends StatefulWidget {
-  const BottomNavigationBarExample({super.key});
+class NavigationBar extends StatefulWidget {
+  const NavigationBar({super.key});
 
   @override
-  State<BottomNavigationBarExample> createState() => _BottomNavigationBarExampleState();
+  State<NavigationBar> createState() => _NavigationBarState();
 }
 
-class CustomBottomNav extends StatelessWidget {
+class CustomNavigationBar extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onItemSelected;
 
-  const CustomBottomNav({
+  const CustomNavigationBar({
     super.key,
     required this.selectedIndex,
     required this.onItemSelected,
@@ -73,14 +72,14 @@ class CustomBottomNav extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _NavItem(
+          _NavButton(
             label: 'Home',
             // icon: 'assets/images/vector.svg',
             icon: Icons.home,
             isSelected: selectedIndex == 0,
             onTap: () => onItemSelected(0),
           ),
-          _NavItem(
+          _NavButton(
             label: 'Info',
             // icon: 'assets/images/vector.svg',
             // icon: Icon(Icons.info).toString(),
@@ -88,14 +87,14 @@ class CustomBottomNav extends StatelessWidget {
             isSelected: selectedIndex == 1,
             onTap: () => onItemSelected(1),
           ),
-          _NavItem(
+          _NavButton(
             label: 'Stats',
             // icon: 'assets/images/vector.svg',
             icon: Icons.school,
             isSelected: selectedIndex == 2,
             onTap: () => onItemSelected(2),
           ),
-          _NavItem(
+          _NavButton(
             label: 'Settings',
             // icon: 'assets/images/vector.svg',
             icon: Icons.business,
@@ -109,13 +108,13 @@ class CustomBottomNav extends StatelessWidget {
 }
 
 
-class _NavItem extends StatelessWidget {
+class _NavButton extends StatelessWidget {
   final String label;
   final IconData icon;
   final bool isSelected;
   final VoidCallback onTap;
 
-  const _NavItem({
+  const _NavButton({
     required this.label,
     required this.icon,
     required this.isSelected,
@@ -165,18 +164,18 @@ class _NavItem extends StatelessWidget {
 }
 
 
-class _BottomNavigationBarExampleState
-    extends State<BottomNavigationBarExample> {
+class _NavigationBarState
+    extends State<NavigationBar> {
 
   int _selectedIndex = 0;
 
   // Top-level pages only
-  final List<Widget> _pages = const [
-    LogPage(),          // Date selection
-    PlaceholderPage(),  // Day info
-    Center(child: Text('Insights')),
-    Center(child: Text('Settings')),
-  ];
+  List<Widget> get _pages => [
+  LogPage(onSubmit: () => _onItemTapped(1)),
+  const PlaceholderPage(),
+  const Center(child: Text('Insights')),
+  const Center(child: Text('Settings')),
+];
 
   void _onItemTapped(int index) {
     setState(() {
@@ -188,7 +187,7 @@ class _BottomNavigationBarExampleState
 Widget build(BuildContext context) {
   return Scaffold(
     body: _pages[_selectedIndex],
-    bottomNavigationBar: CustomBottomNav(
+    bottomNavigationBar: CustomNavigationBar(
       selectedIndex: _selectedIndex,
       onItemSelected: _onItemTapped,
     ),
@@ -196,20 +195,30 @@ Widget build(BuildContext context) {
 }
 }
 
+class NavigationState extends ChangeNotifier {
+  int index = 0;
+
+  void goTo(int i) {
+    index = i;
+    notifyListeners();
+  }
+}
 
 
 // whole first page
 class LogPage extends StatelessWidget {
-  const LogPage({super.key});
+  final VoidCallback onSubmit;
+  
+  const LogPage({
+    super.key, 
+    required this.onSubmit});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
+    return Scaffold(
         appBar: AppBar(title: const Text('When did your last period start?')),
-        body: const Center(child: DatePickerExample()),
-      ),
-    );
+        body: Center(child: DatePickerExample(onSubmit: onSubmit)),
+      );
   }
 }
 
@@ -217,8 +226,9 @@ class LogPage extends StatelessWidget {
 
 //calendar
 class DatePickerExample extends StatefulWidget {
-  const DatePickerExample({super.key});
+  final VoidCallback onSubmit;
 
+  const DatePickerExample({super.key, required this.onSubmit});
   @override
   State<DatePickerExample> createState() => _DatePickerExampleState();
 }
@@ -269,23 +279,21 @@ class _DatePickerExampleState extends State<DatePickerExample> {
                 calc.calculateDayOfCycle(selectedDate!);
                 await calc.calculatePhase();
 
-                Navigator.push(
-                context,
-                MaterialPageRoute(
-                builder: (context) => const PlaceholderPage(),
-      ),
-    );
-  },
-  //child: const Text("Submit"),
-),
+                widget.onSubmit();
+              
+              },
+            ),
           ],
-        ),
-        
-      ],
       
+      ),
+      ],
+
     );
   }
-}
+  //child: const Text("Submit"),
+
+  }
+
 
 // design + functionality for Select Date and Submit buttons 
 class SelectButton extends StatelessWidget {
@@ -353,9 +361,11 @@ class Calculate extends ChangeNotifier {
 
 class PlaceholderPage extends StatelessWidget {
   const PlaceholderPage({super.key});
+  
 
   @override
   Widget build(BuildContext context) {
+    //context.read<NavigationState>().goTo(1);
     final nextPeriodDate = context.watch<Calculate>().nextPeriodDate;
     final difference = context.watch<Calculate>().difference;
     final phase = context.watch<Calculate>().phase;
