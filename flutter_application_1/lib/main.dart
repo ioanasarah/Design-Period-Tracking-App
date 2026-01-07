@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:convert';
+import 'package:flutter_svg/flutter_svg.dart';
 
 void main() {
   runApp(
@@ -37,7 +38,8 @@ class BottomNavigationBarExample extends StatefulWidget {
   @override
   State<BottomNavigationBarExample> createState() => _BottomNavigationBarExampleState();
 }
-class _BottomNavigationBarExampleState extends State<BottomNavigationBarExample> {
+class _BottomNavigationBarExampleState
+    extends State<BottomNavigationBarExample> {
 
   int _selectedIndex = 0;
 
@@ -81,7 +83,6 @@ class _BottomNavigationBarExampleState extends State<BottomNavigationBarExample>
             label: 'Settings',
           ),
         ],
-        selectedItemColor: Colors.amber[800],
       ),
     );
   }
@@ -103,6 +104,8 @@ class LogPage extends StatelessWidget {
     );
   }
 }
+
+
 
 //calendar
 class DatePickerExample extends StatefulWidget {
@@ -240,6 +243,7 @@ class Calculate extends ChangeNotifier {
     notifyListeners();
   }
   }
+
 
 
 class PlaceholderPage extends StatelessWidget {
