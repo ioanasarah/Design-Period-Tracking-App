@@ -23,7 +23,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-
 //load JSON file
 Future<List<Map<String, dynamic>>> loadCycleData() async {
   final jsonString = await rootBundle.loadString('assets/phase_info.json');
@@ -31,15 +30,14 @@ Future<List<Map<String, dynamic>>> loadCycleData() async {
   return jsonList.cast<Map<String, dynamic>>();
 }
 
-
+//navigation bat
 class BottomNavigationBarExample extends StatefulWidget {
   const BottomNavigationBarExample({super.key});
 
   @override
   State<BottomNavigationBarExample> createState() => _BottomNavigationBarExampleState();
 }
-class _BottomNavigationBarExampleState
-    extends State<BottomNavigationBarExample> {
+class _BottomNavigationBarExampleState extends State<BottomNavigationBarExample> {
 
   int _selectedIndex = 0;
 
@@ -83,6 +81,7 @@ class _BottomNavigationBarExampleState
             label: 'Settings',
           ),
         ],
+        selectedItemColor: Colors.amber[800],
       ),
     );
   }
@@ -189,6 +188,7 @@ class SelectButton extends StatelessWidget {
     required this.label, // cand chemi functia ai nevoie de asta neaparat
     required this.onPressed,
   });
+
   @override
   Widget build(BuildContext context) {
     return InkWell (
@@ -280,163 +280,3 @@ class PlaceholderPage extends StatelessWidget {
     );
   }
 }
-
-Container(
-      decoration: BoxDecoration(
-          borderRadius : BorderRadius.only(
-            topLeft: Radius.circular(24),
-            topRight: Radius.circular(24),
-            bottomLeft: Radius.circular(24),
-            bottomRight: Radius.circular(24),
-          ),
-      boxShadow : [BoxShadow(
-          color: Color.fromRGBO(0, 0, 0, 0.11999999731779099),
-          offset: Offset(10,14),
-          blurRadius: 56
-      )],
-      color : Color.fromRGBO(255, 255, 255, 1),
-  ),
-      padding: EdgeInsets.symmetric(horizontal: 0, vertical: 10),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        
-        children: <Widget>[Container(
-      decoration: BoxDecoration(
-          
-  ),
-      padding: EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        
-        children: <Widget>[
-          Container(
-      decoration: BoxDecoration(
-          borderRadius : BorderRadius.only(
-            topLeft: Radius.circular(48),
-            topRight: Radius.circular(48),
-            bottomLeft: Radius.circular(48),
-            bottomRight: Radius.circular(48),
-          ),
-      color : Color.fromRGBO(48, 52, 55, 1),
-  ),
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        
-        children: <Widget>[
-          Container(
-      width: 24,
-      height: 24,
-      decoration: BoxDecoration(
-          
-  ),
-      child: Stack(
-        children: <Widget>[
-          Positioned(
-        top: 2,
-        left: 1.51025390625,
-        child: Container(
-      width: 20.979503631591797,
-      height: 20.527864456176758,
-      
-      child: Stack(
-        children: <Widget>[
-          Positioned(
-        top: 1.1641532182693481e-10,
-        left: 1.52658685692586e-8,
-        child: SvgPicture.asset(
-        'assets/images/vector.svg',
-        semanticsLabel: 'vector'
-      );
-      ),
-        ]
-      )
-    )
-      ),
-        ]
-      )
-    ), SizedBox(width : 8),
-Text('Home', textAlign: TextAlign.left, style: TextStyle(
-        color: Color.fromRGBO(242, 243, 244, 1),
-        fontFamily: 'DM Sans',
-        fontSize: 14,
-        letterSpacing: 0 /*percentages not used in flutter. defaulting to zero*/,
-        fontWeight: FontWeight.normal,
-        height: 1.4285714285714286
-      ),),
-
-        ],
-      ),
-    ), SizedBox(width : 32),
-Container(
-      width: 24,
-      height: 24,
-      decoration: BoxDecoration(
-          
-  ),
-      child: Stack(
-        children: <Widget>[
-          Positioned(
-        top: 1,
-        left: 2,
-        child: Container(
-      width: 20.99995994567871,
-      height: 21.00004005432129,
-      
-      child: Stack(
-        children: <Widget>[
-          Positioned(
-        top: 0,
-        left: 0,
-        child: SvgPicture.asset(
-        'assets/images/vector.svg',
-        semanticsLabel: 'vector'
-      );
-      ),
-        ]
-      )
-    )
-      ),
-        ]
-      )
-    ), SizedBox(width : 32),
-null, SizedBox(width : 32),
-Container(
-      width: 24,
-      height: 24,
-      decoration: BoxDecoration(
-          
-  ),
-      child: Stack(
-        children: <Widget>[
-          Positioned(
-        top: 2,
-        left: 5,
-        child: Container(
-      width: 14,
-      height: 19,
-      
-      child: Stack(
-        children: <Widget>[
-          Positioned(
-        top: 0,
-        left: 0,
-        child: SvgPicture.asset(
-        'assets/images/vector.svg',
-        semanticsLabel: 'vector'
-      );
-      ),
-        ]
-      )
-    )
-      ),
-        ]
-      )
-    ),
-
-        ],
-      ),
-    ),
-],
-      ),
-)
