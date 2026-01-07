@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:convert';
+import 'package:flutter_svg/flutter_svg.dart';
 
 void main() {
   runApp(
@@ -38,6 +39,132 @@ class BottomNavigationBarExample extends StatefulWidget {
   @override
   State<BottomNavigationBarExample> createState() => _BottomNavigationBarExampleState();
 }
+
+class CustomBottomNav extends StatelessWidget {
+  final int selectedIndex;
+  final ValueChanged<int> onItemSelected;
+
+  const CustomBottomNav({
+    super.key,
+    required this.selectedIndex,
+    required this.onItemSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color.fromARGB(255, 255, 255, 255),
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+          bottomLeft: Radius.circular(24),
+          bottomRight: Radius.circular(24),
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color.fromRGBO(10, 0, 0, 0.358),
+            offset: Offset(0, -4),
+            blurRadius: 24,
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _NavItem(
+            label: 'Home',
+            // icon: 'assets/images/vector.svg',
+            icon: Icons.home,
+            isSelected: selectedIndex == 0,
+            onTap: () => onItemSelected(0),
+          ),
+          _NavItem(
+            label: 'Info',
+            // icon: 'assets/images/vector.svg',
+            // icon: Icon(Icons.info).toString(),
+            icon: Icons.info,
+            isSelected: selectedIndex == 1,
+            onTap: () => onItemSelected(1),
+          ),
+          _NavItem(
+            label: 'Stats',
+            // icon: 'assets/images/vector.svg',
+            icon: Icons.school,
+            isSelected: selectedIndex == 2,
+            onTap: () => onItemSelected(2),
+          ),
+          _NavItem(
+            label: 'Settings',
+            // icon: 'assets/images/vector.svg',
+            icon: Icons.business,
+            isSelected: selectedIndex == 3,
+            onTap: () => onItemSelected(3),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+class _NavItem extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _NavItem({
+    required this.label,
+    required this.icon,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(48),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? const Color.fromRGBO(48, 52, 55, 1)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(48),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              size: 24,
+              color:
+                isSelected
+                    ? const Color.fromRGBO(242, 243, 244, 1)
+                    : Colors.grey,
+              ),
+            
+            if (isSelected) ...[
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontFamily: 'DM Sans',
+                  fontSize: 14,
+                  color: Color.fromRGBO(242, 243, 244, 1),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
 class _BottomNavigationBarExampleState
     extends State<BottomNavigationBarExample> {
 
@@ -58,34 +185,15 @@ class _BottomNavigationBarExampleState
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: _pages[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today),
-            label: 'Log',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.info),
-            label: 'Day Info',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.insights),
-            label: 'Insights',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
-      ),
-    );
-  }
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: _pages[_selectedIndex],
+    bottomNavigationBar: CustomBottomNav(
+      selectedIndex: _selectedIndex,
+      onItemSelected: _onItemTapped,
+    ),
+  );
+}
 }
 
 
@@ -104,6 +212,8 @@ class LogPage extends StatelessWidget {
     );
   }
 }
+
+
 
 //calendar
 class DatePickerExample extends StatefulWidget {
@@ -242,6 +352,7 @@ class Calculate extends ChangeNotifier {
   }
 
 
+
 class PlaceholderPage extends StatelessWidget {
   const PlaceholderPage({super.key});
 
@@ -280,163 +391,3 @@ class PlaceholderPage extends StatelessWidget {
     );
   }
 }
-
-Container(
-      decoration: BoxDecoration(
-          borderRadius : BorderRadius.only(
-            topLeft: Radius.circular(24),
-            topRight: Radius.circular(24),
-            bottomLeft: Radius.circular(24),
-            bottomRight: Radius.circular(24),
-          ),
-      boxShadow : [BoxShadow(
-          color: Color.fromRGBO(0, 0, 0, 0.11999999731779099),
-          offset: Offset(10,14),
-          blurRadius: 56
-      )],
-      color : Color.fromRGBO(255, 255, 255, 1),
-  ),
-      padding: EdgeInsets.symmetric(horizontal: 0, vertical: 10),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        
-        children: <Widget>[Container(
-      decoration: BoxDecoration(
-          
-  ),
-      padding: EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        
-        children: <Widget>[
-          Container(
-      decoration: BoxDecoration(
-          borderRadius : BorderRadius.only(
-            topLeft: Radius.circular(48),
-            topRight: Radius.circular(48),
-            bottomLeft: Radius.circular(48),
-            bottomRight: Radius.circular(48),
-          ),
-      color : Color.fromRGBO(48, 52, 55, 1),
-  ),
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        
-        children: <Widget>[
-          Container(
-      width: 24,
-      height: 24,
-      decoration: BoxDecoration(
-          
-  ),
-      child: Stack(
-        children: <Widget>[
-          Positioned(
-        top: 2,
-        left: 1.51025390625,
-        child: Container(
-      width: 20.979503631591797,
-      height: 20.527864456176758,
-      
-      child: Stack(
-        children: <Widget>[
-          Positioned(
-        top: 1.1641532182693481e-10,
-        left: 1.52658685692586e-8,
-        child: SvgPicture.asset(
-        'assets/images/vector.svg',
-        semanticsLabel: 'vector'
-      );
-      ),
-        ]
-      )
-    )
-      ),
-        ]
-      )
-    ), SizedBox(width : 8),
-Text('Home', textAlign: TextAlign.left, style: TextStyle(
-        color: Color.fromRGBO(242, 243, 244, 1),
-        fontFamily: 'DM Sans',
-        fontSize: 14,
-        letterSpacing: 0 /*percentages not used in flutter. defaulting to zero*/,
-        fontWeight: FontWeight.normal,
-        height: 1.4285714285714286
-      ),),
-
-        ],
-      ),
-    ), SizedBox(width : 32),
-Container(
-      width: 24,
-      height: 24,
-      decoration: BoxDecoration(
-          
-  ),
-      child: Stack(
-        children: <Widget>[
-          Positioned(
-        top: 1,
-        left: 2,
-        child: Container(
-      width: 20.99995994567871,
-      height: 21.00004005432129,
-      
-      child: Stack(
-        children: <Widget>[
-          Positioned(
-        top: 0,
-        left: 0,
-        child: SvgPicture.asset(
-        'assets/images/vector.svg',
-        semanticsLabel: 'vector'
-      );
-      ),
-        ]
-      )
-    )
-      ),
-        ]
-      )
-    ), SizedBox(width : 32),
-null, SizedBox(width : 32),
-Container(
-      width: 24,
-      height: 24,
-      decoration: BoxDecoration(
-          
-  ),
-      child: Stack(
-        children: <Widget>[
-          Positioned(
-        top: 2,
-        left: 5,
-        child: Container(
-      width: 14,
-      height: 19,
-      
-      child: Stack(
-        children: <Widget>[
-          Positioned(
-        top: 0,
-        left: 0,
-        child: SvgPicture.asset(
-        'assets/images/vector.svg',
-        semanticsLabel: 'vector'
-      );
-      ),
-        ]
-      )
-    )
-      ),
-        ]
-      )
-    ),
-
-        ],
-      ),
-    ),
-],
-      ),
-)
