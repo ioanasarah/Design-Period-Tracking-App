@@ -3,11 +3,20 @@ import 'package:provider/provider.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:convert';
 
+void main() {
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => Calculate(),
+      child: const LogPage(),
+      const BottomNavigationBarExampleApp(),
+    ),
+  );
+}
 
 /// Flutter code sample for basic [showDatePicker]
 
-
 //load JSON file
+
 Future<List<Map<String, dynamic>>> loadCycleData() async {
   final jsonString = await rootBundle.loadString('assets/phase_info.json');
   final List<dynamic> jsonList = json.decode(jsonString);
@@ -35,10 +44,8 @@ class _BottomNavigationBarExampleState extends State<BottomNavigationBarExample>
   int _selectedIndex = 0;
   static const TextStyle optionStyle = TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   static const List<Widget> _widgetOptions = <Widget>[
-    Text('Index 0: Home', style: optionStyle),
-    Text('Index 1: Business', style: optionStyle),
-    Text('Index 2: School', style: optionStyle),
-    Text('Index 3: Settings', style: optionStyle),
+    LogPage(),
+    Placeholder(),
   ];
 
   void _onItemTapped(int index) {
@@ -50,7 +57,7 @@ class _BottomNavigationBarExampleState extends State<BottomNavigationBarExample>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('BottomNavigationBar Sample')),
+      //appBar: AppBar(title: const Text('BottomNavigationBar Sample')),
       body: Center(child: _widgetOptions.elementAt(_selectedIndex)),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
@@ -63,17 +70,17 @@ class _BottomNavigationBarExampleState extends State<BottomNavigationBarExample>
             icon: Icon(Icons.business),
             label: 'Business',
             backgroundColor: Colors.green,
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.school),
-            label: 'School',
-            backgroundColor: Colors.purple,
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-            backgroundColor: Colors.pink,
-          ),
+          // ),
+          // BottomNavigationBarItem(
+          //   icon: Icon(Icons.school),
+          //   label: 'School',
+          //   backgroundColor: Colors.purple,
+          // ),
+          // BottomNavigationBarItem(
+          //   icon: Icon(Icons.settings),
+          //   label: 'Settings',
+          //   backgroundColor: Colors.pink,
+          // ),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.amber[800],
@@ -84,14 +91,6 @@ class _BottomNavigationBarExampleState extends State<BottomNavigationBarExample>
 }
 
 
-void main() {
-  runApp(
-    ChangeNotifierProvider(
-      create: (_) => Calculate(),
-      child: const LogPage(),
-    ),
-  );
-}
 // whole first page
 class LogPage extends StatelessWidget {
   const LogPage({super.key});
@@ -106,6 +105,7 @@ class LogPage extends StatelessWidget {
     );
   }
 }
+
 //calendar
 class DatePickerExample extends StatefulWidget {
   const DatePickerExample({super.key});
