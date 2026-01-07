@@ -7,9 +7,6 @@ import 'dart:convert';
 /// Flutter code sample for basic [showDatePicker]
 
 
-void main() => runApp(const BottomNavigationBarExampleApp());
-
-
 //load JSON file
 Future<List<Map<String, dynamic>>> loadCycleData() async {
   final jsonString = await rootBundle.loadString('assets/phase_info.json');
