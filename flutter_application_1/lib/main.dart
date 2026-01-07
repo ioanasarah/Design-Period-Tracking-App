@@ -287,8 +287,6 @@ class _DatePickerExampleState extends State<DatePickerExample> {
   }
 }
 
-
-
 // design + functionality for Select Date and Submit buttons 
 class SelectButton extends StatelessWidget {
   final String label; // 
@@ -306,7 +304,7 @@ class SelectButton extends StatelessWidget {
       borderRadius: BorderRadius.circular(100), // design
       child:Container(
         decoration: BoxDecoration( // design
-          color: Color.fromRGBO(164, 80, 80, 1), // design
+          color: Color.fromRGBO(54,18, 58, 1), // design
           borderRadius: BorderRadius.circular(100), // design
         ),
           padding: const EdgeInsets.symmetric( // design
