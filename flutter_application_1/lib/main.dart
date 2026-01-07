@@ -183,7 +183,7 @@ class PlaceholderPage extends StatelessWidget {
     final phase = context.watch<Calculate>().phase;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Placeholder'),
+        title: const Text('Day info'),
       ),
       body: Row(
         mainAxisAlignment: MainAxisAlignment.center,
