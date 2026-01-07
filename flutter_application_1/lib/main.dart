@@ -256,7 +256,7 @@ class PlaceholderPage extends StatelessWidget {
     final phase = context.watch<Calculate>().phase;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Placeholder'),
+        title: const Text('Day info'),
       ),
       body: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -285,62 +285,3 @@ class PlaceholderPage extends StatelessWidget {
   }
 }
 
-class ButtonWidget extends StatelessWidget {
-          @override
-          Widget build(BuildContext context) {
-          // Figma Flutter Generator ButtonWidget - INSTANCE
-            return Container(
-      width: 98,
-      height: 48,
-      
-      child: Stack(
-        children: <Widget>[
-          Positioned(
-        top: 4,
-        left: 1.5,
-        child: Container(
-      decoration: BoxDecoration(
-          borderRadius : BorderRadius.only(
-            topLeft: Radius.circular(100),
-            topRight: Radius.circular(100),
-            bottomLeft: Radius.circular(100),
-            bottomRight: Radius.circular(100),
-          ),
-      color : Color.fromRGBO(103, 80, 164, 1),
-  ),
-      padding: EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        
-        children: <Widget>[Container(
-      decoration: BoxDecoration(
-          
-  ),
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        
-        children: <Widget>[
-          SizedBox(width : 8),
-Text('Label', textAlign: TextAlign.left, style: TextStyle(
-        color: Color.fromRGBO(255, 255, 255, 1),
-        fontFamily: 'Roboto',
-        fontSize: 14,
-        letterSpacing: 0.10000000149011612,
-        fontWeight: FontWeight.normal,
-        height: 1.4285714285714286
-      ),),
-
-        ],
-      ),
-    ),
-],
-      ),
-    )
-      ),
-        ]
-      )
-    );
-          }
-        }
-        
