@@ -2,9 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'dart:convert';
+//import 'package:flutter_svg/flutter_svg.dart';
 
+void main() {
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => Calculate(),
+      child: const MyApp(),
+    ),
+  );
+}
 
-/// Flutter code sample for basic [showDatePicker]
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: const NavigationBar(),
+    );
+  }
+}
 
 
 //load JSON file
@@ -14,32 +32,203 @@ Future<List<Map<String, dynamic>>> loadCycleData() async {
   return jsonList.cast<Map<String, dynamic>>();
 }
 
-void main() {
-  runApp(
-    ChangeNotifierProvider(
-      create: (_) => Calculate(),
-      child: const LogPage(),
-    ),
-  );
+class NavigationBar extends StatefulWidget {
+  const NavigationBar({super.key});
+
+  @override
+  State<NavigationBar> createState() => _NavigationBarState();
 }
-// whole first page
-class LogPage extends StatelessWidget {
-  const LogPage({super.key});
+
+class CustomNavigationBar extends StatelessWidget {
+  final int selectedIndex;
+  final ValueChanged<int> onItemSelected;
+
+  const CustomNavigationBar({
+    super.key,
+    required this.selectedIndex,
+    required this.onItemSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: const Text('When did your last period start?')),
-        body: const Center(child: DatePickerExample()),
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color.fromARGB(255, 255, 255, 255),
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+          bottomLeft: Radius.circular(24),
+          bottomRight: Radius.circular(24),
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color.fromRGBO(10, 0, 0, 0.358),
+            offset: Offset(0, -4),
+            blurRadius: 24,
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _NavButton(
+            label: 'Home',
+            // icon: 'assets/images/vector.svg',
+            icon: Icons.home, // icon for tabs 
+            isSelected: selectedIndex == 0,
+            onTap: () => onItemSelected(0),
+          ),
+          _NavButton(
+            label: 'Info',
+            // icon: 'assets/images/vector.svg',
+            // icon: Icon(Icons.info).toString(),
+            icon: Icons.info,
+            isSelected: selectedIndex == 1,
+            onTap: () => onItemSelected(1),
+          ),
+          _NavButton(
+            label: 'Stats',
+            // icon: 'assets/images/vector.svg',
+            icon: Icons.school,
+            isSelected: selectedIndex == 2,
+            onTap: () => onItemSelected(2),
+          ),
+          _NavButton(
+            label: 'Settings',
+            // icon: 'assets/images/vector.svg',
+            icon: Icons.business,
+            isSelected: selectedIndex == 3,
+            onTap: () => onItemSelected(3),
+          ),
+        ],
       ),
     );
   }
 }
+
+
+class _NavButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _NavButton({
+    required this.label,
+    required this.icon,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(48),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? const Color.fromRGBO(48, 52, 55, 1)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(48),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              size: 24,
+              color:
+                isSelected
+                    ? const Color.fromRGBO(242, 243, 244, 1)
+                    : Colors.grey,
+              ),
+            
+            if (isSelected) ...[
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontFamily: 'DM Sans',
+                  fontSize: 14,
+                  color: Color.fromRGBO(242, 243, 244, 1),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+class _NavigationBarState
+    extends State<NavigationBar> {
+
+  int _selectedIndex = 0;
+
+  // Top-level pages only
+  List<Widget> get _pages => [
+  LogPage(onSubmit: () => _onItemTapped(1)),
+  const PlaceholderPage(),
+  const Center(child: Text('Insights')),
+  const Center(child: Text('Settings')),
+];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: _pages[_selectedIndex],
+    bottomNavigationBar: CustomNavigationBar(
+      selectedIndex: _selectedIndex,
+      onItemSelected: _onItemTapped,
+    ),
+  );
+}
+}
+
+class NavigationState extends ChangeNotifier {
+  int index = 0;
+
+  void goTo(int i) {
+    index = i;
+    notifyListeners();
+  }
+}
+
+
+// whole first page
+class LogPage extends StatelessWidget {
+  final VoidCallback onSubmit;
+  
+  const LogPage({
+    super.key, 
+    required this.onSubmit});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(title: const Text('When did your last period start?')),
+        body: Center(child: DatePickerExample(onSubmit: onSubmit)),
+      );
+  }
+}
+
+
+
 //calendar
 class DatePickerExample extends StatefulWidget {
-  const DatePickerExample({super.key});
+  final VoidCallback onSubmit;
 
+  const DatePickerExample({super.key, required this.onSubmit});
   @override
   State<DatePickerExample> createState() => _DatePickerExampleState();
 }
@@ -90,23 +279,21 @@ class _DatePickerExampleState extends State<DatePickerExample> {
                 calc.calculateDayOfCycle(selectedDate!);
                 await calc.calculatePhase();
 
-                Navigator.push(
-                context,
-                MaterialPageRoute(
-                builder: (context) => const PlaceholderPage(),
-      ),
-    );
-  },
-  //child: const Text("Submit"),
-),
+                widget.onSubmit();
+              
+              },
+            ),
           ],
-        ),
-        
-      ],
       
+      ),
+      ],
+
     );
   }
-}
+  //child: const Text("Submit"),
+
+  }
+
 
 
 
@@ -173,11 +360,14 @@ class Calculate extends ChangeNotifier {
   }
 
 
+
 class PlaceholderPage extends StatelessWidget {
   const PlaceholderPage({super.key});
+  
 
   @override
   Widget build(BuildContext context) {
+    //context.read<NavigationState>().goTo(1);
     final nextPeriodDate = context.watch<Calculate>().nextPeriodDate;
     final difference = context.watch<Calculate>().difference;
     final phase = context.watch<Calculate>().phase;
@@ -211,4 +401,3 @@ class PlaceholderPage extends StatelessWidget {
     );
   }
 }
-
