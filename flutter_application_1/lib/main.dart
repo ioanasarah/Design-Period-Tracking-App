@@ -217,7 +217,7 @@ class LogPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(title: const Text('When did your last period start?')),
-        body: Center(child: DatePickerExample(onSubmit: onSubmit)),
+        body: Center(child: LogCalendar(onSubmit: onSubmit)),
       );
   }
 }
@@ -225,15 +225,15 @@ class LogPage extends StatelessWidget {
 
 
 //calendar
-class DatePickerExample extends StatefulWidget {
+class LogCalendar extends StatefulWidget {
   final VoidCallback onSubmit;
 
-  const DatePickerExample({super.key, required this.onSubmit});
+  const LogCalendar({super.key, required this.onSubmit});
   @override
-  State<DatePickerExample> createState() => _DatePickerExampleState();
+  State<LogCalendar> createState() => _LogCalendarState();
 }
 
-class _DatePickerExampleState extends State<DatePickerExample> {
+class _LogCalendarState extends State<LogCalendar> {
   DateTime? selectedDate;
 
   DateTime now = new DateTime.now();
@@ -253,41 +253,47 @@ class _DatePickerExampleState extends State<DatePickerExample> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      spacing: 20,
-      children: <Widget>[
-        Text(
-          selectedDate != null
-              ? '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}'
-              : 'No date selected',
-        ),
-        Row(
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            SelectButton(
-              label: 'Select Date',
-              onPressed: _selectDate,
+          spacing: 20,
+          children: <Widget>[
+            Text("Your last period started on:"),
+            Text(
+              selectedDate != null
+                  ? '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}'
+                  : 'No date selected',
             ),
-            SelectButton(
-              label: 'Submit',
-              onPressed: () async { // async pentru await
-                if (selectedDate == null) return;
-                
-                final calc = context.read<Calculate>();
-                calc.calculateNextPeriod(selectedDate!);
-                calc.calculateDayOfCycle(selectedDate!);
-                await calc.calculatePhase();
-
-                widget.onSubmit();
-              
-              },
-            ),
-          ],
-      
-      ),
+            //Row(
+              //mainAxisSize: MainAxisSize.min,
+              //children: [
+                SelectButton(
+                  label: 'Select Date',
+                  onPressed: _selectDate,
+                ),
+                SelectButton(
+                  label: 'Submit',
+                  onPressed: () async { // async pentru await
+                    if (selectedDate == null) return;
+                    
+                    final calc = context.read<Calculate>();
+                    calc.calculateNextPeriod(selectedDate!);
+                    calc.calculateDayOfCycle(selectedDate!);
+                    await calc.calculatePhase();
+        
+                    widget.onSubmit();
+                  
+                  },
+                ),
+              ],
+          
+        
+          
+        
+        ),
       ],
-
     );
   }
   //child: const Text("Submit"),
