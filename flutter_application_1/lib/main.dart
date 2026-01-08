@@ -216,7 +216,7 @@ class LogPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: const Text('When did your last period start?')),
+        appBar: AppBar(title: const Text("Title")),
         body: Center(child: LogCalendar(onSubmit: onSubmit)),
       );
   }
@@ -253,13 +253,13 @@ class _LogCalendarState extends State<LogCalendar> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
+    return SingleChildScrollView(
+    padding: const EdgeInsets.all(500),
+      child:
         Column(
           mainAxisSize: MainAxisSize.min,
           spacing: 20,
-          children: <Widget>[
+          children:<Widget> [
             Text("Your last period started on:"),
             Text(
               selectedDate != null
@@ -287,20 +287,14 @@ class _LogCalendarState extends State<LogCalendar> {
                   
                   },
                 ),
-              ],
-          
-        
-          
-        
+                const MyCustomForm(),],
         ),
-      ],
+    
     );
   }
   //child: const Text("Submit"),
 
   }
-
-
 
 
 // design + functionality for Select Date and Submit buttons 
@@ -340,6 +334,37 @@ class SelectButton extends StatelessWidget {
 }
 
 
+// text field class
+class MyCustomForm extends StatelessWidget {
+  const MyCustomForm({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      //crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+          child: TextField(
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              hintText: 'Enter a search term',
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+          child: TextFormField(
+            decoration: const InputDecoration(
+              border: UnderlineInputBorder(),
+              labelText: 'Enter your username',
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
 class Calculate extends ChangeNotifier {
   DateTime? nextPeriodDate;
   int? difference;
