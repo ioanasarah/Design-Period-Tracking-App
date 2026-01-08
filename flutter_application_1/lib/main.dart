@@ -321,13 +321,19 @@ class SelectButton extends StatelessWidget {
         ),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [Text(label, // do not change label pls
-          style: const TextStyle( // design
-            color: Colors.white,// design
-            fontSize: 14,
-          ),
-          ),],
+            //mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [Column(
+              mainAxisAlignment: MainAxisAlignment.center,  
+              children: [
+                Text(label, // do not change label pls
+                style: const TextStyle( // design
+                color: Colors.white,// design
+                fontSize: 14,
+                          ),
+                          ),
+              ],
+            ),],
           ),
         ),
 
