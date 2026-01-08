@@ -266,14 +266,11 @@ class _LogCalendarState extends State<LogCalendar> {
                   ? '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}'
                   : 'No date selected',
             ),
-            //Row(
-              //mainAxisSize: MainAxisSize.min,
-              //children: [
-                SelectButton(
+            SelectButton(
                   label: 'Select Date',
                   onPressed: _selectDate,
                 ),
-                SelectButton(
+            SelectButton(
                   label: 'Submit',
                   onPressed: () async { // async pentru await
                     if (selectedDate == null) return;
@@ -287,7 +284,8 @@ class _LogCalendarState extends State<LogCalendar> {
                   
                   },
                 ),
-                const MyCustomForm(),],
+          ],
+        
         ),
     
     );
@@ -394,7 +392,6 @@ class Calculate extends ChangeNotifier {
 
 class PlaceholderPage extends StatelessWidget {
   const PlaceholderPage({super.key});
-  
 
   @override
   Widget build(BuildContext context) {
