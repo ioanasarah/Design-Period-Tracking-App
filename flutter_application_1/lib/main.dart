@@ -130,7 +130,7 @@ class _NavButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color.fromRGBO(48, 52, 55, 1)
+              ? const Color.fromRGBO(53, 18, 58, 1)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(48),
         ),
@@ -142,7 +142,7 @@ class _NavButton extends StatelessWidget {
               color:
                 isSelected
                     ? const Color.fromRGBO(242, 243, 244, 1)
-                    : Colors.grey,
+                    : Color.fromRGBO(24, 18, 58, 0.5),
               ),
             
             if (isSelected) ...[
@@ -284,7 +284,12 @@ class _LogCalendarState extends State<LogCalendar> {
                   
                   },
                 ),
-                MyCustomForm(),
+                TextBox(
+                  title: "Average period length (days):", 
+                  hint: "enter text here",),
+                TextBox(
+                  title: "Average cycle length (days):", 
+                  hint: "enter text here",),
           ],
         
         ),
@@ -309,14 +314,14 @@ class SelectButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container (
-      width: 100.0,
+      width: 130.0,
       height: 50.0,
       child: InkWell(
       onTap: onPressed,
       borderRadius: BorderRadius.circular(100), // design
       child:Container(
         decoration: BoxDecoration( // design
-          color: Color.fromRGBO(164, 80, 80, 1), // design
+          color: Color.fromRGBO(54, 18, 58, 1), // design
           borderRadius: BorderRadius.circular(100), // design
         ),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -344,29 +349,29 @@ class SelectButton extends StatelessWidget {
 
 
 // text field class
-class MyCustomForm extends StatelessWidget {
-  const MyCustomForm({super.key});
+class TextBox extends StatelessWidget {
+  //const TextBox({super.key});
+  final String title; // text above the box
+  final String hint; // text inside the box
+
+  const TextBox({
+    super.key,
+    required this.title, // cand chemi functia ai nevoie de asta neaparat
+    required this.hint,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      //crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
+        Text(title),
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
           child: TextField(
             decoration: InputDecoration(
               border: OutlineInputBorder(),
-              hintText: 'Enter a search term',
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-          child: TextFormField(
-            decoration: const InputDecoration(
-              border: UnderlineInputBorder(),
-              labelText: 'Enter your username',
+              hintText: "Enter text here",
             ),
           ),
         ),
