@@ -80,7 +80,7 @@ class CustomNavigationBar extends StatelessWidget {
             onTap: () => onItemSelected(0),
           ),
           _NavButton(
-            label: 'Info',
+            label: 'Information',
             // icon: 'assets/images/vector.svg',
             // icon: Icon(Icons.info).toString(),
             icon: Icons.info,
@@ -254,7 +254,7 @@ class _LogCalendarState extends State<LogCalendar> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-    padding: const EdgeInsets.all(500),
+    padding: const EdgeInsets.all(8),
       child:
         Column(
           mainAxisSize: MainAxisSize.min,
@@ -284,6 +284,7 @@ class _LogCalendarState extends State<LogCalendar> {
                   
                   },
                 ),
+                MyCustomForm(),
           ],
         
         ),
@@ -307,7 +308,10 @@ class SelectButton extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) {
-    return InkWell (
+    return Container (
+      width: 100.0,
+      height: 50.0,
+      child: InkWell(
       onTap: onPressed,
       borderRadius: BorderRadius.circular(100), // design
       child:Container(
@@ -315,19 +319,20 @@ class SelectButton extends StatelessWidget {
           color: Color.fromRGBO(164, 80, 80, 1), // design
           borderRadius: BorderRadius.circular(100), // design
         ),
-          padding: const EdgeInsets.symmetric( // design
-            horizontal: 16, // design
-            vertical: 10,),
-          child: Center(
-            child: Text(label, // do not change label pls
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [Text(label, // do not change label pls
           style: const TextStyle( // design
             color: Colors.white,// design
-            fontSize: 14,// design
+            fontSize: 14,
           ),
-          ),
+          ),],
           ),
         ),
-    );
+
+    ),);
+
   }
 }
 
