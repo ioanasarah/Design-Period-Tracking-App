@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/services.dart' show rootBundle, TextInputFormatter, FilteringTextInputFormatter;
 import 'dart:convert';
 //import 'package:flutter_svg/flutter_svg.dart';
 
@@ -270,7 +270,14 @@ class _LogCalendarState extends State<LogCalendar> {
                   label: 'Select Date',
                   onPressed: _selectDate,
                 ),
-            SelectButton(
+            
+                TextBox(
+                  title: "Average period length (days):", 
+                  hint: "enter text here",),
+                TextBox(
+                  title: "Average cycle length (days):", 
+                  hint: "enter text here",),
+                  SelectButton(
                   label: 'Submit',
                   onPressed: () async { // async pentru await
                     if (selectedDate == null) return;
@@ -284,12 +291,6 @@ class _LogCalendarState extends State<LogCalendar> {
                   
                   },
                 ),
-                TextBox(
-                  title: "Average period length (days):", 
-                  hint: "enter text here",),
-                TextBox(
-                  title: "Average cycle length (days):", 
-                  hint: "enter text here",),
           ],
         
         ),
@@ -360,25 +361,29 @@ class TextBox extends StatelessWidget {
     required this.hint,
   });
 
-  @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(title),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-          child: TextField(
-            decoration: InputDecoration(
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+          child:  TextField(
+            inputFormatters: <TextInputFormatter>[
+      FilteringTextInputFormatter.digitsOnly
+    ],
+            decoration: const InputDecoration(
               border: OutlineInputBorder(),
-              hintText: "Enter text here",
+              hintText: "Enter text here"),
             ),
           ),
-        ),
+  
       ],
     );
   }
 }
+
+
 class Calculate extends ChangeNotifier {
   DateTime? nextPeriodDate;
   int? difference;
