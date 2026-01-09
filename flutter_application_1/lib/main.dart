@@ -457,6 +457,7 @@ class Calculate extends ChangeNotifier {
   DateTime? nextPeriodDate;
   int? difference;
   String? phase;
+  int? dayofphase;
 
 
   void calculateNextPeriod(DateTime lastPeriodDate, int periodLength) {
@@ -490,14 +491,19 @@ class Calculate extends ChangeNotifier {
 
     if (cycleDay <= periodLength) {
       phase = 'menstrual';
+      dayofphase = cycleDay;
     } else if (cycleDay < ovulationDay) {
       phase  =  'follicular';
+      dayofphase = cycleDay - periodLength;
     } else if (cycleDay == ovulationDay) {
       phase = 'ovulation';
-    } else if (cycleDay <= ovulationDay +6) {
+      dayofphase = ovulationDay;
+    } else if (cycleDay <= ovulationDay + 6) {
       phase = 'early_luteal';
+      dayofphase = cycleDay - ovulationDay;
     } else {
       phase = 'late_luteal';
+      dayofphase = cycleDay - ovulationDay - 6;
     }
     // return phase!;
     notifyListeners();
