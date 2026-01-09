@@ -51,9 +51,10 @@ class CustomNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(
+    return SafeArea(child:
+        Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
         color: const Color.fromARGB(255, 255, 255, 255),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(24),
@@ -103,6 +104,7 @@ class CustomNavigationBar extends StatelessWidget {
           ),
         ],
       ),
+    ),
     );
   }
 }
