@@ -264,7 +264,7 @@ class _LogCalendarState extends State<LogCalendar> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-    padding: const EdgeInsets.all(8),
+    padding: const EdgeInsets.all(8), //how much space there is from the edges
       child:
         Column(
           mainAxisSize: MainAxisSize.min,
@@ -389,7 +389,14 @@ class TextBox extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title),
+        Text(title,
+        style: TextStyle(
+          color: const Color(0xFF1E1E1E) /* Text-Default-Default */,
+          fontSize: 16,
+          fontFamily: 'DM Sans',
+          fontWeight: FontWeight.w700,
+          height: 1.40,
+          ),),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
           child: TextField(
@@ -400,6 +407,9 @@ class TextBox extends StatelessWidget {
             decoration: InputDecoration(
               border: const OutlineInputBorder(),
               hintText: hint,
+              hintStyle: TextStyle(
+                color: const Color(0xFF1E1E1E),
+                fontFamily: 'DM Sans',)
             ),
           ),
         ),
