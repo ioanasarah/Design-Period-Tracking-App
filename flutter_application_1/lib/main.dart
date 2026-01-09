@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/services.dart' show rootBundle, TextInputFormatter, FilteringTextInputFormatter;
 import 'dart:convert';
 //import 'package:flutter_svg/flutter_svg.dart';
 
@@ -164,8 +164,7 @@ class _NavButton extends StatelessWidget {
 }
 
 
-class _NavigationBarState
-    extends State<NavigationBar> {
+class _NavigationBarState extends State<NavigationBar> {
 
   int _selectedIndex = 0;
 
@@ -304,7 +303,8 @@ class _LogCalendarState extends State<LogCalendar> {
                         int.tryParse(cycleLengthController.text) ?? 0;
 
                     final calc = context.read<Calculate>();
-                    calc.calculateNextPeriod(selectedDate!);
+
+                    calc.calculateNextPeriod(selectedDate!, cycleLength);
                     calc.calculateDayOfCycle(selectedDate!);
                     await calc.calculatePhase();
 
@@ -383,7 +383,6 @@ class TextBox extends StatelessWidget {
     required this.controller,
   });
 
-  @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -392,6 +391,9 @@ class TextBox extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
           child: TextField(
+            inputFormatters: <TextInputFormatter>[
+              FilteringTextInputFormatter.digitsOnly
+            ],
             controller: controller,
             decoration: InputDecoration(
               border: const OutlineInputBorder(),
@@ -409,9 +411,11 @@ class Calculate extends ChangeNotifier {
   DateTime? nextPeriodDate;
   int? difference;
   String? phase;
-  void calculateNextPeriod(DateTime lastPeriodDate) {
-    nextPeriodDate = lastPeriodDate.add(const Duration(days: 28));
-    notifyListeners();}
+
+  void calculateNextPeriod(DateTime lastPeriodDate, int periodLength) {
+    nextPeriodDate = lastPeriodDate.add(Duration(days: periodLength));
+    notifyListeners();
+  }
   
   void calculateDayOfCycle(DateTime lastPeriodDate) {
     final today = DateTime.now();
