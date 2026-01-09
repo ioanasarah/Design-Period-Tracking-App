@@ -164,8 +164,7 @@ class _NavButton extends StatelessWidget {
 }
 
 
-class _NavigationBarState
-    extends State<NavigationBar> {
+class _NavigationBarState extends State<NavigationBar> {
 
   int _selectedIndex = 0;
 
