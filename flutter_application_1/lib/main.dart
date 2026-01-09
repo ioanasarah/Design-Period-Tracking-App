@@ -24,10 +24,19 @@ class MyApp extends StatelessWidget {
   }
 }
 
+// list of files based on phase 
+ const Map<String, String> phaseJsonFiles = {
+  'menstrual': 'assets/Menstrual_Phase.json',
+  'follicular': 'assets/Follicular_Phase.json',
+  'ovulation': 'assets/Ovulation_Phase.json',
+  'early_luteal': 'assets/Early_Luteal_Phase.json',
+  'late_luteal': 'assets/Late_Luteal_Phase.json',
+};
+
 
 //load JSON file
 Future<List<Map<String, dynamic>>> loadCycleData() async {
-  final jsonString = await rootBundle.loadString('assets/phase_info.json');
+  final jsonString = await rootBundle.loadString('assets/Menstrual_Phase.json');
   final List<dynamic> jsonList = json.decode(jsonString);
   return jsonList.cast<Map<String, dynamic>>();
 }
@@ -328,7 +337,12 @@ class _LogCalendarState extends State<LogCalendar> {
 
                     calc.calculateNextPeriod(selectedDate!, cycleLength);
                     calc.calculateDayOfCycle(selectedDate!);
-                    await calc.calculatePhase();
+                    calc.determinePhase(
+                      cycleDay: calc.difference!+1,
+                      cycleLength: cycleLength,
+                      periodLength: periodLength,
+                    );
+                    // await calc.calculatePhase();
 
                     widget.onSubmit();
                   
@@ -444,6 +458,7 @@ class Calculate extends ChangeNotifier {
   int? difference;
   String? phase;
 
+
   void calculateNextPeriod(DateTime lastPeriodDate, int periodLength) {
     nextPeriodDate = lastPeriodDate.add(Duration(days: periodLength));
     notifyListeners();
@@ -451,19 +466,43 @@ class Calculate extends ChangeNotifier {
   
   void calculateDayOfCycle(DateTime lastPeriodDate) {
     final today = DateTime.now();
-    difference = today.difference(lastPeriodDate).inDays;
+    difference = today.difference(lastPeriodDate).inDays + 1;
     notifyListeners();
   }
-  Future <void> calculatePhase() async {
-    if (difference == null) return;
-    final cycleData = await loadCycleData();
-    final entry = cycleData.firstWhere(
-      (e) => e["Day of cycle"] == difference,
-      orElse: () => {"Phase": "Unknown"},
-    );
-    phase = entry["Phase"];
+  // Future <void> calculatePhase() async {
+  //   if (difference == null) return;
+  //   final cycleData = await loadCycleData();
+  //   final entry = cycleData.firstWhere(
+  //     (e) => e["Day"] == difference,
+  //     orElse: () => {"Phase": "Unknown"},
+  //   );
+  //   phase = entry["Phase"];
+  //   notifyListeners();
+  // }
+
+  void determinePhase({
+    required int cycleDay,
+    required int cycleLength,
+    required int periodLength,
+    // final String? phase,
+}) {
+    final ovulationDay = cycleLength - 14;
+
+    if (cycleDay <= periodLength) {
+      phase = 'menstrual';
+    } else if (cycleDay < ovulationDay) {
+      phase  =  'follicular';
+    } else if (cycleDay == ovulationDay) {
+      phase = 'ovulation';
+    } else if (cycleDay <= ovulationDay +6) {
+      phase = 'early_luteal';
+    } else {
+      phase = 'late_luteal';
+    }
+    // return phase!;
     notifyListeners();
-  }
+}
+
   }
 
 

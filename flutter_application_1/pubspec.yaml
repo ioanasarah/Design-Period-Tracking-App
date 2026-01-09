@@ -63,6 +63,7 @@ flutter:
   assets:
     - assets/phase_info.json
     - assets/vector.svg
+    - assets/Menstrual_Phase.json
 
 
   fonts:
