@@ -217,13 +217,21 @@ class LogPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: const Text("Title")),
-        body: Center(child: LogCalendar(onSubmit: onSubmit)),
+        appBar: AppBar(title: 
+        const Text("Log your Period Details!",
+          style: TextStyle(
+          color: const Color(0xFF303437),
+          fontSize: 28,
+          fontFamily: 'DM Sans',
+          fontWeight: FontWeight.w700,
+          height: 1.14,
+          ),)),
+        body: Column(
+          children: [
+            LogCalendar(onSubmit: onSubmit)]),
       );
   }
 }
-
-
 
 //calendar
 class LogCalendar extends StatefulWidget {
@@ -264,23 +272,47 @@ class _LogCalendarState extends State<LogCalendar> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-    padding: const EdgeInsets.all(8), //how much space there is from the edges
+      //padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+      padding: const EdgeInsets.all(8), //how much space there is from the edges
       child:
         Column(
           mainAxisSize: MainAxisSize.min,
           //spac
           children:<Widget> [
-            Text("Your last period started on:"),
-
-            Text(
-              selectedDate != null
-                  ? '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}'
-                  : 'No date selected',
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text("When was the start of your last period?", 
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 16,
+                fontFamily: 'DM Sans',
+                fontWeight: FontWeight.w700,
+                height: 2,
+                ),),
             ),
-            SelectButton(
-                  label: 'Select Date',
-                  onPressed: _selectDate,
-                ),
+
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                selectedDate != null
+                    ? '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}'
+                    : 'No date selected',
+                    style: TextStyle(
+                      color: const Color(0xFF8C8888),
+                      fontSize: 16,
+                      fontFamily: 'DM Sans',
+                      fontWeight: FontWeight.w700,
+                      height: 2,
+                      ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 70),
+              child: SelectButton(
+                    label: 'Select Date',
+                    onPressed: _selectDate,
+                  ),
+            ),
             
             TextBox(
                   title: "Average period length (days):",
