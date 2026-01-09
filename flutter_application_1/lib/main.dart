@@ -303,7 +303,8 @@ class _LogCalendarState extends State<LogCalendar> {
                         int.tryParse(cycleLengthController.text) ?? 0;
 
                     final calc = context.read<Calculate>();
-                    calc.calculateNextPeriod(selectedDate!);
+
+                    calc.calculateNextPeriod(selectedDate!, cycleLength);
                     calc.calculateDayOfCycle(selectedDate!);
                     await calc.calculatePhase();
 
@@ -410,9 +411,11 @@ class Calculate extends ChangeNotifier {
   DateTime? nextPeriodDate;
   int? difference;
   String? phase;
-  void calculateNextPeriod(DateTime lastPeriodDate) {
-    nextPeriodDate = lastPeriodDate.add(const Duration(days: 28));
-    notifyListeners();}
+
+  void calculateNextPeriod(DateTime lastPeriodDate, int periodLength) {
+    nextPeriodDate = lastPeriodDate.add(Duration(days: periodLength));
+    notifyListeners();
+  }
   
   void calculateDayOfCycle(DateTime lastPeriodDate) {
     final today = DateTime.now();
