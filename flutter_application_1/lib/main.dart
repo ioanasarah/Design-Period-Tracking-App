@@ -372,15 +372,15 @@ class SelectButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container (
-      width: 130.0,
-      height: 50.0,
+      width: 120.0,
+      height: 45.0,
       child: InkWell(
       onTap: onPressed,
-      borderRadius: BorderRadius.circular(100), // design
+      borderRadius: BorderRadius.circular(8), // design
       child:Container(
         decoration: BoxDecoration( // design
-          color: Color.fromRGBO(54, 18, 58, 1), // design
-          borderRadius: BorderRadius.circular(100), // design
+          color: Color(0xFF121D41), // design
+          borderRadius: BorderRadius.circular(8), // design
         ),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           child: Row(
@@ -392,7 +392,8 @@ class SelectButton extends StatelessWidget {
                 Text(label, // do not change label pls
                 style: const TextStyle( // design
                 color: Colors.white,// design
-                fontSize: 14,
+                fontSize: 16,
+                fontFamily: 'DM Sans'
                           ),
                           ),
               ],
