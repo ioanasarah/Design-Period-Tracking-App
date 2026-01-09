@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: const NavigationBar(),
+      home: const MainNavigationBar(),
     );
   }
 }
@@ -32,11 +32,11 @@ Future<List<Map<String, dynamic>>> loadCycleData() async {
   return jsonList.cast<Map<String, dynamic>>();
 }
 
-class NavigationBar extends StatefulWidget {
-  const NavigationBar({super.key});
+class MainNavigationBar extends StatefulWidget {
+  const MainNavigationBar({super.key});
 
   @override
-  State<NavigationBar> createState() => _NavigationBarState();
+  State<MainNavigationBar> createState() => _MainNavigationBarState();
 }
 
 class CustomNavigationBar extends StatelessWidget {
@@ -166,7 +166,7 @@ class _NavButton extends StatelessWidget {
 }
 
 
-class _NavigationBarState extends State<NavigationBar> {
+class _MainNavigationBarState extends State<MainNavigationBar> {
 
   int _selectedIndex = 0;
 
@@ -187,6 +187,9 @@ class _NavigationBarState extends State<NavigationBar> {
   @override
 Widget build(BuildContext context) {
   return Scaffold(
+    appBar: AppBar(
+    title: const Text("Log your Period Details!"),
+    ),
     body: _pages[_selectedIndex],
     bottomNavigationBar: CustomNavigationBar(
       selectedIndex: _selectedIndex,
@@ -210,26 +213,11 @@ class NavigationState extends ChangeNotifier {
 class LogPage extends StatelessWidget {
   final VoidCallback onSubmit;
   
-  const LogPage({
-    super.key, 
-    required this.onSubmit});
+  const LogPage({super.key, required this.onSubmit});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(title: 
-        const Text("Log your Period Details!",
-          style: TextStyle(
-          color: const Color(0xFF303437),
-          fontSize: 28,
-          fontFamily: 'DM Sans',
-          fontWeight: FontWeight.w700,
-          height: 1.14,
-          ),)),
-        body: Column(
-          children: [
-            LogCalendar(onSubmit: onSubmit)]),
-      );
+    return LogCalendar(onSubmit: onSubmit);
   }
 }
 
@@ -485,37 +473,85 @@ class PlaceholderPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //context.read<NavigationState>().goTo(1);
-    final nextPeriodDate = context.watch<Calculate>().nextPeriodDate;
-    final difference = context.watch<Calculate>().difference;
-    final phase = context.watch<Calculate>().phase;
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Day info'),
-      ),
-      body: Row(
+    // Accessing the data from your Calculate provider
+    final calc = context.watch<Calculate>();
+    final nextPeriodDate = calc.nextPeriodDate;
+    final difference = calc.difference;
+    final phase = calc.phase;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [Text(
-              nextPeriodDate != null
-                ? 'Your next period is expected on: ${nextPeriodDate!.day}/${nextPeriodDate!.month}/${nextPeriodDate!.year}'
-                : 'Next period date not calculated yet.',
-            //child: ButtonWidget(),
-            //child: Text('Next page placeholder'),
+          const Text(
+            'Cycle Overview',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Color.fromRGBO(54, 18, 58, 1),
+            ),
           ),
-          Text(difference != null
-                ? 'Days since last period: $difference'
-                : 'Day of cycle not calculated yet.',
-            ),
-            Text(phase != null ? 'Current phase: $phase' : 'Phase not calculated yet.'
-            ),
-          ],
+          const SizedBox(height: 30),
+          
+          // Next Period Card
+          _infoTile(
+            title: 'Next Expected Period',
+            value: nextPeriodDate != null
+                ? '${nextPeriodDate.day}/${nextPeriodDate.month}/${nextPeriodDate.year}'
+                : 'Not calculated',
+            icon: Icons.calendar_today,
+          ),
+
+          // Day of Cycle Card
+          _infoTile(
+            title: 'Days Since Last Period',
+            value: difference != null ? '$difference Days' : 'Pending',
+            icon: Icons.timer,
+          ),
+
+          // Current Phase Card
+          _infoTile(
+            title: 'Current Phase',
+            value: phase ?? 'Data missing',
+            icon: Icons.home,
+            isHighlighted: true,
           ),
         ],
       ),
-  
+    );
+  }
+
+  // Helper widget to keep the code clean
+  Widget _infoTile({
+    required String title,
+    required String value,
+    required IconData icon,
+    bool isHighlighted = false,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isHighlighted ? const Color.fromRGBO(54, 18, 58, 0.05) : Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: const Color.fromRGBO(54, 18, 58, 0.1)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: const Color.fromRGBO(54, 18, 58, 1)),
+          const SizedBox(width: 15),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+              Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
