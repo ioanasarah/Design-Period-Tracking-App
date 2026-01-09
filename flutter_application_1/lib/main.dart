@@ -391,13 +391,16 @@ class TextBox extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
           child: TextField(
+            inputFormatters: <TextInputFormatter>[
+              FilteringTextInputFormatter.digitsOnly
+            ],
             controller: controller,
             decoration: InputDecoration(
               border: const OutlineInputBorder(),
               hintText: hint,
             ),
           ),
-  
+        ),
       ],
     );
   }
