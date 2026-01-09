@@ -338,7 +338,7 @@ class _LogCalendarState extends State<LogCalendar> {
                     calc.calculateNextPeriod(selectedDate!, cycleLength);
                     calc.calculateDayOfCycle(selectedDate!);
                     calc.determinePhase(
-                      cycleDay: calc.difference!+1,
+                      cycleDay: calc.difference!,
                       cycleLength: cycleLength,
                       periodLength: periodLength,
                     );
@@ -487,7 +487,7 @@ class Calculate extends ChangeNotifier {
     required int periodLength,
     // final String? phase,
 }) {
-    final ovulationDay = cycleLength - 14;
+    int ovulationDay = cycleLength - 14;
 
     if (cycleDay <= periodLength) {
       phase = 'menstrual';
@@ -523,6 +523,7 @@ class PlaceholderPage extends StatelessWidget {
     final nextPeriodDate = calc.nextPeriodDate;
     final difference = calc.difference;
     final phase = calc.phase;
+    final dayofphase = calc.dayofphase;
 
     return Container(
       width: double.infinity,
@@ -562,7 +563,13 @@ class PlaceholderPage extends StatelessWidget {
             title: 'Current Phase',
             value: phase ?? 'Data missing',
             icon: Icons.home,
-            isHighlighted: true,
+            //isHighlighted: true,
+          ),
+          _infoTile(
+            title: 'Day Of $phase Phase',
+            value: dayofphase != null ? '$dayofphase' : 'Data missing',
+            icon: Icons.heart_broken,
+            //isHighlighted: true,
           ),
         ],
       ),
