@@ -235,8 +235,10 @@ class LogCalendar extends StatefulWidget {
 
 class _LogCalendarState extends State<LogCalendar> {
   DateTime? selectedDate;
-
   DateTime now = new DateTime.now();
+
+  final TextEditingController periodLengthController = TextEditingController();
+  final TextEditingController cycleLengthController = TextEditingController();
 
   Future<void> _selectDate() async {
     final DateTime? pickedDate = await showDatePicker(
@@ -252,15 +254,23 @@ class _LogCalendarState extends State<LogCalendar> {
   }
 
   @override
+  void dispose() {
+    periodLengthController.dispose();
+    cycleLengthController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
     padding: const EdgeInsets.all(8),
       child:
         Column(
           mainAxisSize: MainAxisSize.min,
-          spacing: 20,
+          //spac
           children:<Widget> [
             Text("Your last period started on:"),
+
             Text(
               selectedDate != null
                   ? '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}'
@@ -271,22 +281,33 @@ class _LogCalendarState extends State<LogCalendar> {
                   onPressed: _selectDate,
                 ),
             
-                TextBox(
-                  title: "Average period length (days):", 
-                  hint: "enter text here",),
-                TextBox(
-                  title: "Average cycle length (days):", 
-                  hint: "enter text here",),
-                  SelectButton(
+            TextBox(
+                  title: "Average period length (days):",
+                  hint: "Enter number of days",
+                  controller: periodLengthController,
+                ),
+
+            TextBox(
+                  title: "Average cycle length (days):",
+                  hint: "Enter number of days",
+                  controller: cycleLengthController,
+                ),
+
+            SelectButton(
                   label: 'Submit',
-                  onPressed: () async { // async pentru await
+                  onPressed: () async {
                     if (selectedDate == null) return;
-                    
+
+                    final int periodLength =
+                        int.tryParse(periodLengthController.text) ?? 0;
+                    final int cycleLength =
+                        int.tryParse(cycleLengthController.text) ?? 0;
+
                     final calc = context.read<Calculate>();
                     calc.calculateNextPeriod(selectedDate!);
                     calc.calculateDayOfCycle(selectedDate!);
                     await calc.calculatePhase();
-        
+
                     widget.onSubmit();
                   
                   },
@@ -351,30 +372,29 @@ class SelectButton extends StatelessWidget {
 
 // text field class
 class TextBox extends StatelessWidget {
-  //const TextBox({super.key});
-  final String title; // text above the box
-  final String hint; // text inside the box
+  final String title;
+  final String hint;
+  final TextEditingController controller;
 
   const TextBox({
     super.key,
-    required this.title, // cand chemi functia ai nevoie de asta neaparat
+    required this.title,
     required this.hint,
+    required this.controller,
   });
 
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
+      children: [
         Text(title),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-          child:  TextField(
-            inputFormatters: <TextInputFormatter>[
-      FilteringTextInputFormatter.digitsOnly
-    ],
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              hintText: "Enter text here"),
+          child: TextField(
+            controller: controller,
+            decoration: InputDecoration(
+              border: const OutlineInputBorder(),
+              hintText: hint,
             ),
           ),
   
