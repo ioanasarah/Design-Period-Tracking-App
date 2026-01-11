@@ -584,6 +584,12 @@ class PlaceholderPage extends StatelessWidget {
             icon: Icons.heart_broken,
             //isHighlighted: true,
           ),
+          _infoTile(
+            title: 'Info from json file',
+            value: dayofphase != null ? '$dayofphase' : 'Data missing',
+            icon: Icons.book_rounded,
+            //isHighlighted: true,
+          ),
         ],
       ),
     );
