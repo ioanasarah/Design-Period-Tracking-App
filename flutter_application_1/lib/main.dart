@@ -83,31 +83,31 @@ class CustomNavigationBar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _NavButton(
-            label: 'Home',
+            label: 'Log Page',
             // icon: 'assets/images/vector.svg',
-            icon: Icons.home, // icon for tabs 
+            icon: Icons.heart_broken, // icon for tabs 
             isSelected: selectedIndex == 0,
             onTap: () => onItemSelected(0),
           ),
           _NavButton(
-            label: 'Information',
+            label: 'Home',
             // icon: 'assets/images/vector.svg',
             // icon: Icon(Icons.info).toString(),
-            icon: Icons.info,
+            icon: Icons.home,
             isSelected: selectedIndex == 1,
             onTap: () => onItemSelected(1),
           ),
           _NavButton(
-            label: 'Stats',
+            label: 'Daily Tips',
             // icon: 'assets/images/vector.svg',
-            icon: Icons.school,
+            icon: Icons.info,
             isSelected: selectedIndex == 2,
             onTap: () => onItemSelected(2),
           ),
           _NavButton(
-            label: 'Settings',
+            label: 'Calendar',
             // icon: 'assets/images/vector.svg',
-            icon: Icons.business,
+            icon: Icons.calendar_month,
             isSelected: selectedIndex == 3,
             onTap: () => onItemSelected(3),
           ),
@@ -183,8 +183,8 @@ class _MainNavigationBarState extends State<MainNavigationBar> {
   List<Widget> get _pages => [
   LogPage(onSubmit: () => _onItemTapped(1)),
   const PlaceholderPage(),
-  const Center(child: Text('Insights')),
-  const Center(child: Text('Settings')),
+  const DailyTipsPage(),
+  const CalendarPage(),
 ];
 
   void _onItemTapped(int index) {
@@ -196,9 +196,10 @@ class _MainNavigationBarState extends State<MainNavigationBar> {
   @override
 Widget build(BuildContext context) {
   return Scaffold(
-    appBar: AppBar(
-    title: const Text("Log your Period Details!"),
-    ),
+    //appBar: 
+    // AppBar(
+    // title: const Text("Log your Period Details!"),
+    // ),
     body: _pages[_selectedIndex],
     bottomNavigationBar: CustomNavigationBar(
       selectedIndex: _selectedIndex,
@@ -226,7 +227,19 @@ class LogPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LogCalendar(onSubmit: onSubmit);
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Log your Period Details!"),
+      ),
+      body: LogCalendar(onSubmit: onSubmit),
+    );
+    
+    
+    // appBar: 
+    // AppBar(
+    // title: const Text("Log your Period Details!"),
+    // ),
+    // return LogCalendar(onSubmit: onSubmit);
   }
 }
 
@@ -608,4 +621,50 @@ class PlaceholderPage extends StatelessWidget {
   }
 }
 
+class DailyTipsPage extends StatelessWidget{
+  const DailyTipsPage({super.key});
 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Daily Tips'),
+      ),
+      body: const Center(
+        child: Text('Daily Tips Content Goes Here'),
+      ),
+    );
+  }
+}
+
+class CalendarPage extends StatelessWidget{
+  const CalendarPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Calendar'),
+      ),
+      body: const Center(
+        child: Text('Calendar Content Goes Here'),
+      ),
+    );
+  }
+}
+
+class BasicInfoPage extends StatelessWidget{
+  const BasicInfoPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Basic Info'),
+      ),
+      body: const Center(
+        child: Text('Basic Info Content Goes Here'),
+      ),
+    );
+  }
+}
