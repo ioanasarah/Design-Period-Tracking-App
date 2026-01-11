@@ -385,7 +385,7 @@ class SelectButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container (
-      width: 130.0,
+      width: 190.0,
       height: 50.0,
       child: InkWell(
       onTap: onPressed,
@@ -630,8 +630,26 @@ class DailyTipsPage extends StatelessWidget{
       appBar: AppBar(
         title: const Text('Daily Tips'),
       ),
-      body: const Center(
-        child: Text('Daily Tips Content Goes Here'),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        //crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text('Daily Tips Content Goes Here'),
+          ),
+          SelectButton(
+            label: "Menstruation Info Page", 
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const MenstruationPage(),
+                ),
+              );
+            },
+            )
+        ]
       ),
     );
   }
@@ -653,8 +671,8 @@ class CalendarPage extends StatelessWidget{
   }
 }
 
-class BasicInfoPage extends StatelessWidget{
-  const BasicInfoPage({super.key});
+class MenstruationPage extends StatelessWidget{
+  const MenstruationPage({super.key});
 
   @override
   Widget build(BuildContext context) {
