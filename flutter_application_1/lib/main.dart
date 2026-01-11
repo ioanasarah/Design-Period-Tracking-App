@@ -648,7 +648,51 @@ class DailyTipsPage extends StatelessWidget{
                 ),
               );
             },
-            )
+          ),
+          SelectButton(
+            label: "Folicular Info Page", 
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const FolicularPage(),
+                ),
+              );
+            },
+          ),
+          SelectButton(
+            label: "Ovulation Info Page", 
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const OvulationPage(),
+                ),
+              );
+            },
+          ),
+          SelectButton(
+            label: "Early Luteal Info Page", 
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const EarlyLutealPage(),
+                ),
+              );
+            },
+          ),
+          SelectButton(
+            label: "Late Luteal Info Page", 
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const LateLutealPage(),
+                ),
+              );
+            },
+          ),
         ]
       ),
     );
@@ -681,7 +725,71 @@ class MenstruationPage extends StatelessWidget{
         title: const Text('Basic Info'),
       ),
       body: const Center(
-        child: Text('Basic Info Content Goes Here'),
+        child: Text('Mentruation'),
+      ),
+    );
+  }
+}
+
+class FolicularPage extends StatelessWidget{
+  const FolicularPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Basic Info'),
+      ),
+      body: const Center(
+        child: Text('Folicular'),
+      ),
+    );
+  }
+}
+
+class OvulationPage extends StatelessWidget{
+  const OvulationPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Basic Info'),
+      ),
+      body: const Center(
+        child: Text('Ovulation'),
+      ),
+    );
+  }
+}
+
+class EarlyLutealPage extends StatelessWidget{
+  const EarlyLutealPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Basic Info'),
+      ),
+      body: const Center(
+        child: Text('Early Luteal'),
+      ),
+    );
+  }
+}
+
+class LateLutealPage extends StatelessWidget{
+  const LateLutealPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Basic Info'),
+      ),
+      body: const Center(
+        child: Text('Late Luteal'),
       ),
     );
   }
