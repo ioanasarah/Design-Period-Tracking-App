@@ -735,8 +735,7 @@ class HorizontalScrollButton extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,  
               children: [
                 Text(label, // do not change label pls
-                style: const TextStyle(
-                  color: const Color(0xFF303437),
+                style: const TextStyle(color: const Color(0xFF303437),
                   fontSize: 14,
                   fontFamily: 'DM Sans',
                   fontWeight: FontWeight.w700,
