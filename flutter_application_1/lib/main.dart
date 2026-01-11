@@ -6,12 +6,18 @@ import 'dart:convert';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => Calculate(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => Calculate()),
+        ChangeNotifierProvider(
+          create: (_) => CycleDataProvider()..load(),
+        ),
+      ],
       child: const MyApp(),
     ),
   );
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -35,11 +41,68 @@ class MyApp extends StatelessWidget {
 
 
 //load JSON file
-Future<List<Map<String, dynamic>>> loadCycleData() async {
-  final jsonString = await rootBundle.loadString('assets/Menstrual_Phase.json');
-  final List<dynamic> jsonList = json.decode(jsonString);
-  return jsonList.cast<Map<String, dynamic>>();
+// Future<Map<String, List<Map<String, dynamic>>>> loadCycleData() async {
+//   final jsonMenstrual =
+//       await rootBundle.loadString('assets/Menstrual_Phase.json');
+//   final jsonFollicular =
+//       await rootBundle.loadString('assets/Follicular_Phase.json');
+//   final jsonEarlyLuteal =
+//       await rootBundle.loadString('assets/Early_Luteal_Phase.json');
+//   final jsonLateLuteal =
+//       await rootBundle.loadString('assets/Late_Luteal_Phase.json');
+//   final jsonOvulation =
+//       await rootBundle.loadString('assets/Ovulation_Phase.json');
+
+//   final List<dynamic> menstrualList = json.decode(jsonMenstrual);
+//   final List<dynamic> follicularList = json.decode(jsonFollicular);
+//   final List<dynamic> earlyLutealList = json.decode(jsonEarlyLuteal);
+//   final List<dynamic> lateLutealList = json.decode(jsonLateLuteal);
+//   final List<dynamic> ovulationList = json.decode(jsonOvulation);
+
+//   return {
+//     'menstrual': menstrualList.cast<Map<String, dynamic>>(),
+//     'follicular': follicularList.cast<Map<String, dynamic>>(),
+//     'early_luteal': earlyLutealList.cast<Map<String, dynamic>>(),
+//     'late_luteal': lateLutealList.cast<Map<String, dynamic>>(),
+//     'ovulation': ovulationList.cast<Map<String, dynamic>>(),
+//   };
+// }
+
+class CycleDataProvider extends ChangeNotifier {
+  Map<String, List<Map<String, dynamic>>> _data = {};
+  bool _loaded = false;
+
+  bool get isLoaded => _loaded;
+
+  Future<void> load() async {
+    if (_loaded) return;
+
+    final Map<String, List<Map<String, dynamic>>> result = {};
+
+    for (final entry in phaseJsonFiles.entries) {
+      final jsonString = await rootBundle.loadString(entry.value);
+      final List<dynamic> decoded = json.decode(jsonString);
+      result[entry.key] = decoded.cast<Map<String, dynamic>>();
+    }
+
+    _data = result;
+    _loaded = true;
+    notifyListeners();
+  }
+
+  String getPhaseInfo({
+    required String phase,
+    required int dayOfPhase,
+    required String field,
+  }) {
+    final list = _data[phase];
+    if (list == null || list.isEmpty) return 'No data';
+
+    final index = (dayOfPhase - 1).clamp(0, list.length - 1);
+    return list[index][field]?.toString() ?? 'No data';
+  }
 }
+
 
 class MainNavigationBar extends StatefulWidget {
   const MainNavigationBar({super.key});
@@ -528,6 +591,7 @@ class Calculate extends ChangeNotifier {
 
 class PlaceholderPage extends StatelessWidget {
   const PlaceholderPage({super.key});
+ // var info = menstrual[0]['Level of estrogen'];
 
   @override
   Widget build(BuildContext context) {
@@ -535,8 +599,23 @@ class PlaceholderPage extends StatelessWidget {
     final calc = context.watch<Calculate>();
     final nextPeriodDate = calc.nextPeriodDate;
     final difference = calc.difference;
-    final phase = calc.phase;
-    final dayofphase = calc.dayofphase;
+
+    final cycleData = context.watch<CycleDataProvider>();
+    
+    if (!cycleData.isLoaded) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+  final phase = calc.phase;
+  final dayOfPhase = calc.dayofphase;
+
+  final info = (phase != null && dayOfPhase != null)
+        ? cycleData.getPhaseInfo(
+            phase: phase,
+            dayOfPhase: dayOfPhase,
+            field: 'Level of estrogen',
+          )
+        : 'No data';
 
     return Container(
       width: double.infinity,
@@ -572,18 +651,22 @@ class PlaceholderPage extends StatelessWidget {
           ),
 
           // Current Phase Card
-          _infoTile(
-            title: 'Current Phase',
-            value: phase ?? 'Data missing',
-            icon: Icons.home,
-            //isHighlighted: true,
-          ),
+          // _infoTile(
+          //   title: 'Current Phase',
+          //   value: phase ?? 'Data missing',
+          //   icon: Icons.home,
+          //   //isHighlighted: true,
+          // ),
           _infoTile(
             title: 'Day Of $phase Phase',
-            value: dayofphase != null ? '$dayofphase' : 'Data missing',
+            value: dayOfPhase != null ? '$dayOfPhase' : 'Data missing',
             icon: Icons.heart_broken,
             //isHighlighted: true,
           ),
+          _infoTile(
+            title: 'Level of Estrogen',
+            value: info,
+            icon: Icons.heart_broken,)
         ],
       ),
     );
