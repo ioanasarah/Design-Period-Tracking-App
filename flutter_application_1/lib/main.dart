@@ -71,8 +71,11 @@ class MyApp extends StatelessWidget {
 class CycleDataProvider extends ChangeNotifier {
   Map<String, List<Map<String, dynamic>>> _data = {};
   bool _loaded = false;
+  String _selectedField = 'Level of estrogen';
 
   bool get isLoaded => _loaded;
+  String get selectedField => _selectedField;
+
 
   Future<void> load() async {
     if (_loaded) return;
@@ -89,6 +92,11 @@ class CycleDataProvider extends ChangeNotifier {
     _loaded = true;
     notifyListeners();
   }
+  void selectField(String field) {
+    _selectedField = field;
+    notifyListeners();
+  }
+
 
   String getPhaseInfo({
     required String phase,
@@ -608,14 +616,15 @@ class PlaceholderPage extends StatelessWidget {
 
   final phase = calc.phase;
   final dayOfPhase = calc.dayofphase;
+  final selectedField = cycleData.selectedField;
 
   final info = (phase != null && dayOfPhase != null)
-        ? cycleData.getPhaseInfo(
-            phase: phase,
-            dayOfPhase: dayOfPhase,
-            field: 'Level of estrogen',
-          )
-        : 'No data';
+    ? cycleData.getPhaseInfo(
+        phase: phase,
+        dayOfPhase: dayOfPhase,
+        field: selectedField,
+      )
+    : 'No data';
 
     return Container(
       width: double.infinity,
@@ -632,6 +641,37 @@ class PlaceholderPage extends StatelessWidget {
               color: Color.fromRGBO(54, 18, 58, 1),
             ),
           ),
+          const SizedBox(height: 16),
+
+            SizedBox(
+              height: 70, // controls button size
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  _buildButton(
+                    context,
+                    "Energy Levels Text",
+                    const MenstruationPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Level of progesterone",
+                    const FolicularPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Level of FSH",
+                    const OvulationPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Level of LH",
+                    const EarlyLutealPage(),
+                  ),
+                ],
+              ),
+            ),
+          
           const SizedBox(height: 30),
           
           // Next Period Card
@@ -664,9 +704,10 @@ class PlaceholderPage extends StatelessWidget {
             //isHighlighted: true,
           ),
           _infoTile(
-            title: 'Level of Estrogen',
-            value: info,
-            icon: Icons.heart_broken,)
+            title: selectedField,
+            value: Text(info).data!,
+            icon: Icons.analytics,
+          ),
         ],
       ),
     );
@@ -702,7 +743,26 @@ class PlaceholderPage extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildButton(BuildContext context, String label, Widget page) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 12),
+      child: SizedBox(
+        width: 160, // controls how many buttons fit on screen
+        child: HorizontalScrollButton( // make a new class with a different deign for these
+          label: label,
+          onPressed: () {
+            context.read<CycleDataProvider>().selectField(label);
+            // Navigator.push();
+            //MaterialPageRoute(builder: (_) => page),
+            
+          },
+        ),
+      ),
+    );
+  }
 }
+
 
 class DailyTipsPage extends StatelessWidget {
   const DailyTipsPage({super.key});
