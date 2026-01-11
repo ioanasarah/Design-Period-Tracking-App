@@ -312,7 +312,7 @@ class _LogCalendarState extends State<LogCalendar> {
             ),
             
             TextBox(
-                  title: "Average period length (days):",
+                  title: "Average menstruation length (days):",
                   hint: "Enter number of days",
                   controller: periodLengthController,
                 ),
@@ -607,3 +607,5 @@ class PlaceholderPage extends StatelessWidget {
     );
   }
 }
+
+
