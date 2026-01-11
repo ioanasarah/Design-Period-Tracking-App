@@ -704,7 +704,7 @@ class PlaceholderPage extends StatelessWidget {
   }
 }
 
-class DailyTipsPage extends StatelessWidget{
+class DailyTipsPage extends StatelessWidget {
   const DailyTipsPage({super.key});
 
   @override
@@ -713,74 +713,123 @@ class DailyTipsPage extends StatelessWidget{
       appBar: AppBar(
         title: const Text('Daily Tips'),
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        //crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text('Daily Tips Content Goes Here'),
-          ),
-          SelectButton(
-            label: "Menstruation Info Page", 
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const MenstruationPage(),
-                ),
-              );
-            },
-          ),
-          SelectButton(
-            label: "Folicular Info Page", 
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const FolicularPage(),
-                ),
-              );
-            },
-          ),
-          SelectButton(
-            label: "Ovulation Info Page", 
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const OvulationPage(),
-                ),
-              );
-            },
-          ),
-          SelectButton(
-            label: "Early Luteal Info Page", 
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const EarlyLutealPage(),
-                ),
-              );
-            },
-          ),
-          SelectButton(
-            label: "Late Luteal Info Page", 
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const LateLutealPage(),
-                ),
-              );
-            },
-          ),
-        ]
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Daily Tips Content Goes Here',
+              style: TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 16),
+
+            SizedBox(
+              height: 70, // controls button size
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  _buildButton(
+                    context,
+                    "Menstruation",
+                    const MenstruationPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Follicular",
+                    const FolicularPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Ovulation",
+                    const OvulationPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Early Luteal",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Late Luteal",
+                    const LateLutealPage(),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildButton(BuildContext context, String label, Widget page) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 12),
+      child: SizedBox(
+        width: 160, // controls how many buttons fit on screen
+        child: HorizontalScrollButton( // make a new class with a different deign for these
+          label: label,
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => page),
+            );
+          },
+        ),
       ),
     );
   }
 }
+
+class HorizontalScrollButton extends StatelessWidget {
+  final String label; // 
+  final VoidCallback onPressed;
+
+  const HorizontalScrollButton({
+    super.key,
+    required this.label, // cand chemi functia ai nevoie de asta neaparat
+    required this.onPressed,
+  });
+  @override
+  Widget build(BuildContext context) {
+    return Container (
+      width: 190.0,
+      height: 60.0,
+      child: InkWell(
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(100), // design
+      child:Container(
+        decoration: BoxDecoration( // design
+          color: Color.fromRGBO(255, 255, 255, 1), // design
+          borderRadius: BorderRadius.circular(20), // design
+        ),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            //mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [Column(
+              mainAxisAlignment: MainAxisAlignment.center,  
+              children: [
+                Text(label, // do not change label pls
+                style: const TextStyle(
+                  color: const Color(0xFF303437),
+                  fontSize: 14,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.w700,
+                  height: 1.43,),
+                          ),
+              ],
+            ),],
+          ),
+        ),
+
+    ),);
+
+  }
+}
+
+
 
 class CalendarPage extends StatelessWidget{
   const CalendarPage({super.key});
