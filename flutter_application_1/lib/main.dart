@@ -507,7 +507,10 @@ class PlaceholderPage extends StatelessWidget {
       )
     : 'No data';
 
-    return Container(
+    return SingleChildScrollView(
+      padding:const EdgeInsets.all(16),
+      child:
+    Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20.0),
       child: Column(
@@ -591,7 +594,7 @@ class PlaceholderPage extends StatelessWidget {
           ),
         ],
       ),
-    );
+    ));
   }
 
   // Helper widget to keep the code clean
@@ -613,17 +616,31 @@ class PlaceholderPage extends StatelessWidget {
         children: [
           Icon(icon, color: const Color.fromRGBO(54, 18, 58, 1)),
           const SizedBox(width: 15),
-          Column(
+          Expanded(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-              Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Text(
+                title,
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+                softWrap: true,
+              ),
             ],
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
+
 
   Widget _buildButton(BuildContext context, String label, Widget page) {
     return Padding(
@@ -804,6 +821,29 @@ class MenstruationPage extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
+
+final calc = context.watch<Calculate>();
+    final nextPeriodDate = calc.nextPeriodDate;
+    final difference = calc.difference;
+
+    final cycleData = context.watch<CycleDataProvider>();
+    
+    if (!cycleData.isLoaded) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+  final phase = calc.phase;
+  final dayOfPhase = calc.dayofphase;
+  final selectedField = cycleData.selectedField;
+
+  final info = (phase != null && dayOfPhase != null)
+    ? cycleData.getPhaseInfo(
+        phase: phase,
+        dayOfPhase: dayOfPhase,
+        field: selectedField,
+      )
+    : 'No data';
+
     return Scaffold(
       backgroundColor: Color(0xFFFBE3E4),
       body: Container(
@@ -849,24 +889,80 @@ class MenstruationPage extends StatelessWidget{
                 children: [
                   _buildButton(
                     context,
-                    "Energy Levels Text",
+                    "What is happening in each phase",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of estrogen ",
                     const MenstruationPage(),
                   ),
                   _buildButton(
                     context,
-                    "Level of progesterone",
+                    "Effects of progesterone ",
                     const FolicularPage(),
                   ),
                   _buildButton(
                     context,
-                    "Level of FSH",
+                    "Effects of FSH",
                     const OvulationPage(),
                   ),
                   _buildButton(
                     context,
-                    "Level of LH",
+                    "Effects of LH",
                     const EarlyLutealPage(),
                   ),
+                  _buildButton(
+                    context,
+                    "Energy Levels Text",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Type of food",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Example of Food",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Health aspect",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Concentration Levels",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Mood",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Types of Vitamins",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "What is happening in the Ovaries",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "What is happening in the Brain",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "What is happening in the Uterus",
+                    const EarlyLutealPage(),
+                  )
+
                 ],
               ),
             ),
