@@ -831,7 +831,7 @@ class DailyTipsPage extends StatelessWidget {
 
               Padding(
                 padding: const EdgeInsets.only(top: 20.0),
-                child: SizedBox(height: 400,
+                child: SizedBox(height: 200,
                 // Next Period Card
                 child: 
                   _infoTile(
@@ -864,7 +864,7 @@ class DailyTipsPage extends StatelessWidget {
               ),
 
               SizedBox(
-                height: 120, // controls button size
+                height: 90, // controls button size
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   children: [
@@ -958,9 +958,10 @@ class DailyTipsPage extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(right: 12),
       child: SizedBox(
-        width: 160, // controls how many buttons fit on screen
-        child: HorizontalScrollButton(
+        width: 292, // controls how many buttons fit on screen
+        child: HorizontalScrollButtonPhases(
           label: label,
+          colorBox: label,
           onPressed: () {
             Navigator.push(
               context,
@@ -972,8 +973,6 @@ class DailyTipsPage extends StatelessWidget {
     );
   }
 }
-
-
 
 
 class CalendarPage extends StatelessWidget{
@@ -1397,25 +1396,32 @@ class HorizontalScrollButton extends StatelessWidget {
 class HorizontalScrollButtonPhases extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
+  final String colorBox;
 
   const HorizontalScrollButtonPhases({
     super.key,
     required this.label,
     required this.onPressed,
+    required this.colorBox,
   });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 137,
-      height: 120,
+      width: 292,
+      height: 75,
       child: InkWell(
         onTap: onPressed,
         borderRadius: BorderRadius.circular(24),
         child: Container(
-          padding: const EdgeInsets.all(18),
+          padding: const EdgeInsets.all(15),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colorBox == 'Menstruation' ? Color(0xFFFBE3E4) :
+                   colorBox == 'Follicular' ? Color(0xFFE3F0FB) :
+                   colorBox == 'Ovulation' ? Color(0xFFFFF3E5) :
+                   colorBox == 'Early Luteal' ? Color(0xFFE8F6E8) :
+                   colorBox == 'Late Luteal' ? Color(0xFFF5E8F8) :
+                   Colors.white,
             borderRadius: BorderRadius.circular(24),
             boxShadow: const [
               BoxShadow(
@@ -1447,16 +1453,18 @@ class HorizontalScrollButtonPhases extends StatelessWidget {
 
               const SizedBox(height: 12),
 
-              // Label (UNCHANGED)
+              // Label 
               Text(
                 label,
-                style: const TextStyle(
-                  color: Color(0xFF303437),
-                  fontSize: 14,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: const Color(0xFF5454CA),
+                  fontSize: 18,
                   fontFamily: 'DM Sans',
                   fontWeight: FontWeight.w700,
-                  height: 1.43,
-                ),
+                  height: 0.67,
+                  letterSpacing: 0.72,
+                  ),
               ),
             ],
           ),
