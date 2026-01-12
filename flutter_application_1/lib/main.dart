@@ -32,11 +32,11 @@ class MyApp extends StatelessWidget {
 
 // list of files based on phase 
 const Map<String, String> phaseJsonFiles = {
-  'menstrual': 'assets/Menstrual_Phase.json',
-  'follicular': 'assets/Follicular_Phase.json',
-  'ovulation': 'assets/Ovulation_Phase.json',
-  'early_luteal': 'assets/Early_Luteal_Phase.json',
-  'late_luteal': 'assets/Late_Luteal_Phase.json',
+  'Menstrual': 'assets/Menstrual_Phase.json',
+  'Follicular': 'assets/Follicular_Phase.json',
+  'Ovulation': 'assets/Ovulation_Phase.json',
+  'Early Luteal': 'assets/Early_Luteal_Phase.json',
+  'Late Luteal': 'assets/Late_Luteal_Phase.json',
 };
 
 
@@ -123,19 +123,19 @@ class Calculate extends ChangeNotifier {
     int ovulationDay = cycleLength - 14;
 
     if (cycleDay <= periodLength) {
-      phase = 'menstrual';
+      phase = 'Menstrual';
       dayofphase = cycleDay;
     } else if (cycleDay < ovulationDay) {
-      phase  =  'follicular';
+      phase  =  'Follicular';
       dayofphase = cycleDay - periodLength;
     } else if (cycleDay == ovulationDay) {
-      phase = 'ovulation';
+      phase = 'Ovulation';
       dayofphase = ovulationDay;
     } else if (cycleDay <= ovulationDay + 6) {
-      phase = 'early_luteal';
+      phase = 'Early Luteal';
       dayofphase = cycleDay - ovulationDay;
     } else {
-      phase = 'late_luteal';
+      phase = 'Late Luteal';
       dayofphase = cycleDay - ovulationDay - 6;
     }
     // return phase!;
@@ -650,6 +650,23 @@ class DailyTipsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // data loaded into page 
+    final calc = context.watch<Calculate>();
+    final nextPeriodDate = calc.nextPeriodDate;
+    final difference = calc.difference;
+
+    final cycleData = context.watch<CycleDataProvider>();
+
+    if (!cycleData.isLoaded) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final phase = calc.phase;
+    final dayOfPhase = calc.dayofphase;
+    final today = DateTime.now();
+    final selectedField = cycleData.selectedField;
+
+    // design of page 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Daily Tips'),
@@ -657,14 +674,53 @@ class DailyTipsPage extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Text(
-              'Daily Tips Content Goes Here',
-              style: TextStyle(fontSize: 18),
+            Container(
+              height: 98, 
+              width: 324, // size of pink container
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration( // design of pink container
+                color: const Color.fromARGB(255, 227, 120, 120),
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Day $dayOfPhase',
+                          style: TextStyle(fontSize: 25, 
+                          fontWeight: FontWeight.w700,),
+                        ),
+                        Text(
+                          ' $phase Phase',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                        ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Text(
+                        //  'Today, $today.year, $today.month, $today.day',
+                          'Today, ${today.day}/${today.month}/${today.year}',
+                          style: TextStyle( // edit text of today within pink container
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                        ),
+                        ),
+                      ],
+                      )
+                  ],
+                ),
+              ),
             ),
-            const SizedBox(height: 16),
-
             SizedBox(
               height: 120, // controls button size
               child: ListView(
@@ -709,7 +765,7 @@ class DailyTipsPage extends StatelessWidget {
       padding: const EdgeInsets.only(right: 12),
       child: SizedBox(
         width: 160, // controls how many buttons fit on screen
-        child: HorizontalScrollButton( // make a new class with a different deign for these
+        child: HorizontalScrollButton(
           label: label,
           onPressed: () {
             Navigator.push(
@@ -744,32 +800,10 @@ class CalendarPage extends StatelessWidget{
 
 class MenstruationPage extends StatelessWidget{
   const MenstruationPage({super.key});
+  final DateTime? nextPeriodDate = null;
 
   @override
   Widget build(BuildContext context) {
-
-    final calc = context.watch<Calculate>();
-    final nextPeriodDate = calc.nextPeriodDate;
-    final difference = calc.difference;
-
-    final cycleData = context.watch<CycleDataProvider>();
-    
-    if (!cycleData.isLoaded) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    final phase = calc.phase;
-    final dayOfPhase = calc.dayofphase;
-    final selectedField = cycleData.selectedField;
-
-    final info = (phase != null && dayOfPhase != null)
-      ? cycleData.getPhaseInfo(
-          phase: phase,
-          dayOfPhase: dayOfPhase,
-          field: selectedField,
-        )
-      : 'No data';
-
     return Scaffold(
       backgroundColor: Color(0xFFFBE3E4),
       body: Container(
@@ -844,7 +878,9 @@ class MenstruationPage extends StatelessWidget{
               child: 
                 _infoTile(
                   //need to change what it shows and link to json file
-                  value: Text(info).data!,
+                  value: nextPeriodDate != null
+                      ? 'info from json file - menstruation phase'
+                      : 'Not calculated',
                   // no icon
                   //icon: Icons.calendar_today,
                 ),
@@ -859,7 +895,7 @@ class MenstruationPage extends StatelessWidget{
     );
   }
 
-  //this one doesnt need an icon
+//this one doesnt need an icon
   Widget _infoTile({
     //required String title,
     required String value,
@@ -907,8 +943,7 @@ class MenstruationPage extends StatelessWidget{
       ),
     );
   }
-} 
-
+}
 
 class FolicularPage extends StatelessWidget{
   const FolicularPage({super.key});
