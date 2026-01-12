@@ -652,10 +652,12 @@ class DailyTipsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Daily Tips'),
+        title: const Text('Daily Tips', 
+        style: TextStyle(fontFamily: 'DM Sans'), // change style of daily tips text 
+        ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0), // change space around the page (how close it is to top and bottom of screen)
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
