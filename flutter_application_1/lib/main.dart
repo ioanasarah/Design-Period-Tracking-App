@@ -54,6 +54,7 @@ class CycleDataProvider extends ChangeNotifier {
     if (_loaded) return;
 
     final Map<String, List<Map<String, dynamic>>> result = {};
+    final Map<String, List<Map<String, dynamic>>> _allphases = {};
 
 //decoding each json file
     for (final entry in phaseJsonFiles.entries) {
@@ -823,12 +824,15 @@ class CalendarPage extends StatelessWidget{
   }
 }
 
+
+
+
+
 class MenstruationPage extends StatelessWidget{
   const MenstruationPage({super.key});
   final DateTime? nextPeriodDate = null;
 
-
-  Future<String> _loadMenstruationInfo(String selectedField) async {
+Future<String> _loadMenstruationInfo(String selectedField) async {
   final jsonString = await rootBundle.loadString('assets/All_Phases.json');
   final List<dynamic> decoded = json.decode(jsonString);
 
@@ -839,10 +843,12 @@ class MenstruationPage extends StatelessWidget{
     (entry) => entry['Phase'] == 'Menstrual',
     orElse: () => {},
   );
+  final data = menstruationEntry[selectedField]?.toString();
 
-  return menstruationEntry[selectedField]?.toString() ?? 'No data';
+  return data ?? 'No data';
 }
 
+  
   @override
   Widget build(BuildContext context) {
     
@@ -919,12 +925,12 @@ final calc = context.watch<Calculate>();
                   ),
                   _buildButton(
                     context,
-                    "Effects of estrogen ",
+                    "Effects of estrogen",
                     const MenstruationPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of progesterone ",
+                    "Effects of progesterone",
                     const FolicularPage(),
                   ),
                   _buildButton(
@@ -939,7 +945,7 @@ final calc = context.watch<Calculate>();
                   ),
                   _buildButton(
                     context,
-                    "Energy Levels Text",
+                    "Energy Levels Type",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
@@ -1006,24 +1012,13 @@ final calc = context.watch<Calculate>();
                   ),
                   )
               ),
-            Padding(
-              padding: const EdgeInsets.only(top: 20.0),
-              child: SizedBox(height: 200,
-              // Next Period Card
-              child: 
-                _infoTile(
-                  //need to change what it shows and link to json file
-                  value: nextPeriodDate != null
-                      ? 'info from json file - menstruation phase'
-                      : 'Not calculated',
-                  // no icon
-                  //icon: Icons.calendar_today,
-                ),
-                
-                
-              ),
-            ),
-          SizedBox(height:10),
+    Padding(
+  padding: const EdgeInsets.only(top: 20.0),
+  child: Padding(
+  padding: const EdgeInsets.only(top: 20.0),
+  child: _infoTile(value: 'graph'))
+  ),
+ SizedBox(height:10),
 
           Align(
             alignment: Alignment.centerLeft,
@@ -1040,30 +1035,34 @@ final calc = context.watch<Calculate>();
                   )
               ),
 
-              Padding(
-                padding: const EdgeInsets.only(top: 20.0),
-                child: SizedBox(height: 200,
-                // Explanation Card
-                child: 
-                  _infoTile(
-                    //need to change what it shows and link to json file
-                    value: nextPeriodDate != null
-                        ? 'info from json file - menstruation phase'
-                        : 'Not calculated',
-                    // no icon
-                    //icon: Icons.calendar_today,
-                  ),
-                  
-                ),
-              ),
-          ],
-          )
-        
-        ),
-      ),
-    );
-    // );
-  }
+             Padding(
+  padding: const EdgeInsets.only(top: 20.0),
+  child: SizedBox(
+    height: 200,
+    child: FutureBuilder<String>(
+      future: _loadMenstruationInfo(selectedField),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return _infoTile(value: 'Error loading data');
+        }
+
+        return _infoTile(
+          value: snapshot.data ?? 'No data',
+        );
+    
+      },
+      )
+    ),
+  ),
+]
+)
+)
+      ));
+}
 
 //this one doesnt need an icon
   Widget _infoTile({
@@ -1120,13 +1119,29 @@ final calc = context.watch<Calculate>();
 
 class FolicularPage extends StatelessWidget{
   const FolicularPage({super.key});
+Future<String> _loadMenstruationInfo(String selectedField) async {
+  final jsonString = await rootBundle.loadString('assets/All_Phases.json');
+  final List<dynamic> decoded = json.decode(jsonString);
 
+  final List<Map<String, dynamic>> allData =
+      decoded.cast<Map<String, dynamic>>();
+
+  final Map<String, dynamic> menstruationEntry = allData.firstWhere(
+    (entry) => entry['Phase'] == 'Follicular',
+    orElse: () => {},
+  );
+  final data = menstruationEntry[selectedField]?.toString();
+
+  return data ?? 'No data';
+}
+
+  
   @override
   Widget build(BuildContext context) {
-
+    
 final calc = context.watch<Calculate>();
     final nextPeriodDate = calc.nextPeriodDate;
-    // final difference = calc.difference;
+    final difference = calc.difference;
 
     final cycleData = context.watch<CycleDataProvider>();
     
@@ -1138,15 +1153,11 @@ final calc = context.watch<Calculate>();
   final dayOfPhase = calc.dayofphase;
   final selectedField = cycleData.selectedField;
 
-  final info = (phase != null && dayOfPhase != null)
-    ? cycleData.getPhaseInfo(
-        phase: phase,
-        dayOfPhase: dayOfPhase,
-        field: selectedField,
-      )
-    : 'No data';
-
-
+// scaffold inside body safe area, child singlescroll view child padding(20)
+// child of padding column
+// 
+// 
+// 
     return Scaffold(
       body: SafeArea(
       child:
@@ -1201,12 +1212,12 @@ final calc = context.watch<Calculate>();
                   ),
                   _buildButton(
                     context,
-                    "Effects of estrogen ",
+                    "Effects of estrogen",
                     const MenstruationPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of progesterone ",
+                    "Effects of progesterone",
                     const FolicularPage(),
                   ),
                   _buildButton(
@@ -1221,7 +1232,7 @@ final calc = context.watch<Calculate>();
                   ),
                   _buildButton(
                     context,
-                    "Energy Levels Text",
+                    "Energy Levels Type",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
@@ -1288,24 +1299,13 @@ final calc = context.watch<Calculate>();
                   ),
                   )
               ),
-            Padding(
-              padding: const EdgeInsets.only(top: 20.0),
-              child: SizedBox(height: 200,
-              // Next Period Card
-              child: 
-                _infoTile(
-                  //need to change what it shows and link to json file
-                  value: nextPeriodDate != null
-                      ? 'info from json file - follicular phase'
-                      : 'Not calculated',
-                  // no icon
-                  //icon: Icons.calendar_today,
-                ),
-                
-                
-              ),
-            ),
-          SizedBox(height:10),
+    Padding(
+  padding: const EdgeInsets.only(top: 20.0),
+  child: Padding(
+  padding: const EdgeInsets.only(top: 20.0),
+  child: _infoTile(value: 'graph'))
+  ),
+ SizedBox(height:10),
 
           Align(
             alignment: Alignment.centerLeft,
@@ -1322,30 +1322,34 @@ final calc = context.watch<Calculate>();
                   )
               ),
 
-              Padding(
-                padding: const EdgeInsets.only(top: 20.0),
-                child: SizedBox(height: 200,
-                // Next Period Card
-                child: 
-                  _infoTile(
-                    //need to change what it shows and link to json file
-                    value: nextPeriodDate != null
-                        ? 'info from json file - follicular phase'
-                        : 'Not calculated',
-                    // no icon
-                    //icon: Icons.calendar_today,
-                  ),
-                  
-                ),
-              ),
-          ],
-          )
-        
-        ),
-      ),
-    );
-    // );
-  }
+             Padding(
+  padding: const EdgeInsets.only(top: 20.0),
+  child: SizedBox(
+    height: 200,
+    child: FutureBuilder<String>(
+      future: _loadMenstruationInfo(selectedField),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return _infoTile(value: 'Error loading data');
+        }
+
+        return _infoTile(
+          value: snapshot.data ?? 'No data',
+        );
+    
+      },
+      )
+    ),
+  ),
+]
+)
+)
+      ));
+}
 
 //this one doesnt need an icon
   Widget _infoTile({
@@ -1403,10 +1407,26 @@ final calc = context.watch<Calculate>();
 
 class OvulationPage extends StatelessWidget{
   const OvulationPage({super.key});
+Future<String> _loadOvulationInfo(String selectedField) async {
+  final jsonString = await rootBundle.loadString('assets/All_Phases.json');
+  final List<dynamic> decoded = json.decode(jsonString);
 
+  final List<Map<String, dynamic>> allData =
+      decoded.cast<Map<String, dynamic>>();
+
+  final Map<String, dynamic> ovulationEntry = allData.firstWhere(
+    (entry) => entry['Phase'] == 'Ovulation',
+    orElse: () => {},
+  );
+  final data = ovulationEntry[selectedField]?.toString();
+
+  return data ?? 'No data';
+}
+
+  
   @override
   Widget build(BuildContext context) {
-
+    
 final calc = context.watch<Calculate>();
     final nextPeriodDate = calc.nextPeriodDate;
     final difference = calc.difference;
@@ -1420,14 +1440,6 @@ final calc = context.watch<Calculate>();
   final phase = calc.phase;
   final dayOfPhase = calc.dayofphase;
   final selectedField = cycleData.selectedField;
-
-  final info = (phase != null && dayOfPhase != null)
-    ? cycleData.getPhaseInfo(
-        phase: phase,
-        dayOfPhase: dayOfPhase,
-        field: selectedField,
-      )
-    : 'No data';
 
     return Scaffold(
       body: SafeArea(
@@ -1483,12 +1495,12 @@ final calc = context.watch<Calculate>();
                   ),
                   _buildButton(
                     context,
-                    "Effects of estrogen ",
+                    "Effects of estrogen",
                     const MenstruationPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of progesterone ",
+                    "Effects of progesterone",
                     const FolicularPage(),
                   ),
                   _buildButton(
@@ -1503,7 +1515,7 @@ final calc = context.watch<Calculate>();
                   ),
                   _buildButton(
                     context,
-                    "Energy Levels Text",
+                    "Energy Levels Type",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
@@ -1570,24 +1582,13 @@ final calc = context.watch<Calculate>();
                   ),
                   )
               ),
-            Padding(
-              padding: const EdgeInsets.only(top: 20.0),
-              child: SizedBox(height: 200,
-              // Next Period Card
-              child: 
-                _infoTile(
-                  //need to change what it shows and link to json file
-                  value: nextPeriodDate != null
-                      ? 'info from json file - ovulation phase'
-                      : 'Not calculated',
-                  // no icon
-                  //icon: Icons.calendar_today,
-                ),
-                
-                
-              ),
-            ),
-          SizedBox(height:10),
+    Padding(
+  padding: const EdgeInsets.only(top: 20.0),
+  child: Padding(
+  padding: const EdgeInsets.only(top: 20.0),
+  child: _infoTile(value: 'graph'))
+  ),
+ SizedBox(height:10),
 
           Align(
             alignment: Alignment.centerLeft,
@@ -1604,30 +1605,34 @@ final calc = context.watch<Calculate>();
                   )
               ),
 
-              Padding(
-                padding: const EdgeInsets.only(top: 20.0),
-                child: SizedBox(height: 200,
-                // Next Period Card
-                child: 
-                  _infoTile(
-                    //need to change what it shows and link to json file
-                    value: nextPeriodDate != null
-                        ? 'info from json file - ovulation phase'
-                        : 'Not calculated',
-                    // no icon
-                    //icon: Icons.calendar_today,
-                  ),
-                  
-                ),
-              ),
-          ],
-          )
-        
-        ),
-      ),
-    );
-    // );
-  }
+             Padding(
+  padding: const EdgeInsets.only(top: 20.0),
+  child: SizedBox(
+    height: 200,
+    child: FutureBuilder<String>(
+      future: _loadOvulationInfo(selectedField),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return _infoTile(value: 'Error loading data');
+        }
+
+        return _infoTile(
+          value: snapshot.data ?? 'No data',
+        );
+    
+      },
+      )
+    ),
+  ),
+]
+)
+)
+      ));
+}
 
 //this one doesnt need an icon
   Widget _infoTile({
@@ -1682,13 +1687,47 @@ final calc = context.watch<Calculate>();
   }
 }
 
+  Widget _buildButton(BuildContext context, String label, Widget page) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 12),
+      child: SizedBox(
+        width: 160, // controls how many buttons fit on screen
+        child: HorizontalScrollButton( // make a new class with a different deign for these
+          label: label,
+          onPressed: () {
+            context.read<CycleDataProvider>().selectField(label);
+            // Navigator.push();
+            //MaterialPageRoute(builder: (_) => page),
+            
+          },
+        ),
+      ),
+    );
+  }
+
 
 class EarlyLutealPage extends StatelessWidget{
   const EarlyLutealPage({super.key});
+Future<String> _loadEarlyLutealInfo(String selectedField) async {
+  final jsonString = await rootBundle.loadString('assets/All_Phases.json');
+  final List<dynamic> decoded = json.decode(jsonString);
 
+  final List<Map<String, dynamic>> allData =
+      decoded.cast<Map<String, dynamic>>();
+
+  final Map<String, dynamic> earlyLutealEntry = allData.firstWhere(
+    (entry) => entry['Phase'] == 'Early Luteal',
+    orElse: () => {},
+  );
+  final data = earlyLutealEntry[selectedField]?.toString();
+
+  return data ?? 'No data';
+}
+
+  
   @override
   Widget build(BuildContext context) {
-
+    
 final calc = context.watch<Calculate>();
     final nextPeriodDate = calc.nextPeriodDate;
     final difference = calc.difference;
@@ -1703,14 +1742,11 @@ final calc = context.watch<Calculate>();
   final dayOfPhase = calc.dayofphase;
   final selectedField = cycleData.selectedField;
 
-  final info = (phase != null && dayOfPhase != null)
-    ? cycleData.getPhaseInfo(
-        phase: phase,
-        dayOfPhase: dayOfPhase,
-        field: selectedField,
-      )
-    : 'No data';
-
+// scaffold inside body safe area, child singlescroll view child padding(20)
+// child of padding column
+// 
+// 
+// 
     return Scaffold(
       body: SafeArea(
       child:
@@ -1765,12 +1801,12 @@ final calc = context.watch<Calculate>();
                   ),
                   _buildButton(
                     context,
-                    "Effects of estrogen ",
+                    "Effects of estrogen",
                     const MenstruationPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of progesterone ",
+                    "Effects of progesterone",
                     const FolicularPage(),
                   ),
                   _buildButton(
@@ -1785,7 +1821,7 @@ final calc = context.watch<Calculate>();
                   ),
                   _buildButton(
                     context,
-                    "Energy Levels Text",
+                    "Energy Levels Type",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
@@ -1852,25 +1888,13 @@ final calc = context.watch<Calculate>();
                   ),
                   )
               ),
-            Padding(
-              padding: const EdgeInsets.only(top: 20.0),
-              child: SizedBox(height: 200,
-              // Next Period Card
-              child: 
-                _infoTile(
-                  //need to change what it shows and link to json file
-                  
-                  value: nextPeriodDate != null
-                      ? 'info from json file - early luteal phase'
-                      : 'Not calculated',
-                  // no icon
-                  //icon: Icons.calendar_today,
-                ),
-                
-                
-              ),
-            ),
-          SizedBox(height:10),
+    Padding(
+  padding: const EdgeInsets.only(top: 20.0),
+  child: Padding(
+  padding: const EdgeInsets.only(top: 20.0),
+  child: _infoTile(value: 'graph'))
+  ),
+ SizedBox(height:10),
 
           Align(
             alignment: Alignment.centerLeft,
@@ -1887,30 +1911,34 @@ final calc = context.watch<Calculate>();
                   )
               ),
 
-              Padding(
-                padding: const EdgeInsets.only(top: 20.0),
-                child: SizedBox(height: 200,
-                // Next Period Card
-                child: 
-                  _infoTile(
-                    //need to change what it shows and link to json file
-                    value: nextPeriodDate != null
-                        ? 'info from json file - early luteal phase'
-                        : 'Not calculated',
-                    // no icon
-                    //icon: Icons.calendar_today,
-                  ),
-                  
-                ),
-              ),
-          ],
-          )
-        
-        ),
-      ),
-    );
-    // );
-  }
+             Padding(
+  padding: const EdgeInsets.only(top: 20.0),
+  child: SizedBox(
+    height: 200,
+    child: FutureBuilder<String>(
+      future: _loadEarlyLutealInfo(selectedField),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return _infoTile(value: 'Error loading data');
+        }
+
+        return _infoTile(
+          value: snapshot.data ?? 'No data',
+        );
+    
+      },
+      )
+    ),
+  ),
+]
+)
+)
+      ));
+}
 
 //this one doesnt need an icon
   Widget _infoTile({
@@ -1969,8 +1997,26 @@ final calc = context.watch<Calculate>();
 class LateLutealPage extends StatelessWidget{
   const LateLutealPage({super.key});
 
+  Future<String> _loadLateLutealInfo(String selectedField) async {
+  final jsonString = await rootBundle.loadString('assets/All_Phases.json');
+  final List<dynamic> decoded = json.decode(jsonString);
+
+  final List<Map<String, dynamic>> allData =
+      decoded.cast<Map<String, dynamic>>();
+
+  final Map<String, dynamic> lateLutealEntry = allData.firstWhere(
+    (entry) => entry['Phase'] == 'Late Luteal',
+    orElse: () => {},
+  );
+  final data = lateLutealEntry[selectedField]?.toString();
+
+  return data ?? 'No data';
+}
+
+  
   @override
   Widget build(BuildContext context) {
+    
 final calc = context.watch<Calculate>();
     final nextPeriodDate = calc.nextPeriodDate;
     final difference = calc.difference;
@@ -1985,15 +2031,11 @@ final calc = context.watch<Calculate>();
   final dayOfPhase = calc.dayofphase;
   final selectedField = cycleData.selectedField;
 
-  final info = (phase != null && dayOfPhase != null)
-    ? cycleData.getPhaseInfo(
-        phase: phase,
-        dayOfPhase: dayOfPhase,
-        field: selectedField,
-      )
-    : 'No data';
-
-
+// scaffold inside body safe area, child singlescroll view child padding(20)
+// child of padding column
+// 
+// 
+// 
     return Scaffold(
       body: SafeArea(
       child:
@@ -2048,12 +2090,12 @@ final calc = context.watch<Calculate>();
                   ),
                   _buildButton(
                     context,
-                    "Effects of estrogen ",
+                    "Effects of estrogen",
                     const MenstruationPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of progesterone ",
+                    "Effects of progesterone",
                     const FolicularPage(),
                   ),
                   _buildButton(
@@ -2068,7 +2110,7 @@ final calc = context.watch<Calculate>();
                   ),
                   _buildButton(
                     context,
-                    "Energy Levels Text",
+                    "Energy Levels Type",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
@@ -2135,24 +2177,13 @@ final calc = context.watch<Calculate>();
                   ),
                   )
               ),
-            Padding(
-              padding: const EdgeInsets.only(top: 20.0),
-              child: SizedBox(height: 200,
-              // Next Period Card
-              child: 
-                _infoTile(
-                  //need to change what it shows and link to json file
-                  value: nextPeriodDate != null
-                      ? 'info from json file - late luteal phase'
-                      : 'Not calculated',
-                  // no icon
-                  //icon: Icons.calendar_today,
-                ),
-                
-                
-              ),
-            ),
-          SizedBox(height:10),
+    Padding(
+  padding: const EdgeInsets.only(top: 20.0),
+  child: Padding(
+  padding: const EdgeInsets.only(top: 20.0),
+  child: _infoTile(value: 'graph'))
+  ),
+ SizedBox(height:10),
 
           Align(
             alignment: Alignment.centerLeft,
@@ -2169,30 +2200,34 @@ final calc = context.watch<Calculate>();
                   )
               ),
 
-              Padding(
-                padding: const EdgeInsets.only(top: 20.0),
-                child: SizedBox(height: 200,
-                // Next Period Card
-                child: 
-                  _infoTile(
-                    //need to change what it shows and link to json file
-                    value: nextPeriodDate != null
-                        ? 'info from json file - late luteal phase'
-                        : 'Not calculated',
-                    // no icon
-                    //icon: Icons.calendar_today,
-                  ),
-                  
-                ),
-              ),
-          ],
-          )
-        
-        ),
-      ),
-    );
-    // );
-  }
+             Padding(
+  padding: const EdgeInsets.only(top: 20.0),
+  child: SizedBox(
+    height: 200,
+    child: FutureBuilder<String>(
+      future: _loadLateLutealInfo(selectedField),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return _infoTile(value: 'Error loading data');
+        }
+
+        return _infoTile(
+          value: snapshot.data ?? 'No data',
+        );
+    
+      },
+      )
+    ),
+  ),
+]
+)
+)
+      ));
+}
 
 //this one doesnt need an icon
   Widget _infoTile({
