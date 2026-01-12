@@ -800,6 +800,7 @@ class CalendarPage extends StatelessWidget{
 
 class MenstruationPage extends StatelessWidget{
   const MenstruationPage({super.key});
+  final DateTime? nextPeriodDate = null;
 
   @override
   Widget build(BuildContext context) {
@@ -889,6 +890,55 @@ class MenstruationPage extends StatelessWidget{
 
                     
           ],
+        ),
+      ),
+    );
+  }
+
+//this one doesnt need an icon
+  Widget _infoTile({
+    //required String title,
+    required String value,
+    //required IconData icon,
+    bool isHighlighted = false,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isHighlighted ? const Color.fromRGBO(54, 18, 58, 0.05) : Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: const Color.fromRGBO(54, 18, 58, 0.1)),
+      ),
+      child: Row(
+        children: [
+          //Icon(icon, color: const Color.fromARGB(255, 112, 161, 217)),
+          const SizedBox(width: 15),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              //Text(title, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+              Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildButton(BuildContext context, String label, Widget page) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 12),
+      child: SizedBox(
+        width: 160, // controls how many buttons fit on screen
+        child: HorizontalScrollButton( // make a new class with a different deign for these
+          label: label,
+          onPressed: () {
+            context.read<CycleDataProvider>().selectField(label);
+            // Navigator.push();
+            //MaterialPageRoute(builder: (_) => page),
+            
+          },
         ),
       ),
     );
