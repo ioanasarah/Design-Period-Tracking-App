@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
 
 // list of files based on phase 
 const Map<String, String> phaseJsonFiles = {
-  'Menstrual': 'assets/Menstrual_Phase.json',
+  'Menstruation': 'assets/Menstrual_Phase.json',
   'Follicular': 'assets/Follicular_Phase.json',
   'Ovulation': 'assets/Ovulation_Phase.json',
   'Early Luteal': 'assets/Early_Luteal_Phase.json',
@@ -123,7 +123,7 @@ class Calculate extends ChangeNotifier {
     int ovulationDay = cycleLength - 14;
 
     if (cycleDay <= periodLength) {
-      phase = 'Menstrual';
+      phase = 'Menstruation';
       dayofphase = cycleDay;
     } else if (cycleDay < ovulationDay) {
       phase  =  'Follicular';
@@ -668,99 +668,293 @@ class DailyTipsPage extends StatelessWidget {
 
     // design of page 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Daily Tips'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
-              height: 98, 
-              width: 324, // size of pink container
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration( // design of pink container
-                color: const Color.fromARGB(255, 227, 120, 120),
-                borderRadius: BorderRadius.circular(12.0),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Day $dayOfPhase',
-                          style: TextStyle(fontSize: 25, 
-                          fontWeight: FontWeight.w700,),
-                        ),
-                        Text(
-                          ' $phase Phase',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                        ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Text(
-                        //  'Today, $today.year, $today.month, $today.day',
-                          'Today, ${today.day}/${today.month}/${today.year}',
-                          style: TextStyle( // edit text of today within pink container
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                        ),
-                        ),
-                      ],
-                      )
-                  ],
+      // appBar: AppBar(
+      //   title: const Text('Daily Tips'),
+      // ),
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 329,
+                height: 89, // size of pink container
+                padding: const EdgeInsets.all(14.0),
+                decoration: BoxDecoration( // design of pink container
+                  color: const Color(0xFFFBE3E4),
+                  borderRadius: BorderRadius.circular(24.0),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 61.0, left: 24.0),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Day $dayOfPhase',
+                            style: TextStyle(fontSize: 25, 
+                            fontWeight: FontWeight.w700,),
+                          ),
+                          Text(
+                            ' $phase',
+                            textAlign: TextAlign.right,
+                              style: TextStyle(
+                                color: const Color(0xFF5454CA),
+                                fontSize: 13,
+                                fontFamily: 'DM Sans',
+                                fontWeight: FontWeight.w700,
+                                height: 1.20,
+                                letterSpacing: 0.40,
+                                ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                          //  'Today, $today.year, $today.month, $today.day',
+                            'Today, ${today.day}/${today.month}/${today.year}',
+                            style: TextStyle( // edit text of today within pink container
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                          ),
+                          ),
+                        ],
+                        )
+                    ],
+                  ),
                 ),
               ),
-            ),
-            SizedBox(
+
+              SizedBox(height: 30),
+
+              Align(
+                alignment: Alignment.centerLeft,
+                child:
+                Text(
+                ' Health Tips',
+                style: TextStyle(
+                    color: const Color(0xFF404446),
+                    fontSize: 18,
+                    fontFamily: 'DM Sans',
+                    fontWeight: FontWeight.w700,
+                    height: 1.33,
+                ),
+              )
+              ),
+
+              SizedBox(height: 10),
+
+              SizedBox(
               height: 120, // controls button size
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 children: [
                   _buildButton(
                     context,
-                    "Menstruation",
+                    "Energy Levels Text",
                     const MenstruationPage(),
                   ),
                   _buildButton(
                     context,
-                    "Follicular",
+                    "Level of progesterone",
                     const FolicularPage(),
                   ),
                   _buildButton(
                     context,
-                    "Ovulation",
+                    "Level of FSH",
                     const OvulationPage(),
                   ),
                   _buildButton(
                     context,
-                    "Early Luteal",
+                    "Level of LH",
                     const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Late Luteal",
-                    const LateLutealPage(),
                   ),
                 ],
               ),
             ),
-          ],
+
+              SizedBox(height: 20),
+
+              Align(
+                alignment: Alignment.centerLeft,
+                child:
+                Text(
+                'Expected Energy Levels ',
+                style: TextStyle(
+                  color: const Color(0xFF404446),
+                  fontSize: 18,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.w700,
+                  height: 1.33,
+                  ),
+                  )
+              ),
+
+              Padding(
+                padding: const EdgeInsets.only(top: 20.0),
+                child: SizedBox(height: 300,
+                // Next Period Card
+                child: 
+                  _infoTile(
+                    //need to change what it shows and link to json file
+                    value: nextPeriodDate != null
+                        ? 'info from json file - menstruation phase'
+                        : 'Not calculated',
+                    // no icon
+                    //icon: Icons.calendar_today,
+                  ),
+                  
+                ),
+              ),
+
+              SizedBox(height: 10),
+
+              Align(
+                alignment: Alignment.centerLeft,
+                child:
+                Text(
+                'Title for info abt energy?', //change this
+                style: TextStyle(
+                  color: const Color(0xFF404446),
+                  fontSize: 18,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.w700,
+                  height: 1.33,
+                  ),
+                  )
+              ),
+
+              Padding(
+                padding: const EdgeInsets.only(top: 20.0),
+                child: SizedBox(height: 400,
+                // Next Period Card
+                child: 
+                  _infoTile(
+                    //need to change what it shows and link to json file
+                    value: nextPeriodDate != null
+                        ? 'info from json file - menstruation phase'
+                        : 'Not calculated',
+                    // no icon
+                    //icon: Icons.calendar_today,
+                  ),
+                  
+                ),
+              ),
+
+              SizedBox(height: 10),
+
+              Align(
+                alignment: Alignment.centerLeft,
+                child:
+                Text(
+                'Upcoming Phases', //change this
+                style: TextStyle(
+                  color: const Color(0xFF404446),
+                  fontSize: 18,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.w700,
+                  height: 1.33,
+                  ),
+                  )
+              ),
+
+              SizedBox(
+                height: 120, // controls button size
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    _buildButtonPhases(
+                      context,
+                      "Menstruation",
+                      const MenstruationPage(),
+                    ),
+                    _buildButtonPhases(
+                      context,
+                      "Follicular",
+                      const FolicularPage(),
+                    ),
+                    _buildButtonPhases(
+                      context,
+                      "Ovulation",
+                      const OvulationPage(),
+                    ),
+                    _buildButtonPhases(
+                      context,
+                      "Early Luteal",
+                      const EarlyLutealPage(),
+                    ),
+                    _buildButtonPhases(
+                      context,
+                      "Late Luteal",
+                      const LateLutealPage(),
+                    ),
+                  ],
+                ),
+              ),
+
+            ],
+          ),
         ),
+      ),
+    ),
+    );
+    }
+
+  //this one doesnt need an icon
+  Widget _infoTile({
+    //required String title,
+    required String value,
+    //required IconData icon,
+    bool isHighlighted = false,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isHighlighted ? const Color.fromRGBO(54, 18, 58, 0.05) : Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: const Color.fromRGBO(54, 18, 58, 0.1)),
+      ),
+      child: Row(
+        children: [
+          //Icon(icon, color: const Color.fromARGB(255, 112, 161, 217)),
+          const SizedBox(width: 15),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              //Text(title, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+              Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            ],
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildButton(BuildContext context, String label, Widget page) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 12),
+      child: SizedBox(
+        width: 160, // controls how many buttons fit on screen
+        child: HorizontalScrollButton(
+          label: label,
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => page),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildButtonPhases(BuildContext context, String label, Widget page) {
     return Padding(
       padding: const EdgeInsets.only(right: 12),
       child: SizedBox(
@@ -804,6 +998,29 @@ class MenstruationPage extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
+
+    final calc = context.watch<Calculate>();
+    final nextPeriodDate = calc.nextPeriodDate;
+    final difference = calc.difference;
+
+    final cycleData = context.watch<CycleDataProvider>();
+    
+    if (!cycleData.isLoaded) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final phase = calc.phase;
+    final dayOfPhase = calc.dayofphase;
+    final selectedField = cycleData.selectedField;
+
+    final info = (phase != null && dayOfPhase != null)
+      ? cycleData.getPhaseInfo(
+          phase: phase,
+          dayOfPhase: dayOfPhase,
+          field: selectedField,
+        )
+      : 'No data';
+
     return Scaffold(
       backgroundColor: Color(0xFFFBE3E4),
       body: Container(
@@ -1110,6 +1327,78 @@ class HorizontalScrollButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   const HorizontalScrollButton({
+    super.key,
+    required this.label,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 137,
+      height: 120,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(24),
+        child: Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x0C000000),
+                blurRadius: 40,
+                offset: Offset(4, 6),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Icon circle
+              Container(
+                width: 32,
+                height: 32,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFF2F8FF),
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.favorite, // replace later if needed
+                  size: 16,
+                  color: Color(0xFF5454CA),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // Label (UNCHANGED)
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Color(0xFF303437),
+                  fontSize: 14,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.w700,
+                  height: 1.43,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class HorizontalScrollButtonPhases extends StatelessWidget {
+  final String label;
+  final VoidCallback onPressed;
+
+  const HorizontalScrollButtonPhases({
     super.key,
     required this.label,
     required this.onPressed,
