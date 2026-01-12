@@ -64,6 +64,10 @@ flutter:
     - assets/phase_info.json
     - assets/vector.svg
     - assets/Menstrual_Phase.json
+    - assets/Early_Luteal_Phase.json
+    - assets/Late_Luteal_Phase.json
+    - assets/Follicular_Phase.json
+    - assets/Ovulation_Phase.json
 
 
   fonts:

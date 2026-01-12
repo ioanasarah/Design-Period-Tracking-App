@@ -6,12 +6,18 @@ import 'dart:convert';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => Calculate(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => Calculate()),
+        ChangeNotifierProvider(
+          create: (_) => CycleDataProvider()..load(),
+        ),
+      ],
       child: const MyApp(),
     ),
   );
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -25,7 +31,7 @@ class MyApp extends StatelessWidget {
 }
 
 // list of files based on phase 
- const Map<String, String> phaseJsonFiles = {
+const Map<String, String> phaseJsonFiles = {
   'menstrual': 'assets/Menstrual_Phase.json',
   'follicular': 'assets/Follicular_Phase.json',
   'ovulation': 'assets/Ovulation_Phase.json',
@@ -34,12 +40,111 @@ class MyApp extends StatelessWidget {
 };
 
 
-//load JSON file
-Future<List<Map<String, dynamic>>> loadCycleData() async {
-  final jsonString = await rootBundle.loadString('assets/Menstrual_Phase.json');
-  final List<dynamic> jsonList = json.decode(jsonString);
-  return jsonList.cast<Map<String, dynamic>>();
+class CycleDataProvider extends ChangeNotifier {
+  Map<String, List<Map<String, dynamic>>> _data = {};
+  bool _loaded = false;
+  String _selectedField = 'Level of estrogen';
+
+  bool get isLoaded => _loaded;
+  String get selectedField => _selectedField;
+
+
+  Future<void> load() async {
+    if (_loaded) return;
+
+    final Map<String, List<Map<String, dynamic>>> result = {};
+
+//decoding each json file
+    for (final entry in phaseJsonFiles.entries) {
+      final jsonString = await rootBundle.loadString(entry.value);
+      final List<dynamic> decoded = json.decode(jsonString);
+      result[entry.key] = decoded.cast<Map<String, dynamic>>();
+    }
+
+    _data = result;
+    _loaded = true;
+    notifyListeners();
+  }
+  void selectField(String field) {
+    _selectedField = field;
+    notifyListeners();
+  }
+
+
+  String getPhaseInfo({
+    required String phase,
+    required int dayOfPhase,
+    required String field,
+  }) {
+    // one of the json files
+    final infoPerPhase = _data[phase];
+    if (infoPerPhase == null || infoPerPhase.isEmpty) return 'No data';
+
+//in functie de index iti deschide fiecare zi din acel phase json file 
+    final infoPerDayInPhase = (dayOfPhase - 1).clamp(0, infoPerPhase.length - 1); // toata ziua
+    return infoPerPhase[infoPerDayInPhase][field]?.toString() ?? 'No data'; // fiecare cell din row ul ala
+  }
 }
+
+class Calculate extends ChangeNotifier {
+  DateTime? nextPeriodDate;
+  int? difference;
+  String? phase;
+  int? dayofphase;
+
+
+  void calculateNextPeriod(DateTime lastPeriodDate, int periodLength) {
+    nextPeriodDate = lastPeriodDate.add(Duration(days: periodLength));
+    notifyListeners();
+  }
+  
+  void calculateDayOfCycle(DateTime lastPeriodDate) {
+    final today = DateTime.now();
+    difference = today.difference(lastPeriodDate).inDays + 1;
+    notifyListeners();
+  }
+  // Future <void> calculatePhase() async {
+  //   if (difference == null) return;
+  //   final cycleData = await loadCycleData();
+  //   final entry = cycleData.firstWhere(
+  //     (e) => e["Day"] == difference,
+  //     orElse: () => {"Phase": "Unknown"},
+  //   );
+  //   phase = entry["Phase"];
+  //   notifyListeners();
+  // }
+
+  void determinePhase({
+    required int cycleDay,
+    required int cycleLength,
+    required int periodLength,
+    // final String? phase,
+}) {
+    int ovulationDay = cycleLength - 14;
+
+    if (cycleDay <= periodLength) {
+      phase = 'menstrual';
+      dayofphase = cycleDay;
+    } else if (cycleDay < ovulationDay) {
+      phase  =  'follicular';
+      dayofphase = cycleDay - periodLength;
+    } else if (cycleDay == ovulationDay) {
+      phase = 'ovulation';
+      dayofphase = ovulationDay;
+    } else if (cycleDay <= ovulationDay + 6) {
+      phase = 'early_luteal';
+      dayofphase = cycleDay - ovulationDay;
+    } else {
+      phase = 'late_luteal';
+      dayofphase = cycleDay - ovulationDay - 6;
+    }
+    // return phase!;
+    notifyListeners();
+}
+
+  }
+
+
 
 class MainNavigationBar extends StatefulWidget {
   const MainNavigationBar({super.key});
@@ -83,31 +188,31 @@ class CustomNavigationBar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _NavButton(
-            label: 'Home',
+            label: 'Log Page',
             // icon: 'assets/images/vector.svg',
-            icon: Icons.home, // icon for tabs 
+            icon: Icons.heart_broken, // icon for tabs 
             isSelected: selectedIndex == 0,
             onTap: () => onItemSelected(0),
           ),
           _NavButton(
-            label: 'Information',
+            label: 'Home',
             // icon: 'assets/images/vector.svg',
             // icon: Icon(Icons.info).toString(),
-            icon: Icons.info,
+            icon: Icons.home,
             isSelected: selectedIndex == 1,
             onTap: () => onItemSelected(1),
           ),
           _NavButton(
-            label: 'Stats',
+            label: 'Daily Tips',
             // icon: 'assets/images/vector.svg',
-            icon: Icons.school,
+            icon: Icons.info,
             isSelected: selectedIndex == 2,
             onTap: () => onItemSelected(2),
           ),
           _NavButton(
-            label: 'Settings',
+            label: 'Calendar',
             // icon: 'assets/images/vector.svg',
-            icon: Icons.business,
+            icon: Icons.calendar_month,
             isSelected: selectedIndex == 3,
             onTap: () => onItemSelected(3),
           ),
@@ -183,8 +288,8 @@ class _MainNavigationBarState extends State<MainNavigationBar> {
   List<Widget> get _pages => [
   LogPage(onSubmit: () => _onItemTapped(1)),
   const PlaceholderPage(),
-  const Center(child: Text('Insights')),
-  const Center(child: Text('Settings')),
+  const DailyTipsPage(),
+  const CalendarPage(),
 ];
 
   void _onItemTapped(int index) {
@@ -196,9 +301,10 @@ class _MainNavigationBarState extends State<MainNavigationBar> {
   @override
 Widget build(BuildContext context) {
   return Scaffold(
-    appBar: AppBar(
-    title: const Text("Log your Period Details!"),
-    ),
+    //appBar: 
+    // AppBar(
+    // title: const Text("Log your Period Details!"),
+    // ),
     body: _pages[_selectedIndex],
     bottomNavigationBar: CustomNavigationBar(
       selectedIndex: _selectedIndex,
@@ -226,7 +332,19 @@ class LogPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LogCalendar(onSubmit: onSubmit);
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Log your Period Details!"),
+      ),
+      body: LogCalendar(onSubmit: onSubmit),
+    );
+    
+    
+    // appBar: 
+    // AppBar(
+    // title: const Text("Log your Period Details!"),
+    // ),
+    // return LogCalendar(onSubmit: onSubmit);
   }
 }
 
@@ -312,7 +430,7 @@ class _LogCalendarState extends State<LogCalendar> {
             ),
             
             TextBox(
-                  title: "Average period length (days):",
+                  title: "Average menstruation length (days):",
                   hint: "Enter number of days",
                   controller: periodLengthController,
                 ),
@@ -359,6 +477,352 @@ class _LogCalendarState extends State<LogCalendar> {
   }
 
 
+
+class PlaceholderPage extends StatelessWidget {
+  const PlaceholderPage({super.key});
+ // var info = menstrual[0]['Level of estrogen'];
+
+  @override
+  Widget build(BuildContext context) {
+    // Accessing the data from your Calculate provider
+    final calc = context.watch<Calculate>();
+    final nextPeriodDate = calc.nextPeriodDate;
+    final difference = calc.difference;
+
+    final cycleData = context.watch<CycleDataProvider>();
+    
+    if (!cycleData.isLoaded) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+  final phase = calc.phase;
+  final dayOfPhase = calc.dayofphase;
+  final selectedField = cycleData.selectedField;
+
+  final info = (phase != null && dayOfPhase != null)
+    ? cycleData.getPhaseInfo(
+        phase: phase,
+        dayOfPhase: dayOfPhase,
+        field: selectedField,
+      )
+    : 'No data';
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const Text(
+            'Cycle Overview',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Color.fromRGBO(54, 18, 58, 1),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+            SizedBox(
+              height: 70, // controls button size
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  _buildButton(
+                    context,
+                    "Energy Levels Text",
+                    const MenstruationPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Level of progesterone",
+                    const FolicularPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Level of FSH",
+                    const OvulationPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Level of LH",
+                    const EarlyLutealPage(),
+                  ),
+                ],
+              ),
+            ),
+          
+          const SizedBox(height: 30),
+          
+          // Next Period Card
+          _infoTile(
+            title: 'Next Expected Period',
+            value: nextPeriodDate != null
+                ? '${nextPeriodDate.day}/${nextPeriodDate.month}/${nextPeriodDate.year}'
+                : 'Not calculated',
+            icon: Icons.calendar_today,
+          ),
+
+          // Day of Cycle Card
+          _infoTile(
+            title: 'Days Since Last Period',
+            value: difference != null ? '$difference Days' : 'Pending',
+            icon: Icons.timer,
+          ),
+
+          // Current Phase Card
+          // _infoTile(
+          //   title: 'Current Phase',
+          //   value: phase ?? 'Data missing',
+          //   icon: Icons.home,
+          //   //isHighlighted: true,
+          // ),
+          _infoTile(
+            title: 'Day Of $phase Phase',
+            value: dayOfPhase != null ? '$dayOfPhase' : 'Data missing',
+            icon: Icons.heart_broken,
+            //isHighlighted: true,
+          ),
+          _infoTile(
+            title: selectedField,
+            value: Text(info).data!,
+            icon: Icons.analytics,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Helper widget to keep the code clean
+  Widget _infoTile({
+    required String title,
+    required String value,
+    required IconData icon,
+    bool isHighlighted = false,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isHighlighted ? const Color.fromRGBO(54, 18, 58, 0.05) : Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: const Color.fromRGBO(54, 18, 58, 0.1)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: const Color.fromRGBO(54, 18, 58, 1)),
+          const SizedBox(width: 15),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+              Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildButton(BuildContext context, String label, Widget page) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 12),
+      child: SizedBox(
+        width: 160, // controls how many buttons fit on screen
+        child: HorizontalScrollButton( // make a new class with a different deign for these
+          label: label,
+          onPressed: () {
+            context.read<CycleDataProvider>().selectField(label);
+            // Navigator.push();
+            //MaterialPageRoute(builder: (_) => page),
+            
+          },
+        ),
+      ),
+    );
+  }
+}
+
+
+class DailyTipsPage extends StatelessWidget {
+  const DailyTipsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Daily Tips'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Daily Tips Content Goes Here',
+              style: TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 16),
+
+            SizedBox(
+              height: 70, // controls button size
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  _buildButton(
+                    context,
+                    "Menstruation",
+                    const MenstruationPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Follicular",
+                    const FolicularPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Ovulation",
+                    const OvulationPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Early Luteal",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Late Luteal",
+                    const LateLutealPage(),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildButton(BuildContext context, String label, Widget page) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 12),
+      child: SizedBox(
+        width: 160, // controls how many buttons fit on screen
+        child: HorizontalScrollButton( // make a new class with a different deign for these
+          label: label,
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => page),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+
+
+
+class CalendarPage extends StatelessWidget{
+  const CalendarPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Calendar'),
+      ),
+      body: const Center(
+        child: Text('Calendar Content Goes Here'),
+      ),
+    );
+  }
+}
+
+class MenstruationPage extends StatelessWidget{
+  const MenstruationPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Basic Info'),
+      ),
+      body: const Center(
+        child: Text('Mentruation'),
+      ),
+    );
+  }
+}
+
+class FolicularPage extends StatelessWidget{
+  const FolicularPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Basic Info'),
+      ),
+      body: const Center(
+        child: Text('Folicular'),
+      ),
+    );
+  }
+}
+
+class OvulationPage extends StatelessWidget{
+  const OvulationPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Basic Info'),
+      ),
+      body: const Center(
+        child: Text('Ovulation'),
+      ),
+    );
+  }
+}
+
+class EarlyLutealPage extends StatelessWidget{
+  const EarlyLutealPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Basic Info'),
+      ),
+      body: const Center(
+        child: Text('Early Luteal'),
+      ),
+    );
+  }
+}
+
+class LateLutealPage extends StatelessWidget{
+  const LateLutealPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Basic Info'),
+      ),
+      body: const Center(
+        child: Text('Late Luteal'),
+      ),
+    );
+  }
+}
+
+
 // design + functionality for Select Date and Submit buttons 
 class SelectButton extends StatelessWidget {
   final String label; // 
@@ -372,8 +836,8 @@ class SelectButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container (
-      width: 120.0,
-      height: 45.0,
+      width: 190.0,
+      height: 50.0,
       child: InkWell(
       onTap: onPressed,
       borderRadius: BorderRadius.circular(8), // design
@@ -454,157 +918,57 @@ class TextBox extends StatelessWidget {
 }
 
 
-class Calculate extends ChangeNotifier {
-  DateTime? nextPeriodDate;
-  int? difference;
-  String? phase;
-  int? dayofphase;
+class HorizontalScrollButton extends StatelessWidget {
+  final String label; // 
+  final VoidCallback onPressed;
 
-
-  void calculateNextPeriod(DateTime lastPeriodDate, int periodLength) {
-    nextPeriodDate = lastPeriodDate.add(Duration(days: periodLength));
-    notifyListeners();
-  }
-  
-  void calculateDayOfCycle(DateTime lastPeriodDate) {
-    final today = DateTime.now();
-    difference = today.difference(lastPeriodDate).inDays + 1;
-    notifyListeners();
-  }
-  // Future <void> calculatePhase() async {
-  //   if (difference == null) return;
-  //   final cycleData = await loadCycleData();
-  //   final entry = cycleData.firstWhere(
-  //     (e) => e["Day"] == difference,
-  //     orElse: () => {"Phase": "Unknown"},
-  //   );
-  //   phase = entry["Phase"];
-  //   notifyListeners();
-  // }
-
-  void determinePhase({
-    required int cycleDay,
-    required int cycleLength,
-    required int periodLength,
-    // final String? phase,
-}) {
-    int ovulationDay = cycleLength - 14;
-
-    if (cycleDay <= periodLength) {
-      phase = 'menstrual';
-      dayofphase = cycleDay;
-    } else if (cycleDay < ovulationDay) {
-      phase  =  'follicular';
-      dayofphase = cycleDay - periodLength;
-    } else if (cycleDay == ovulationDay) {
-      phase = 'ovulation';
-      dayofphase = ovulationDay;
-    } else if (cycleDay <= ovulationDay + 6) {
-      phase = 'early_luteal';
-      dayofphase = cycleDay - ovulationDay;
-    } else {
-      phase = 'late_luteal';
-      dayofphase = cycleDay - ovulationDay - 6;
-    }
-    // return phase!;
-    notifyListeners();
-}
-
-  }
-
-
-
-class PlaceholderPage extends StatelessWidget {
-  const PlaceholderPage({super.key});
-
+  const HorizontalScrollButton({
+    super.key,
+    required this.label, // cand chemi functia ai nevoie de asta neaparat
+    required this.onPressed,
+  });
   @override
   Widget build(BuildContext context) {
-    // Accessing the data from your Calculate provider
-    final calc = context.watch<Calculate>();
-    final nextPeriodDate = calc.nextPeriodDate;
-    final difference = calc.difference;
-    final phase = calc.phase;
-    final dayofphase = calc.dayofphase;
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const Text(
-            'Cycle Overview',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Color.fromRGBO(54, 18, 58, 1),
+    return Container (
+      width: 190.0,
+      height: 60.0,
+      child: InkWell(
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(100), // design
+      child:Container(
+        decoration: BoxDecoration( // design
+          color: Color.fromRGBO(255, 255, 255, 1), // design
+          borderRadius: BorderRadius.circular(20), // design
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15), // shadow color
+              blurRadius: 10, // softness
+              offset: Offset(0, 4), // x, y position
+              spreadRadius: 1,
             ),
+  ],
+        ),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            //mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [Column(
+              mainAxisAlignment: MainAxisAlignment.center,  
+              children: [
+                Text(label, // do not change label pls
+                style: const TextStyle(
+                  color: const Color(0xFF303437),
+                  fontSize: 14,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.w700,
+                  height: 1.43,),
+                          ),
+              ],
+            ),],
           ),
-          const SizedBox(height: 30),
-          
-          // Next Period Card
-          _infoTile(
-            title: 'Next Expected Period',
-            value: nextPeriodDate != null
-                ? '${nextPeriodDate.day}/${nextPeriodDate.month}/${nextPeriodDate.year}'
-                : 'Not calculated',
-            icon: Icons.calendar_today,
-          ),
+        ),
 
-          // Day of Cycle Card
-          _infoTile(
-            title: 'Days Since Last Period',
-            value: difference != null ? '$difference Days' : 'Pending',
-            icon: Icons.timer,
-          ),
+    ),);
 
-          // Current Phase Card
-          _infoTile(
-            title: 'Current Phase',
-            value: phase ?? 'Data missing',
-            icon: Icons.home,
-            //isHighlighted: true,
-          ),
-          _infoTile(
-            title: 'Day Of $phase Phase',
-            value: dayofphase != null ? '$dayofphase' : 'Data missing',
-            icon: Icons.heart_broken,
-            //isHighlighted: true,
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Helper widget to keep the code clean
-  Widget _infoTile({
-    required String title,
-    required String value,
-    required IconData icon,
-    bool isHighlighted = false,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isHighlighted ? const Color.fromRGBO(54, 18, 58, 0.05) : Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: const Color.fromRGBO(54, 18, 58, 0.1)),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: const Color.fromRGBO(54, 18, 58, 1)),
-          const SizedBox(width: 15),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-              Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            ],
-          ),
-        ],
-      ),
-    );
   }
 }
