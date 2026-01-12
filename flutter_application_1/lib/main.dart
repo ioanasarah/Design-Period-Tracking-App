@@ -525,7 +525,7 @@ class PlaceholderPage extends StatelessWidget {
           const SizedBox(height: 16),
 
             SizedBox(
-              height: 70, // controls button size
+              height: 120, // controls button size
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 children: [
@@ -666,7 +666,7 @@ class DailyTipsPage extends StatelessWidget {
             const SizedBox(height: 16),
 
             SizedBox(
-              height: 70, // controls button size
+              height: 120, // controls button size
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 children: [
@@ -844,9 +844,7 @@ class MenstruationPage extends StatelessWidget{
               child: 
                 _infoTile(
                   //need to change what it shows and link to json file
-                  value: nextPeriodDate != null
-                      ? 'info from json file - menstruation phase'
-                      : 'Not calculated',
+                  value: Text(info).data!,
                   // no icon
                   //icon: Icons.calendar_today,
                 ),
