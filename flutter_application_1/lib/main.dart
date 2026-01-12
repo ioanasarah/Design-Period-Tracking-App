@@ -710,7 +710,7 @@ class DailyTipsPage extends StatelessWidget {
                         Text(
                         //  'Today, $today.year, $today.month, $today.day',
                           'Today, ${today.day}/${today.month}/${today.year}',
-                          style: TextStyle(
+                          style: TextStyle( // edit text of today within pink container
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
                         ),
@@ -722,7 +722,7 @@ class DailyTipsPage extends StatelessWidget {
               ),
             ),
             SizedBox(
-              height: 70, // controls button size
+              height: 80, // controls button size
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 children: [
@@ -803,170 +803,16 @@ class MenstruationPage extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
-
-    final calc = context.watch<Calculate>();
-    final nextPeriodDate = calc.nextPeriodDate;
-    final difference = calc.difference;
-
-    final cycleData = context.watch<CycleDataProvider>();
-    
-    if (!cycleData.isLoaded) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    final phase = calc.phase;
-    final dayOfPhase = calc.dayofphase;
-    final selectedField = cycleData.selectedField;
-
-    final info = (phase != null && dayOfPhase != null)
-      ? cycleData.getPhaseInfo(
-          phase: phase,
-          dayOfPhase: dayOfPhase,
-          field: selectedField,
-        )
-      : 'No data';
-
     return Scaffold(
-      backgroundColor: Color(0xFFFBE3E4),
-      body: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-         
-            Text(
-              'MENSTRUATION',
-              style: TextStyle(
-                color: const Color(0xFF5454CA),
-                fontSize: 36,
-                fontFamily: 'DM Sans',
-                fontWeight: FontWeight.w700,
-                height: 0.67,
-                letterSpacing: 1.44,
-                ),
-            ),
-            SizedBox(height: 30),
-            Align(
-              alignment: Alignment.centerLeft,
-              child:
-              Text(
-                'Information',
-                style: TextStyle(
-                  color:  Color(0xFF404446),
-                  fontSize: 18,
-                  fontFamily: 'DM Sans',
-                  fontWeight: FontWeight.w700,
-                  height: 1.33,
-                ),
-              )
-            ),
-
-            SizedBox(height: 16),
-
-            SizedBox(
-              height: 120, // controls button size
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: [
-                  _buildButton(
-                    context,
-                    "Energy Levels Text",
-                    const MenstruationPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Level of progesterone",
-                    const FolicularPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Level of FSH",
-                    const OvulationPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Level of LH",
-                    const EarlyLutealPage(),
-                  ),
-                ],
-              ),
-            ),
-
-            Padding(
-              padding: const EdgeInsets.only(top: 20.0),
-              child: SizedBox(height: 400,
-              // Next Period Card
-              child: 
-                _infoTile(
-                  //need to change what it shows and link to json file
-                  value: nextPeriodDate != null
-                      ? 'info from json file - menstruation phase'
-                      : 'Not calculated',
-                  // no icon
-                  //icon: Icons.calendar_today,
-                ),
-                
-              ),
-            ),
-
-                    
-          ],
-        ),
+      appBar: AppBar(
+        title: const Text('Basic Info'),
+      ),
+      body: const Center(
+        child: Text('Mentruation'),
       ),
     );
   }
-
-  //this one doesnt need an icon
-  Widget _infoTile({
-    //required String title,
-    required String value,
-    //required IconData icon,
-    bool isHighlighted = false,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isHighlighted ? const Color.fromRGBO(54, 18, 58, 0.05) : Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: const Color.fromRGBO(54, 18, 58, 0.1)),
-      ),
-      child: Row(
-        children: [
-          //Icon(icon, color: const Color.fromARGB(255, 112, 161, 217)),
-          const SizedBox(width: 15),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              //Text(title, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-              Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildButton(BuildContext context, String label, Widget page) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 12),
-      child: SizedBox(
-        width: 160, // controls how many buttons fit on screen
-        child: HorizontalScrollButton( // make a new class with a different deign for these
-          label: label,
-          onPressed: () {
-            context.read<CycleDataProvider>().selectField(label);
-            // Navigator.push();
-            //MaterialPageRoute(builder: (_) => page),
-            
-          },
-        ),
-      ),
-    );
-  }
-} 
-
+}
 
 class FolicularPage extends StatelessWidget{
   const FolicularPage({super.key});
@@ -1129,73 +975,56 @@ class TextBox extends StatelessWidget {
 
 
 class HorizontalScrollButton extends StatelessWidget {
-  final String label;
+  final String label; // 
   final VoidCallback onPressed;
 
   const HorizontalScrollButton({
     super.key,
-    required this.label,
+    required this.label, // cand chemi functia ai nevoie de asta neaparat
     required this.onPressed,
   });
-
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 137,
-      height: 120,
+    return Container (
+      width: 190.0,
+      height: 60.0,
       child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(24),
-        child: Container(
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x0C000000),
-                blurRadius: 40,
-                offset: Offset(4, 6),
-              ),
-            ],
-          ),
-          child: Column(
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(100), // design
+      child:Container(
+        decoration: BoxDecoration( // design
+          color: Color.fromRGBO(255, 255, 255, 1), // design
+          borderRadius: BorderRadius.circular(20), // design
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15), // shadow color
+              blurRadius: 10, // softness
+              offset: Offset(0, 4), // x, y position
+              spreadRadius: 1,
+            ),
+  ],
+        ),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            //mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Icon circle
-              Container(
-                width: 32,
-                height: 32,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF2F8FF),
-                  shape: BoxShape.circle,
-                ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.favorite, // replace later if needed
-                  size: 16,
-                  color: Color(0xFF5454CA),
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              // Label (UNCHANGED)
-              Text(
-                label,
+            children: [Column(
+              mainAxisAlignment: MainAxisAlignment.center,  
+              children: [
+                Text(label, // do not change label pls
                 style: const TextStyle(
-                  color: Color(0xFF303437),
+                  color: const Color(0xFF303437),
                   fontSize: 14,
                   fontFamily: 'DM Sans',
                   fontWeight: FontWeight.w700,
-                  height: 1.43,
-                ),
-              ),
-            ],
+                  height: 1.43,),
+                          ),
+              ],
+            ),],
           ),
         ),
-      ),
-    );
+
+    ),);
+
   }
 }
