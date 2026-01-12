@@ -809,7 +809,7 @@ class MenstruationPage extends StatelessWidget{
             SizedBox(height: 16),
 
             SizedBox(
-              height: 100, // controls button size
+              height: 120, // controls button size
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 children: [
@@ -837,26 +837,35 @@ class MenstruationPage extends StatelessWidget{
               ),
             ),
 
-            SizedBox(height: 30),
-
-            // Next Period Card
-            _infoTile(
-              //need to change what it shows and link to json file
-              value: nextPeriodDate != null
-                  ? 'info from json file - menstruation phase'
-                  : 'Not calculated',
-              icon: Icons.calendar_today,
+            Padding(
+              padding: const EdgeInsets.only(top: 20.0),
+              child: SizedBox(height: 400,
+              // Next Period Card
+              child: 
+                _infoTile(
+                  //need to change what it shows and link to json file
+                  value: nextPeriodDate != null
+                      ? 'info from json file - menstruation phase'
+                      : 'Not calculated',
+                  // no icon
+                  //icon: Icons.calendar_today,
+                ),
+                
+              ),
             ),
+
                     
           ],
         ),
       ),
     );
   }
+
+  //this one doesnt need an icon
   Widget _infoTile({
     //required String title,
     required String value,
-    required IconData icon,
+    //required IconData icon,
     bool isHighlighted = false,
   }) {
     return Container(
@@ -869,7 +878,7 @@ class MenstruationPage extends StatelessWidget{
       ),
       child: Row(
         children: [
-          Icon(icon, color: const Color.fromARGB(255, 112, 161, 217)),
+          //Icon(icon, color: const Color.fromARGB(255, 112, 161, 217)),
           const SizedBox(width: 15),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
