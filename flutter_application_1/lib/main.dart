@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
 }
 
 // list of files based on phase 
- const Map<String, String> phaseJsonFiles = {
+const Map<String, String> phaseJsonFiles = {
   'menstrual': 'assets/Menstrual_Phase.json',
   'follicular': 'assets/Follicular_Phase.json',
   'ovulation': 'assets/Ovulation_Phase.json',
@@ -39,34 +39,6 @@ class MyApp extends StatelessWidget {
   'late_luteal': 'assets/Late_Luteal_Phase.json',
 };
 
-
-//load JSON file
-// Future<Map<String, List<Map<String, dynamic>>>> loadCycleData() async {
-//   final jsonMenstrual =
-//       await rootBundle.loadString('assets/Menstrual_Phase.json');
-//   final jsonFollicular =
-//       await rootBundle.loadString('assets/Follicular_Phase.json');
-//   final jsonEarlyLuteal =
-//       await rootBundle.loadString('assets/Early_Luteal_Phase.json');
-//   final jsonLateLuteal =
-//       await rootBundle.loadString('assets/Late_Luteal_Phase.json');
-//   final jsonOvulation =
-//       await rootBundle.loadString('assets/Ovulation_Phase.json');
-
-//   final List<dynamic> menstrualList = json.decode(jsonMenstrual);
-//   final List<dynamic> follicularList = json.decode(jsonFollicular);
-//   final List<dynamic> earlyLutealList = json.decode(jsonEarlyLuteal);
-//   final List<dynamic> lateLutealList = json.decode(jsonLateLuteal);
-//   final List<dynamic> ovulationList = json.decode(jsonOvulation);
-
-//   return {
-//     'menstrual': menstrualList.cast<Map<String, dynamic>>(),
-//     'follicular': follicularList.cast<Map<String, dynamic>>(),
-//     'early_luteal': earlyLutealList.cast<Map<String, dynamic>>(),
-//     'late_luteal': lateLutealList.cast<Map<String, dynamic>>(),
-//     'ovulation': ovulationList.cast<Map<String, dynamic>>(),
-//   };
-// }
 
 class CycleDataProvider extends ChangeNotifier {
   Map<String, List<Map<String, dynamic>>> _data = {};
@@ -82,6 +54,7 @@ class CycleDataProvider extends ChangeNotifier {
 
     final Map<String, List<Map<String, dynamic>>> result = {};
 
+//decoding each json file
     for (final entry in phaseJsonFiles.entries) {
       final jsonString = await rootBundle.loadString(entry.value);
       final List<dynamic> decoded = json.decode(jsonString);
@@ -103,13 +76,74 @@ class CycleDataProvider extends ChangeNotifier {
     required int dayOfPhase,
     required String field,
   }) {
-    final list = _data[phase];
-    if (list == null || list.isEmpty) return 'No data';
+    // one of the json files
+    final infoPerPhase = _data[phase];
+    if (infoPerPhase == null || infoPerPhase.isEmpty) return 'No data';
 
-    final index = (dayOfPhase - 1).clamp(0, list.length - 1);
-    return list[index][field]?.toString() ?? 'No data';
+//in functie de index iti deschide fiecare zi din acel phase json file 
+    final infoPerDayInPhase = (dayOfPhase - 1).clamp(0, infoPerPhase.length - 1); // toata ziua
+    return infoPerPhase[infoPerDayInPhase][field]?.toString() ?? 'No data'; // fiecare cell din row ul ala
   }
 }
+
+class Calculate extends ChangeNotifier {
+  DateTime? nextPeriodDate;
+  int? difference;
+  String? phase;
+  int? dayofphase;
+
+
+  void calculateNextPeriod(DateTime lastPeriodDate, int periodLength) {
+    nextPeriodDate = lastPeriodDate.add(Duration(days: periodLength));
+    notifyListeners();
+  }
+  
+  void calculateDayOfCycle(DateTime lastPeriodDate) {
+    final today = DateTime.now();
+    difference = today.difference(lastPeriodDate).inDays + 1;
+    notifyListeners();
+  }
+  // Future <void> calculatePhase() async {
+  //   if (difference == null) return;
+  //   final cycleData = await loadCycleData();
+  //   final entry = cycleData.firstWhere(
+  //     (e) => e["Day"] == difference,
+  //     orElse: () => {"Phase": "Unknown"},
+  //   );
+  //   phase = entry["Phase"];
+  //   notifyListeners();
+  // }
+
+  void determinePhase({
+    required int cycleDay,
+    required int cycleLength,
+    required int periodLength,
+    // final String? phase,
+}) {
+    int ovulationDay = cycleLength - 14;
+
+    if (cycleDay <= periodLength) {
+      phase = 'menstrual';
+      dayofphase = cycleDay;
+    } else if (cycleDay < ovulationDay) {
+      phase  =  'follicular';
+      dayofphase = cycleDay - periodLength;
+    } else if (cycleDay == ovulationDay) {
+      phase = 'ovulation';
+      dayofphase = ovulationDay;
+    } else if (cycleDay <= ovulationDay + 6) {
+      phase = 'early_luteal';
+      dayofphase = cycleDay - ovulationDay;
+    } else {
+      phase = 'late_luteal';
+      dayofphase = cycleDay - ovulationDay - 6;
+    }
+    // return phase!;
+    notifyListeners();
+}
+
+  }
+
 
 
 class MainNavigationBar extends StatefulWidget {
@@ -443,159 +477,6 @@ class _LogCalendarState extends State<LogCalendar> {
   }
 
 
-// design + functionality for Select Date and Submit buttons 
-class SelectButton extends StatelessWidget {
-  final String label; // 
-  final VoidCallback onPressed;
-
-  const SelectButton({
-    super.key,
-    required this.label, // cand chemi functia ai nevoie de asta neaparat
-    required this.onPressed,
-  });
-  @override
-  Widget build(BuildContext context) {
-    return Container (
-      width: 190.0,
-      height: 50.0,
-      child: InkWell(
-      onTap: onPressed,
-      borderRadius: BorderRadius.circular(100), // design
-      child:Container(
-        decoration: BoxDecoration( // design
-          color: Color.fromRGBO(54, 18, 58, 1), // design
-          borderRadius: BorderRadius.circular(100), // design
-        ),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          child: Row(
-            //mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [Column(
-              mainAxisAlignment: MainAxisAlignment.center,  
-              children: [
-                Text(label, // do not change label pls
-                style: const TextStyle( // design
-                color: Colors.white,// design
-                fontSize: 14,
-                          ),
-                          ),
-              ],
-            ),],
-          ),
-        ),
-
-    ),);
-
-  }
-}
-
-
-// text field class
-class TextBox extends StatelessWidget {
-  final String title;
-  final String hint;
-  final TextEditingController controller;
-
-  const TextBox({
-    super.key,
-    required this.title,
-    required this.hint,
-    required this.controller,
-  });
-
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(title,
-        style: TextStyle(
-          color: const Color(0xFF1E1E1E) /* Text-Default-Default */,
-          fontSize: 16,
-          fontFamily: 'DM Sans',
-          fontWeight: FontWeight.w700,
-          height: 1.40,
-          ),),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-          child: TextField(
-            inputFormatters: <TextInputFormatter>[
-              FilteringTextInputFormatter.digitsOnly
-            ],
-            controller: controller,
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              hintText: hint,
-              hintStyle: TextStyle(
-                color: const Color(0xFF1E1E1E),
-                fontFamily: 'DM Sans',)
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-
-class Calculate extends ChangeNotifier {
-  DateTime? nextPeriodDate;
-  int? difference;
-  String? phase;
-  int? dayofphase;
-
-
-  void calculateNextPeriod(DateTime lastPeriodDate, int periodLength) {
-    nextPeriodDate = lastPeriodDate.add(Duration(days: periodLength));
-    notifyListeners();
-  }
-  
-  void calculateDayOfCycle(DateTime lastPeriodDate) {
-    final today = DateTime.now();
-    difference = today.difference(lastPeriodDate).inDays + 1;
-    notifyListeners();
-  }
-  // Future <void> calculatePhase() async {
-  //   if (difference == null) return;
-  //   final cycleData = await loadCycleData();
-  //   final entry = cycleData.firstWhere(
-  //     (e) => e["Day"] == difference,
-  //     orElse: () => {"Phase": "Unknown"},
-  //   );
-  //   phase = entry["Phase"];
-  //   notifyListeners();
-  // }
-
-  void determinePhase({
-    required int cycleDay,
-    required int cycleLength,
-    required int periodLength,
-    // final String? phase,
-}) {
-    int ovulationDay = cycleLength - 14;
-
-    if (cycleDay <= periodLength) {
-      phase = 'menstrual';
-      dayofphase = cycleDay;
-    } else if (cycleDay < ovulationDay) {
-      phase  =  'follicular';
-      dayofphase = cycleDay - periodLength;
-    } else if (cycleDay == ovulationDay) {
-      phase = 'ovulation';
-      dayofphase = ovulationDay;
-    } else if (cycleDay <= ovulationDay + 6) {
-      phase = 'early_luteal';
-      dayofphase = cycleDay - ovulationDay;
-    } else {
-      phase = 'late_luteal';
-      dayofphase = cycleDay - ovulationDay - 6;
-    }
-    // return phase!;
-    notifyListeners();
-}
-
-  }
-
-
 
 class PlaceholderPage extends StatelessWidget {
   const PlaceholderPage({super.key});
@@ -842,60 +723,6 @@ class DailyTipsPage extends StatelessWidget {
   }
 }
 
-class HorizontalScrollButton extends StatelessWidget {
-  final String label; // 
-  final VoidCallback onPressed;
-
-  const HorizontalScrollButton({
-    super.key,
-    required this.label, // cand chemi functia ai nevoie de asta neaparat
-    required this.onPressed,
-  });
-  @override
-  Widget build(BuildContext context) {
-    return Container (
-      width: 190.0,
-      height: 60.0,
-      child: InkWell(
-      onTap: onPressed,
-      borderRadius: BorderRadius.circular(100), // design
-      child:Container(
-        decoration: BoxDecoration( // design
-          color: Color.fromRGBO(255, 255, 255, 1), // design
-          borderRadius: BorderRadius.circular(20), // design
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.15), // shadow color
-              blurRadius: 10, // softness
-              offset: Offset(0, 4), // x, y position
-              spreadRadius: 1,
-            ),
-  ],
-        ),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          child: Row(
-            //mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [Column(
-              mainAxisAlignment: MainAxisAlignment.center,  
-              children: [
-                Text(label, // do not change label pls
-                style: const TextStyle(
-                  color: const Color(0xFF303437),
-                  fontSize: 14,
-                  fontFamily: 'DM Sans',
-                  fontWeight: FontWeight.w700,
-                  height: 1.43,),
-                          ),
-              ],
-            ),],
-          ),
-        ),
-
-    ),);
-
-  }
-}
 
 
 
@@ -992,5 +819,155 @@ class LateLutealPage extends StatelessWidget{
         child: Text('Late Luteal'),
       ),
     );
+  }
+}
+
+
+// design + functionality for Select Date and Submit buttons 
+class SelectButton extends StatelessWidget {
+  final String label; // 
+  final VoidCallback onPressed;
+
+  const SelectButton({
+    super.key,
+    required this.label, // cand chemi functia ai nevoie de asta neaparat
+    required this.onPressed,
+  });
+  @override
+  Widget build(BuildContext context) {
+    return Container (
+      width: 190.0,
+      height: 50.0,
+      child: InkWell(
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(100), // design
+      child:Container(
+        decoration: BoxDecoration( // design
+          color: Color.fromRGBO(54, 18, 58, 1), // design
+          borderRadius: BorderRadius.circular(100), // design
+        ),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            //mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [Column(
+              mainAxisAlignment: MainAxisAlignment.center,  
+              children: [
+                Text(label, // do not change label pls
+                style: const TextStyle( // design
+                color: Colors.white,// design
+                fontSize: 14,
+                          ),
+                          ),
+              ],
+            ),],
+          ),
+        ),
+
+    ),);
+
+  }
+}
+
+
+// text field class
+class TextBox extends StatelessWidget {
+  final String title;
+  final String hint;
+  final TextEditingController controller;
+
+  const TextBox({
+    super.key,
+    required this.title,
+    required this.hint,
+    required this.controller,
+  });
+
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title,
+        style: TextStyle(
+          color: const Color(0xFF1E1E1E) /* Text-Default-Default */,
+          fontSize: 16,
+          fontFamily: 'DM Sans',
+          fontWeight: FontWeight.w700,
+          height: 1.40,
+          ),),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+          child: TextField(
+            inputFormatters: <TextInputFormatter>[
+              FilteringTextInputFormatter.digitsOnly
+            ],
+            controller: controller,
+            decoration: InputDecoration(
+              border: const OutlineInputBorder(),
+              hintText: hint,
+              hintStyle: TextStyle(
+                color: const Color(0xFF1E1E1E),
+                fontFamily: 'DM Sans',)
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+
+class HorizontalScrollButton extends StatelessWidget {
+  final String label; // 
+  final VoidCallback onPressed;
+
+  const HorizontalScrollButton({
+    super.key,
+    required this.label, // cand chemi functia ai nevoie de asta neaparat
+    required this.onPressed,
+  });
+  @override
+  Widget build(BuildContext context) {
+    return Container (
+      width: 190.0,
+      height: 60.0,
+      child: InkWell(
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(100), // design
+      child:Container(
+        decoration: BoxDecoration( // design
+          color: Color.fromRGBO(255, 255, 255, 1), // design
+          borderRadius: BorderRadius.circular(20), // design
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15), // shadow color
+              blurRadius: 10, // softness
+              offset: Offset(0, 4), // x, y position
+              spreadRadius: 1,
+            ),
+  ],
+        ),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            //mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [Column(
+              mainAxisAlignment: MainAxisAlignment.center,  
+              children: [
+                Text(label, // do not change label pls
+                style: const TextStyle(
+                  color: const Color(0xFF303437),
+                  fontSize: 14,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.w700,
+                  height: 1.43,),
+                          ),
+              ],
+            ),],
+          ),
+        ),
+
+    ),);
+
   }
 }
