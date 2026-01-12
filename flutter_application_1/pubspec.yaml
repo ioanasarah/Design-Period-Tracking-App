@@ -68,6 +68,7 @@ flutter:
     - assets/Late_Luteal_Phase.json
     - assets/Follicular_Phase.json
     - assets/Ovulation_Phase.json
+    - assets/All_Phases.json
 
 
   fonts:

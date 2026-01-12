@@ -37,6 +37,7 @@ const Map<String, String> phaseJsonFiles = {
   'Ovulation': 'assets/Ovulation_Phase.json',
   'Early Luteal': 'assets/Early_Luteal_Phase.json',
   'Late Luteal': 'assets/Late_Luteal_Phase.json',
+  // 'All Phases': 'assets/All_Phases.json'
 };
 
 
@@ -529,8 +530,13 @@ class PlaceholderPage extends StatelessWidget {
 
             SizedBox(
               height: 120, // controls button size
-              child: ListView(
+              child: GestureDetector(
+    behavior: HitTestBehavior.opaque,
+    onHorizontalDragUpdate: (_) {},
+    child: ListView(
                 scrollDirection: Axis.horizontal,
+                primary: false,
+                physics: const BouncingScrollPhysics(),
                 children: [
                   _buildButton(
                     context,
@@ -554,6 +560,7 @@ class PlaceholderPage extends StatelessWidget {
                   ),
                 ],
               ),
+              )
             ),
           
           const SizedBox(height: 30),
@@ -616,6 +623,7 @@ class PlaceholderPage extends StatelessWidget {
         children: [
           Icon(icon, color: const Color.fromRGBO(54, 18, 58, 1)),
           const SizedBox(width: 15),
+          
           Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -819,9 +827,25 @@ class MenstruationPage extends StatelessWidget{
   const MenstruationPage({super.key});
   final DateTime? nextPeriodDate = null;
 
+
+  Future<String> _loadMenstruationInfo(String selectedField) async {
+  final jsonString = await rootBundle.loadString('assets/All_Phases.json');
+  final List<dynamic> decoded = json.decode(jsonString);
+
+  final List<Map<String, dynamic>> allData =
+      decoded.cast<Map<String, dynamic>>();
+
+  final Map<String, dynamic> menstruationEntry = allData.firstWhere(
+    (entry) => entry['Phase'] == 'Menstrual',
+    orElse: () => {},
+  );
+
+  return menstruationEntry[selectedField]?.toString() ?? 'No data';
+}
+
   @override
   Widget build(BuildContext context) {
-
+    
 final calc = context.watch<Calculate>();
     final nextPeriodDate = calc.nextPeriodDate;
     final difference = calc.difference;
@@ -836,23 +860,24 @@ final calc = context.watch<Calculate>();
   final dayOfPhase = calc.dayofphase;
   final selectedField = cycleData.selectedField;
 
-  final info = (phase != null && dayOfPhase != null)
-    ? cycleData.getPhaseInfo(
-        phase: phase,
-        dayOfPhase: dayOfPhase,
-        field: selectedField,
-      )
-    : 'No data';
-
+// scaffold inside body safe area, child singlescroll view child padding(20)
+// child of padding column
+// 
+// 
+// 
     return Scaffold(
-      backgroundColor: Color(0xFFFBE3E4),
-      body: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
+      body: SafeArea(
+      child:
+      SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: 
+      // Container(
+      //   width: double.infinity,
+      //   padding: const EdgeInsets.all(20.0),
+        // child: 
+        Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-         
             Text(
               'MENSTRUATION',
               style: TextStyle(
@@ -966,10 +991,24 @@ final calc = context.watch<Calculate>();
                 ],
               ),
             ),
-
+          SizedBox(height:10),
+          Align(
+            alignment: Alignment.centerLeft,
+                child:
+                Text(
+                'Graph', //change this
+                style: TextStyle(
+                  color: const Color(0xFF404446),
+                  fontSize: 18,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.w700,
+                  height: 1.33,
+                  ),
+                  )
+              ),
             Padding(
               padding: const EdgeInsets.only(top: 20.0),
-              child: SizedBox(height: 400,
+              child: SizedBox(height: 200,
               // Next Period Card
               child: 
                 _infoTile(
@@ -981,14 +1020,49 @@ final calc = context.watch<Calculate>();
                   //icon: Icons.calendar_today,
                 ),
                 
+                
               ),
             ),
+          SizedBox(height:10),
 
-                    
+          Align(
+            alignment: Alignment.centerLeft,
+                child:
+                Text(
+                'Explanation', //change this
+                style: TextStyle(
+                  color: const Color(0xFF404446),
+                  fontSize: 18,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.w700,
+                  height: 1.33,
+                  ),
+                  )
+              ),
+
+              Padding(
+                padding: const EdgeInsets.only(top: 20.0),
+                child: SizedBox(height: 200,
+                // Explanation Card
+                child: 
+                  _infoTile(
+                    //need to change what it shows and link to json file
+                    value: nextPeriodDate != null
+                        ? 'info from json file - menstruation phase'
+                        : 'Not calculated',
+                    // no icon
+                    //icon: Icons.calendar_today,
+                  ),
+                  
+                ),
+              ),
           ],
+          )
+        
         ),
       ),
     );
+    // );
   }
 
 //this one doesnt need an icon
@@ -1010,12 +1084,15 @@ final calc = context.watch<Calculate>();
         children: [
           //Icon(icon, color: const Color.fromARGB(255, 112, 161, 217)),
           const SizedBox(width: 15),
-          Column(
+          Expanded(
+            child: 
+            Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               //Text(title, style: const TextStyle(fontSize: 12, color: Colors.grey)),
               Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             ],
+          ),
           ),
         ],
       ),
@@ -1046,17 +1123,231 @@ class FolicularPage extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
+
+final calc = context.watch<Calculate>();
+    final nextPeriodDate = calc.nextPeriodDate;
+    // final difference = calc.difference;
+
+    final cycleData = context.watch<CycleDataProvider>();
+    
+    if (!cycleData.isLoaded) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+  final phase = calc.phase;
+  final dayOfPhase = calc.dayofphase;
+  final selectedField = cycleData.selectedField;
+
+  final info = (phase != null && dayOfPhase != null)
+    ? cycleData.getPhaseInfo(
+        phase: phase,
+        dayOfPhase: dayOfPhase,
+        field: selectedField,
+      )
+    : 'No data';
+
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Basic Info'),
-      ),
-      body: const Center(
-        child: Text('Folicular'),
+      body: SafeArea(
+      child:
+      SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: 
+      // Container(
+      //   width: double.infinity,
+      //   padding: const EdgeInsets.all(20.0),
+        // child: 
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'FOLLICULAR',
+              style: TextStyle(
+                color: const Color(0xFF5454CA),
+                fontSize: 36,
+                fontFamily: 'DM Sans',
+                fontWeight: FontWeight.w700,
+                height: 0.67,
+                letterSpacing: 1.44,
+                ),
+            ),
+            SizedBox(height: 30),
+            Align(
+              alignment: Alignment.centerLeft,
+              child:
+              Text(
+                'Information',
+                style: TextStyle(
+                  color:  Color(0xFF404446),
+                  fontSize: 18,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.w700,
+                  height: 1.33,
+                ),
+              )
+            ),
+
+            SizedBox(height: 16),
+
+            SizedBox(
+              height: 120, // controls button size
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  _buildButton(
+                    context,
+                    "What is happening in each phase",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of estrogen ",
+                    const MenstruationPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of progesterone ",
+                    const FolicularPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of FSH",
+                    const OvulationPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of LH",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Energy Levels Text",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Type of food",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Example of Food",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Health aspect",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Concentration Levels",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Mood",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Types of Vitamins",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "What is happening in the Ovaries",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "What is happening in the Brain",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "What is happening in the Uterus",
+                    const EarlyLutealPage(),
+                  )
+
+                ],
+              ),
+            ),
+          SizedBox(height:10),
+          Align(
+            alignment: Alignment.centerLeft,
+                child:
+                Text(
+                'Graph', //change this
+                style: TextStyle(
+                  color: const Color(0xFF404446),
+                  fontSize: 18,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.w700,
+                  height: 1.33,
+                  ),
+                  )
+              ),
+            Padding(
+              padding: const EdgeInsets.only(top: 20.0),
+              child: SizedBox(height: 200,
+              // Next Period Card
+              child: 
+                _infoTile(
+                  //need to change what it shows and link to json file
+                  value: nextPeriodDate != null
+                      ? 'info from json file - follicular phase'
+                      : 'Not calculated',
+                  // no icon
+                  //icon: Icons.calendar_today,
+                ),
+                
+                
+              ),
+            ),
+          SizedBox(height:10),
+
+          Align(
+            alignment: Alignment.centerLeft,
+                child:
+                Text(
+                'Explanation', //change this
+                style: TextStyle(
+                  color: const Color(0xFF404446),
+                  fontSize: 18,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.w700,
+                  height: 1.33,
+                  ),
+                  )
+              ),
+
+              Padding(
+                padding: const EdgeInsets.only(top: 20.0),
+                child: SizedBox(height: 200,
+                // Next Period Card
+                child: 
+                  _infoTile(
+                    //need to change what it shows and link to json file
+                    value: nextPeriodDate != null
+                        ? 'info from json file - follicular phase'
+                        : 'Not calculated',
+                    // no icon
+                    //icon: Icons.calendar_today,
+                  ),
+                  
+                ),
+              ),
+          ],
+          )
+        
+        ),
       ),
     );
+    // );
   }
 
-  //this one doesnt need an icon
+//this one doesnt need an icon
   Widget _infoTile({
     //required String title,
     required String value,
@@ -1075,12 +1366,15 @@ class FolicularPage extends StatelessWidget{
         children: [
           //Icon(icon, color: const Color.fromARGB(255, 112, 161, 217)),
           const SizedBox(width: 15),
-          Column(
+          Expanded(
+            child: 
+            Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               //Text(title, style: const TextStyle(fontSize: 12, color: Colors.grey)),
               Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             ],
+          ),
           ),
         ],
       ),
@@ -1106,55 +1400,852 @@ class FolicularPage extends StatelessWidget{
   }
 }
 
+
 class OvulationPage extends StatelessWidget{
   const OvulationPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+
+final calc = context.watch<Calculate>();
+    final nextPeriodDate = calc.nextPeriodDate;
+    final difference = calc.difference;
+
+    final cycleData = context.watch<CycleDataProvider>();
+    
+    if (!cycleData.isLoaded) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+  final phase = calc.phase;
+  final dayOfPhase = calc.dayofphase;
+  final selectedField = cycleData.selectedField;
+
+  final info = (phase != null && dayOfPhase != null)
+    ? cycleData.getPhaseInfo(
+        phase: phase,
+        dayOfPhase: dayOfPhase,
+        field: selectedField,
+      )
+    : 'No data';
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Basic Info'),
+      body: SafeArea(
+      child:
+      SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: 
+      // Container(
+      //   width: double.infinity,
+      //   padding: const EdgeInsets.all(20.0),
+        // child: 
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'OVULATION',
+              style: TextStyle(
+                color: const Color(0xFF5454CA),
+                fontSize: 36,
+                fontFamily: 'DM Sans',
+                fontWeight: FontWeight.w700,
+                height: 0.67,
+                letterSpacing: 1.44,
+                ),
+            ),
+            SizedBox(height: 30),
+            Align(
+              alignment: Alignment.centerLeft,
+              child:
+              Text(
+                'Information',
+                style: TextStyle(
+                  color:  Color(0xFF404446),
+                  fontSize: 18,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.w700,
+                  height: 1.33,
+                ),
+              )
+            ),
+
+            SizedBox(height: 16),
+
+            SizedBox(
+              height: 120, // controls button size
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  _buildButton(
+                    context,
+                    "What is happening in each phase",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of estrogen ",
+                    const MenstruationPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of progesterone ",
+                    const FolicularPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of FSH",
+                    const OvulationPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of LH",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Energy Levels Text",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Type of food",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Example of Food",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Health aspect",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Concentration Levels",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Mood",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Types of Vitamins",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "What is happening in the Ovaries",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "What is happening in the Brain",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "What is happening in the Uterus",
+                    const EarlyLutealPage(),
+                  )
+
+                ],
+              ),
+            ),
+          SizedBox(height:10),
+          Align(
+            alignment: Alignment.centerLeft,
+                child:
+                Text(
+                'Graph', //change this
+                style: TextStyle(
+                  color: const Color(0xFF404446),
+                  fontSize: 18,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.w700,
+                  height: 1.33,
+                  ),
+                  )
+              ),
+            Padding(
+              padding: const EdgeInsets.only(top: 20.0),
+              child: SizedBox(height: 200,
+              // Next Period Card
+              child: 
+                _infoTile(
+                  //need to change what it shows and link to json file
+                  value: nextPeriodDate != null
+                      ? 'info from json file - ovulation phase'
+                      : 'Not calculated',
+                  // no icon
+                  //icon: Icons.calendar_today,
+                ),
+                
+                
+              ),
+            ),
+          SizedBox(height:10),
+
+          Align(
+            alignment: Alignment.centerLeft,
+                child:
+                Text(
+                'Explanation', //change this
+                style: TextStyle(
+                  color: const Color(0xFF404446),
+                  fontSize: 18,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.w700,
+                  height: 1.33,
+                  ),
+                  )
+              ),
+
+              Padding(
+                padding: const EdgeInsets.only(top: 20.0),
+                child: SizedBox(height: 200,
+                // Next Period Card
+                child: 
+                  _infoTile(
+                    //need to change what it shows and link to json file
+                    value: nextPeriodDate != null
+                        ? 'info from json file - ovulation phase'
+                        : 'Not calculated',
+                    // no icon
+                    //icon: Icons.calendar_today,
+                  ),
+                  
+                ),
+              ),
+          ],
+          )
+        
+        ),
       ),
-      body: const Center(
-        child: Text('Ovulation'),
+    );
+    // );
+  }
+
+//this one doesnt need an icon
+  Widget _infoTile({
+    //required String title,
+    required String value,
+    //required IconData icon,
+    bool isHighlighted = false,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isHighlighted ? const Color.fromRGBO(54, 18, 58, 0.05) : Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: const Color.fromRGBO(54, 18, 58, 0.1)),
+      ),
+      child: Row(
+        children: [
+          //Icon(icon, color: const Color.fromARGB(255, 112, 161, 217)),
+          const SizedBox(width: 15),
+          Expanded(
+            child: 
+            Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              //Text(title, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+              Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            ],
+          ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildButton(BuildContext context, String label, Widget page) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 12),
+      child: SizedBox(
+        width: 160, // controls how many buttons fit on screen
+        child: HorizontalScrollButton( // make a new class with a different deign for these
+          label: label,
+          onPressed: () {
+            context.read<CycleDataProvider>().selectField(label);
+            // Navigator.push();
+            //MaterialPageRoute(builder: (_) => page),
+            
+          },
+        ),
       ),
     );
   }
 }
+
 
 class EarlyLutealPage extends StatelessWidget{
   const EarlyLutealPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+
+final calc = context.watch<Calculate>();
+    final nextPeriodDate = calc.nextPeriodDate;
+    final difference = calc.difference;
+
+    final cycleData = context.watch<CycleDataProvider>();
+    
+    if (!cycleData.isLoaded) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+  final phase = calc.phase;
+  final dayOfPhase = calc.dayofphase;
+  final selectedField = cycleData.selectedField;
+
+  final info = (phase != null && dayOfPhase != null)
+    ? cycleData.getPhaseInfo(
+        phase: phase,
+        dayOfPhase: dayOfPhase,
+        field: selectedField,
+      )
+    : 'No data';
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Basic Info'),
+      body: SafeArea(
+      child:
+      SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: 
+      // Container(
+      //   width: double.infinity,
+      //   padding: const EdgeInsets.all(20.0),
+        // child: 
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'EARLY LUTEAL',
+              style: TextStyle(
+                color: const Color(0xFF5454CA),
+                fontSize: 36,
+                fontFamily: 'DM Sans',
+                fontWeight: FontWeight.w700,
+                height: 0.67,
+                letterSpacing: 1.44,
+                ),
+            ),
+            SizedBox(height: 30),
+            Align(
+              alignment: Alignment.centerLeft,
+              child:
+              Text(
+                'Information',
+                style: TextStyle(
+                  color:  Color(0xFF404446),
+                  fontSize: 18,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.w700,
+                  height: 1.33,
+                ),
+              )
+            ),
+
+            SizedBox(height: 16),
+
+            SizedBox(
+              height: 120, // controls button size
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  _buildButton(
+                    context,
+                    "What is happening in each phase",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of estrogen ",
+                    const MenstruationPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of progesterone ",
+                    const FolicularPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of FSH",
+                    const OvulationPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of LH",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Energy Levels Text",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Type of food",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Example of Food",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Health aspect",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Concentration Levels",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Mood",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Types of Vitamins",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "What is happening in the Ovaries",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "What is happening in the Brain",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "What is happening in the Uterus",
+                    const EarlyLutealPage(),
+                  )
+
+                ],
+              ),
+            ),
+          SizedBox(height:10),
+          Align(
+            alignment: Alignment.centerLeft,
+                child:
+                Text(
+                'Graph', //change this
+                style: TextStyle(
+                  color: const Color(0xFF404446),
+                  fontSize: 18,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.w700,
+                  height: 1.33,
+                  ),
+                  )
+              ),
+            Padding(
+              padding: const EdgeInsets.only(top: 20.0),
+              child: SizedBox(height: 200,
+              // Next Period Card
+              child: 
+                _infoTile(
+                  //need to change what it shows and link to json file
+                  
+                  value: nextPeriodDate != null
+                      ? 'info from json file - early luteal phase'
+                      : 'Not calculated',
+                  // no icon
+                  //icon: Icons.calendar_today,
+                ),
+                
+                
+              ),
+            ),
+          SizedBox(height:10),
+
+          Align(
+            alignment: Alignment.centerLeft,
+                child:
+                Text(
+                'Explanation', //change this
+                style: TextStyle(
+                  color: const Color(0xFF404446),
+                  fontSize: 18,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.w700,
+                  height: 1.33,
+                  ),
+                  )
+              ),
+
+              Padding(
+                padding: const EdgeInsets.only(top: 20.0),
+                child: SizedBox(height: 200,
+                // Next Period Card
+                child: 
+                  _infoTile(
+                    //need to change what it shows and link to json file
+                    value: nextPeriodDate != null
+                        ? 'info from json file - early luteal phase'
+                        : 'Not calculated',
+                    // no icon
+                    //icon: Icons.calendar_today,
+                  ),
+                  
+                ),
+              ),
+          ],
+          )
+        
+        ),
       ),
-      body: const Center(
-        child: Text('Early Luteal'),
+    );
+    // );
+  }
+
+//this one doesnt need an icon
+  Widget _infoTile({
+    //required String title,
+    required String value,
+    //required IconData icon,
+    bool isHighlighted = false,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isHighlighted ? const Color.fromRGBO(54, 18, 58, 0.05) : Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: const Color.fromRGBO(54, 18, 58, 0.1)),
+      ),
+      child: Row(
+        children: [
+          //Icon(icon, color: const Color.fromARGB(255, 112, 161, 217)),
+          const SizedBox(width: 15),
+          Expanded(
+            child: 
+            Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              //Text(title, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+              Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            ],
+          ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildButton(BuildContext context, String label, Widget page) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 12),
+      child: SizedBox(
+        width: 160, // controls how many buttons fit on screen
+        child: HorizontalScrollButton( // make a new class with a different deign for these
+          label: label,
+          onPressed: () {
+            context.read<CycleDataProvider>().selectField(label);
+            // Navigator.push();
+            //MaterialPageRoute(builder: (_) => page),
+            
+          },
+        ),
       ),
     );
   }
 }
+
 
 class LateLutealPage extends StatelessWidget{
   const LateLutealPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+final calc = context.watch<Calculate>();
+    final nextPeriodDate = calc.nextPeriodDate;
+    final difference = calc.difference;
+
+    final cycleData = context.watch<CycleDataProvider>();
+    
+    if (!cycleData.isLoaded) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+  final phase = calc.phase;
+  final dayOfPhase = calc.dayofphase;
+  final selectedField = cycleData.selectedField;
+
+  final info = (phase != null && dayOfPhase != null)
+    ? cycleData.getPhaseInfo(
+        phase: phase,
+        dayOfPhase: dayOfPhase,
+        field: selectedField,
+      )
+    : 'No data';
+
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Basic Info'),
+      body: SafeArea(
+      child:
+      SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: 
+      // Container(
+      //   width: double.infinity,
+      //   padding: const EdgeInsets.all(20.0),
+        // child: 
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'LATE LUTEAL',
+              style: TextStyle(
+                color: const Color(0xFF5454CA),
+                fontSize: 36,
+                fontFamily: 'DM Sans',
+                fontWeight: FontWeight.w700,
+                height: 0.67,
+                letterSpacing: 1.44,
+                ),
+            ),
+            SizedBox(height: 30),
+            Align(
+              alignment: Alignment.centerLeft,
+              child:
+              Text(
+                'Information',
+                style: TextStyle(
+                  color:  Color(0xFF404446),
+                  fontSize: 18,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.w700,
+                  height: 1.33,
+                ),
+              )
+            ),
+
+            SizedBox(height: 16),
+
+            SizedBox(
+              height: 120, // controls button size
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  _buildButton(
+                    context,
+                    "What is happening in each phase",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of estrogen ",
+                    const MenstruationPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of progesterone ",
+                    const FolicularPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of FSH",
+                    const OvulationPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of LH",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Energy Levels Text",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Type of food",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Example of Food",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Health aspect",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Concentration Levels",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Mood",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Types of Vitamins",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "What is happening in the Ovaries",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "What is happening in the Brain",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "What is happening in the Uterus",
+                    const EarlyLutealPage(),
+                  )
+
+                ],
+              ),
+            ),
+          SizedBox(height:10),
+          Align(
+            alignment: Alignment.centerLeft,
+                child:
+                Text(
+                'Graph', //change this
+                style: TextStyle(
+                  color: const Color(0xFF404446),
+                  fontSize: 18,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.w700,
+                  height: 1.33,
+                  ),
+                  )
+              ),
+            Padding(
+              padding: const EdgeInsets.only(top: 20.0),
+              child: SizedBox(height: 200,
+              // Next Period Card
+              child: 
+                _infoTile(
+                  //need to change what it shows and link to json file
+                  value: nextPeriodDate != null
+                      ? 'info from json file - late luteal phase'
+                      : 'Not calculated',
+                  // no icon
+                  //icon: Icons.calendar_today,
+                ),
+                
+                
+              ),
+            ),
+          SizedBox(height:10),
+
+          Align(
+            alignment: Alignment.centerLeft,
+                child:
+                Text(
+                'Explanation', //change this
+                style: TextStyle(
+                  color: const Color(0xFF404446),
+                  fontSize: 18,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.w700,
+                  height: 1.33,
+                  ),
+                  )
+              ),
+
+              Padding(
+                padding: const EdgeInsets.only(top: 20.0),
+                child: SizedBox(height: 200,
+                // Next Period Card
+                child: 
+                  _infoTile(
+                    //need to change what it shows and link to json file
+                    value: nextPeriodDate != null
+                        ? 'info from json file - late luteal phase'
+                        : 'Not calculated',
+                    // no icon
+                    //icon: Icons.calendar_today,
+                  ),
+                  
+                ),
+              ),
+          ],
+          )
+        
+        ),
       ),
-      body: const Center(
-        child: Text('Late Luteal'),
+    );
+    // );
+  }
+
+//this one doesnt need an icon
+  Widget _infoTile({
+    //required String title,
+    required String value,
+    //required IconData icon,
+    bool isHighlighted = false,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isHighlighted ? const Color.fromRGBO(54, 18, 58, 0.05) : Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: const Color.fromRGBO(54, 18, 58, 0.1)),
+      ),
+      child: Row(
+        children: [
+          //Icon(icon, color: const Color.fromARGB(255, 112, 161, 217)),
+          const SizedBox(width: 15),
+          Expanded(
+            child: 
+            Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              //Text(title, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+              Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            ],
+          ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildButton(BuildContext context, String label, Widget page) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 12),
+      child: SizedBox(
+        width: 160, // controls how many buttons fit on screen
+        child: HorizontalScrollButton( // make a new class with a different deign for these
+          label: label,
+          onPressed: () {
+            context.read<CycleDataProvider>().selectField(label);
+            // Navigator.push();
+            //MaterialPageRoute(builder: (_) => page),
+            
+          },
+        ),
       ),
     );
   }
 }
-
-
 // design + functionality for Select Date and Submit buttons 
 class SelectButton extends StatelessWidget {
   final String label; // 
