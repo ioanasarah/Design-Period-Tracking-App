@@ -863,6 +863,14 @@ class HorizontalScrollButton extends StatelessWidget {
         decoration: BoxDecoration( // design
           color: Color.fromRGBO(255, 255, 255, 1), // design
           borderRadius: BorderRadius.circular(20), // design
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15), // shadow color
+              blurRadius: 10, // softness
+              offset: Offset(0, 4), // x, y position
+              spreadRadius: 1,
+            ),
+  ],
         ),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           child: Row(
