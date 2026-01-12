@@ -525,7 +525,7 @@ class PlaceholderPage extends StatelessWidget {
           const SizedBox(height: 16),
 
             SizedBox(
-              height: 70, // controls button size
+              height: 120, // controls button size
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 children: [
@@ -722,7 +722,7 @@ class DailyTipsPage extends StatelessWidget {
               ),
             ),
             SizedBox(
-              height: 80, // controls button size
+              height: 70, // controls button size
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 children: [
@@ -804,11 +804,92 @@ class MenstruationPage extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Basic Info'),
-      ),
-      body: const Center(
-        child: Text('Mentruation'),
+      backgroundColor: Color(0xFFFBE3E4),
+      body: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+         
+            Text(
+              'MENSTRUATION',
+              style: TextStyle(
+                color: const Color(0xFF5454CA),
+                fontSize: 36,
+                fontFamily: 'DM Sans',
+                fontWeight: FontWeight.w700,
+                height: 0.67,
+                letterSpacing: 1.44,
+                ),
+            ),
+            SizedBox(height: 30),
+            Align(
+              alignment: Alignment.centerLeft,
+              child:
+              Text(
+                'Information',
+                style: TextStyle(
+                  color:  Color(0xFF404446),
+                  fontSize: 18,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.w700,
+                  height: 1.33,
+                ),
+              )
+            ),
+
+            SizedBox(height: 16),
+
+            SizedBox(
+              height: 120, // controls button size
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  _buildButton(
+                    context,
+                    "Energy Levels Text",
+                    const MenstruationPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Level of progesterone",
+                    const FolicularPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Level of FSH",
+                    const OvulationPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Level of LH",
+                    const EarlyLutealPage(),
+                  ),
+                ],
+              ),
+            ),
+
+            Padding(
+              padding: const EdgeInsets.only(top: 20.0),
+              child: SizedBox(height: 400,
+              // Next Period Card
+              child: 
+                _infoTile(
+                  //need to change what it shows and link to json file
+                  value: nextPeriodDate != null
+                      ? 'info from json file - menstruation phase'
+                      : 'Not calculated',
+                  // no icon
+                  //icon: Icons.calendar_today,
+                ),
+                
+              ),
+            ),
+
+                    
+          ],
+        ),
       ),
     );
   }
