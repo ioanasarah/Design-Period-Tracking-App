@@ -801,9 +801,9 @@ class DailyTipsPage extends StatelessWidget {
                 // Next Period Card
                 child: 
                   _infoTile(
-                    //need to change what it shows and link to json file
+                    //need to change what it shows - link to grapj
                     value: nextPeriodDate != null
-                        ? 'info from json file - menstruation phase'
+                        ? 'this is where graph goes'
                         : 'Not calculated',
                     // no icon
                     //icon: Icons.calendar_today,
@@ -836,11 +836,18 @@ class DailyTipsPage extends StatelessWidget {
                 child: 
                   _infoTile(
                     //need to change what it shows and link to json file
-                    value: nextPeriodDate != null
-                        ? 'info from json file - menstruation phase'
-                        : 'Not calculated',
+                    // value: nextPeriodDate != null
+                    //     ? 'info from json file - menstruation phase'
+                    //     : 'Not calculated',
                     // no icon
                     //icon: Icons.calendar_today,
+                    value: (phase != null && dayOfPhase != null)
+                    ? cycleData.getPhaseInfo(
+                        phase: phase,
+                        dayOfPhase: dayOfPhase,
+                        field: selectedField,
+                      )
+                    : 'No data', // fallback if phase or dayOfPhase is null
                   ),
                   
                 ),
@@ -941,18 +948,18 @@ class DailyTipsPage extends StatelessWidget {
       padding: const EdgeInsets.only(right: 12),
       child: SizedBox(
         width: 160, // controls how many buttons fit on screen
-        child: HorizontalScrollButton(
+        child: HorizontalScrollButton( // make a new class with a different deign for these
           label: label,
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => page),
-            );
+            context.read<CycleDataProvider>().selectField(label);
+            // Navigator.push();
+            //MaterialPageRoute(builder: (_) => page),
           },
         ),
       ),
     );
   }
+}
 
   Widget _buildButtonPhases(BuildContext context, String label, Widget page) {
     return Padding(
@@ -972,7 +979,7 @@ class DailyTipsPage extends StatelessWidget {
       ),
     );
   }
-}
+
 
 
 class CalendarPage extends StatelessWidget{
