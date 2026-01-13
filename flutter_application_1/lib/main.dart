@@ -1241,7 +1241,7 @@ Future<String> _loadMenstruationInfo(String selectedField) async {
              Padding(
   padding: const EdgeInsets.only(top: 20.0),
   child: SizedBox(
-    height: 200,
+    height: 300,
     child: FutureBuilder<String>(
       future: _loadMenstruationInfo(selectedField),
       builder: (context, snapshot) {
