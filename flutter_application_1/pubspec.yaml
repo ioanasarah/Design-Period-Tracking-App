@@ -68,10 +68,17 @@ flutter:
     - assets/Late_Luteal_Phase.json
     - assets/Follicular_Phase.json
     - assets/Ovulation_Phase.json
+    - assets/fonts/
 
 
   fonts:
     - family: DMSans
+      fonts:
+        - asset: assets/fonts/DMSans-Regular.ttf
+        - asset: assets/fonts/DMSans-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/DMSans-Bold.ttf
+          weight: 700
 
       
       #dependencies:
