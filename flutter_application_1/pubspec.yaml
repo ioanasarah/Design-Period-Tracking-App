@@ -55,11 +55,8 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
   uses-material-design: true
+
   assets:
     - assets/phase_info.json
     - assets/vector.svg
@@ -69,8 +66,7 @@ flutter:
     - assets/Follicular_Phase.json
     - assets/Ovulation_Phase.json
     - assets/All_Phases.json
-    - assets/clip-woman-doing-exercises.svg
-
+    - assets/clip-woman-doing-exercises.png
 
   fonts:
     - family: DMSans
@@ -80,6 +76,7 @@ flutter:
           weight: 500
         - asset: assets/fonts/DMSans-Bold.ttf
           weight: 700
+
 
       
       #dependencies:

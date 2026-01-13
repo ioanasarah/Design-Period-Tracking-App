@@ -339,7 +339,29 @@ class LogPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Log your Period Details!"),
       ),
-      body: LogCalendar(onSubmit: onSubmit),
+      body: SafeArea(child:
+      SingleChildScrollView(
+      child:
+      Column(
+      children: [
+      LogCalendar(onSubmit: onSubmit),
+      Align(
+        alignment: Alignment.bottomRight,
+        child:
+      Image.asset(
+            'assets/clip-woman-doing-exercises.png',
+            width: 200,
+            height: 200,
+          ),
+      ),
+    //         SvgPicture.asset(
+    //       'clip-woman-doing-exercises.svg',
+    //           semanticsLabel: 'Exercise Woman',
+    //  ),
+      ],
+      ),
+      ),
+      ),
     );
     
     
@@ -603,10 +625,6 @@ class PlaceholderPage extends StatelessWidget {
             icon: Icons.analytics,
           ),
 
-          SvgPicture.asset(
-          'clip-woman-doing-exercises.svg',
-              semanticsLabel: 'Exercise Womam',
-     )
         ],
       ),
     )),);
