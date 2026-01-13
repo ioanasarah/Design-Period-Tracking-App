@@ -512,6 +512,7 @@ class PlaceholderPage extends StatelessWidget {
     return SingleChildScrollView(
       padding:const EdgeInsets.all(16),
       child:
+      SafeArea(child:
     Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20.0),
@@ -602,7 +603,7 @@ class PlaceholderPage extends StatelessWidget {
           ),
         ],
       ),
-    ));
+    )),);
   }
 
   // Helper widget to keep the code clean
