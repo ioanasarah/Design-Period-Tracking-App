@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart' show rootBundle, TextInputFormatter, FilteringTextInputFormatter;
 import 'dart:convert';
+import 'package:fl_chart/fl_chart.dart';
 //import 'package:flutter_svg/flutter_svg.dart';
 
 void main() {
@@ -681,17 +682,16 @@ class DailyTipsPage extends StatelessWidget {
     final calc = context.watch<Calculate>();
     final nextPeriodDate = calc.nextPeriodDate;
     final difference = calc.difference;
+    final phase = calc.phase;
+    final dayOfPhase = calc.dayofphase;
+    final today = DateTime.now();
 
     final cycleData = context.watch<CycleDataProvider>();
+    final selectedField = cycleData.selectedField;
 
     if (!cycleData.isLoaded) {
       return const Center(child: CircularProgressIndicator());
     }
-
-    final phase = calc.phase;
-    final dayOfPhase = calc.dayofphase;
-    final today = DateTime.now();
-    final selectedField = cycleData.selectedField;
 
     // design of page 
     return Scaffold(
@@ -827,14 +827,32 @@ class DailyTipsPage extends StatelessWidget {
                 child: SizedBox(height: 300,
                 // Next Period Card
                 child: 
-                  _infoTile(
-                    //need to change what it shows - link to grapj
-                    value: nextPeriodDate != null
-                        ? 'this is where graph goes'
-                        : 'Not calculated',
-                    // no icon
-                    //icon: Icons.calendar_today,
-                  ),
+                LineChart(
+                  LineChartData(
+                    lineBarsData: 
+                    [LineChartBarData(
+                      spots: [
+                        FlSpot(0,0),
+                        FlSpot(1,1),
+                        FlSpot(2,1),
+                        FlSpot(3,4),
+                        FlSpot(4,5),
+                      ]
+                    )]
+                  )
+                )
+                  // _infoTile(
+                  //   //need to change what it shows - link to grapj
+                  //   value: (phase != null && dayOfPhase != null)
+                  //   ? cycleData.getPhaseInfo(
+                  //       phase: phase,
+                  //       dayOfPhase: dayOfPhase,
+                  //       field: 'Level of estrogen',
+                  //     )
+                  //   : 'No data', 
+                  //   // no icon
+                  //   //icon: Icons.calendar_today,
+                  // ),
                   
                 ),
               ),
