@@ -42,6 +42,26 @@ const Map<String, String> phaseJsonFiles = {
 };
 
 
+class PhaseDayInfo {
+  final String phase;
+  final int dayOfPhase;
+  final Map<String, dynamic> values;
+
+  PhaseDayInfo({
+    required this.phase,
+    required this.dayOfPhase,
+    required this.values,
+  });
+
+  double? getDouble(String field) {
+    final raw = values[field];
+    if (raw == null) return null;
+    return double.tryParse(raw.toString()); // why double and not string
+  }
+}
+
+
+
 class CycleDataProvider extends ChangeNotifier {
   Map<String, List<Map<String, dynamic>>> _data = {};
   bool _loaded = false;
@@ -49,6 +69,23 @@ class CycleDataProvider extends ChangeNotifier {
 
   bool get isLoaded => _loaded;
   String get selectedField => _selectedField;
+
+
+// go through this and understand cause wtf
+  List<PhaseDayInfo> getAllPhaseDays(String phase) {
+  final phaseData = _data[phase];
+  if (phaseData == null || phaseData.isEmpty) return [];
+
+  return List.generate(
+    phaseData.length,
+    (index) => PhaseDayInfo(
+      phase: phase,
+      dayOfPhase: index + 1,
+      values: phaseData[index],
+    ),
+  );
+}
+
 
 
   Future<void> load() async {
@@ -87,6 +124,23 @@ class CycleDataProvider extends ChangeNotifier {
     final infoPerDayInPhase = (dayOfPhase - 1).clamp(0, infoPerPhase.length - 1); // toata ziua
     return infoPerPhase[infoPerDayInPhase][field]?.toString() ?? 'No data'; // fiecare cell din row ul ala
   }
+
+//   PhaseDayInfo? getPhaseDayInfo({
+//   required String phase,
+//   required int dayOfPhase,
+// }) {
+//   final infoPerPhase = _data[phase];
+//   if (infoPerPhase == null || infoPerPhase.isEmpty) return null;
+
+//   final index = (dayOfPhase - 1).clamp(0, infoPerPhase.length - 1);
+
+//   return PhaseDayInfo(
+//     phase: phase,
+//     dayOfPhase: dayOfPhase,
+//     values: infoPerPhase[index],
+//   );
+// }
+
 }
 
 class Calculate extends ChangeNotifier {
@@ -675,13 +729,26 @@ class PlaceholderPage extends StatelessWidget {
 
 class DailyTipsPage extends StatelessWidget {
   const DailyTipsPage({super.key});
+  static List<CycleDataProvider> estrogenData = [
+    CycleDataProvider() 
+  ];
 
+  
   @override
   Widget build(BuildContext context) {
+    // for getting hormone data - add this wherever need graph
+    final phasesInOrder = [
+  'Menstruation',
+  'Follicular',
+  'Ovulation',
+  'Early Luteal',
+  'Late Luteal',
+];
+
     // data loaded into page 
     final calc = context.watch<Calculate>();
-    final nextPeriodDate = calc.nextPeriodDate;
-    final difference = calc.difference;
+    // final nextPeriodDate = calc.nextPeriodDate;
+    // final difference = calc.difference;
     final phase = calc.phase;
     final dayOfPhase = calc.dayofphase;
     final today = DateTime.now();
@@ -692,6 +759,23 @@ class DailyTipsPage extends StatelessWidget {
     if (!cycleData.isLoaded) {
       return const Center(child: CircularProgressIndicator());
     }
+
+    // add this wherever need graph 
+List<FlSpot> estrogenSpots = [];
+double xValue = 0;
+
+for (final phaseName in phasesInOrder) {
+  final days = cycleData.getAllPhaseDays(phaseName);
+
+  for (final day in days) {
+    final estrogen = day.getDouble('Level of estrogen');
+    if (estrogen != null) {
+      estrogenSpots.add(FlSpot(xValue, estrogen));
+      xValue += 1;
+    }
+  }
+}
+
 
     // design of page 
     return Scaffold(
@@ -828,19 +912,23 @@ class DailyTipsPage extends StatelessWidget {
                 // Next Period Card
                 child: 
                 LineChart(
-                  LineChartData(
-                    lineBarsData: 
-                    [LineChartBarData(
-                      spots: [
-                        FlSpot(0,0),
-                        FlSpot(1,1),
-                        FlSpot(2,1),
-                        FlSpot(3,4),
-                        FlSpot(4,5),
-                      ]
-                    )]
-                  )
-                )
+  LineChartData(
+    minX: 0,
+    maxX: estrogenSpots.isNotEmpty
+        ? estrogenSpots.last.x
+        : 0,
+    minY: 0,
+    lineBarsData: [
+      LineChartBarData(
+        spots: estrogenSpots,
+        isCurved: false,
+        dotData: FlDotData(show: false),
+        barWidth: 3,
+      ),
+    ],
+  ),
+)
+
                   // _infoTile(
                   //   //need to change what it shows - link to grapj
                   //   value: (phase != null && dayOfPhase != null)
