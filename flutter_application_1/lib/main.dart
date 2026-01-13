@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart' show rootBundle, TextInputFormatter, FilteringTextInputFormatter;
 import 'dart:convert';
+import 'package:flutter_svg/flutter_svg.dart';
 //import 'package:flutter_svg/flutter_svg.dart';
 
 void main() {
@@ -601,6 +602,11 @@ class PlaceholderPage extends StatelessWidget {
             value: Text(info).data!,
             icon: Icons.analytics,
           ),
+
+          SvgPicture.asset(
+          'clip-woman-doing-exercises.svg',
+              semanticsLabel: 'Exercise Womam',
+     )
         ],
       ),
     )),);
