@@ -65,7 +65,7 @@ class PhaseDayInfo {
 class CycleDataProvider extends ChangeNotifier {
   Map<String, List<Map<String, dynamic>>> _data = {};
   bool _loaded = false;
-  String _selectedField = 'Phase info';
+  String _selectedField = 'Phase Info';
 
   bool get isLoaded => _loaded;
   String get selectedField => _selectedField;
