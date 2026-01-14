@@ -857,7 +857,7 @@ for (final phaseName in phasesInOrder) {
   for (final day in days) {
     final fsh = day.getDouble('Level of FSH');
     if (fsh != null) {
-      fshSpots.add(FlSpot(xProgesterone, fsh));
+      fshSpots.add(FlSpot(xFsh, fsh));
       xFsh += 1;
     }
   }
