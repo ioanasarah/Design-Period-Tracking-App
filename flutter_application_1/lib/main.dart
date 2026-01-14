@@ -148,7 +148,12 @@ class Calculate extends ChangeNotifier {
   int? difference;
   String? phase;
   int? dayofphase;
+  int cycleLength = 28;
 
+  void updateCycleLength(int newLength) {
+    cycleLength = newLength;
+    notifyListeners(); // This tells PlaceholderPage to rebuild
+  }
 
   void calculateNextPeriod(DateTime lastPeriodDate, int periodLength) {
     nextPeriodDate = lastPeriodDate.add(Duration(days: periodLength));
@@ -577,7 +582,7 @@ class PlaceholderPage extends StatelessWidget {
 
     // Calculate where the dot should sit (0.0 to 1.0)
     // If you are on Day 7 of 28, progress is 0.25 (exactly 1/4 of the way)
-    final double totalDaysInCycle = 28; // Adjust based on your logic
+    final double totalDaysInCycle = (calc.cycleLength ?? 28).toDouble(); // Adjust based on your logic
     final double currentDay = (calc.difference ?? 0).toDouble();
     final double progress = (currentDay / totalDaysInCycle).clamp(0.0, 1.0);
 
