@@ -65,7 +65,7 @@ class PhaseDayInfo {
 class CycleDataProvider extends ChangeNotifier {
   Map<String, List<Map<String, dynamic>>> _data = {};
   bool _loaded = false;
-  String _selectedField = 'Level of Estrogen';
+  String _selectedField = 'Phase info';
 
   bool get isLoaded => _loaded;
   String get selectedField => _selectedField;
@@ -595,7 +595,7 @@ class PlaceholderPage extends StatelessWidget {
     ? cycleData.getPhaseInfo(
         phase: phase,
         dayOfPhase: dayOfPhase,
-        field: selectedField,
+        field: "Today's Recap",
       )
     : 'No data';
 
@@ -680,98 +680,98 @@ backgroundColor: Colors.white,
             ),
       
       
-            const SizedBox(height: 16),
+      //       const SizedBox(height: 16),
       
-              SizedBox(
-                height: 120, // controls button size
-                child: GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onHorizontalDragUpdate: (_) {},
-      child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  primary: false,
-                  physics: const BouncingScrollPhysics(),
-                  children: [
-                    _buildButton(
-                      context,
-                      "Phase Info",
-                      const EarlyLutealPage(),
-                    ),
-                    _buildButton(
-                      context,
-                      "Effects of Estrogen",
-                      const MenstruationPage(),
-                    ),
-                    _buildButton(
-                      context,
-                      "Effects of Progesterone",
-                      const FolicularPage(),
-                    ),
-                    _buildButton(
-                      context,
-                      "Effects of FSH",
-                      const OvulationPage(),
-                    ),
-                    _buildButton(
-                      context,
-                      "Effects of LH",
-                      const EarlyLutealPage(),
-                    ),
-                    _buildButton(
-                      context,
-                      "Energy Levels Info",
-                      const EarlyLutealPage(),
-                    ),
-                    _buildButton(
-                      context,
-                      "What to eat",
-                      const EarlyLutealPage(),
-                    ),
-                    _buildButton(
-                      context,
-                      "Foods and Recipes",
-                      const EarlyLutealPage(),
-                    ),
-                    _buildButton(
-                      context,
-                      "Concentration",
-                      const EarlyLutealPage(),
-                    ),
-                    _buildButton(
-                      context,
-                      "Health",
-                      const EarlyLutealPage(),
-                    ),
-                    _buildButton(
-                      context,
-                      "Mood",
-                      const EarlyLutealPage(),
-                    ),
-                    _buildButton(
-                      context,
-                      "Types of Vitamins",
-                      const EarlyLutealPage(),
-                    ),
-                    _buildButton(
-                      context,
-                      "Insights in the Brain",
-                      const EarlyLutealPage(),
-                    ),
-                    _buildButton(
-                      context,
-                      "Insights in the Ovaries",
-                      const EarlyLutealPage(),
-                    ),
-                    _buildButton(
-                      context,
-                      "Insights in the Uterus",
-                      const EarlyLutealPage(),
-                    )
+      //         SizedBox(
+      //           height: 120, // controls button size
+      //           child: GestureDetector(
+      // behavior: HitTestBehavior.opaque,
+      // onHorizontalDragUpdate: (_) {},
+      // child: ListView(
+      //             scrollDirection: Axis.horizontal,
+      //             primary: false,
+      //             physics: const BouncingScrollPhysics(),
+      //             children: [
+      //               _buildButton(
+      //                 context,
+      //                 "Phase Info",
+      //                 const EarlyLutealPage(),
+      //               ),
+      //               _buildButton(
+      //                 context,
+      //                 "Effects of Estrogen",
+      //                 const MenstruationPage(),
+      //               ),
+      //               _buildButton(
+      //                 context,
+      //                 "Effects of Progesterone",
+      //                 const FolicularPage(),
+      //               ),
+      //               _buildButton(
+      //                 context,
+      //                 "Effects of FSH",
+      //                 const OvulationPage(),
+      //               ),
+      //               _buildButton(
+      //                 context,
+      //                 "Effects of LH",
+      //                 const EarlyLutealPage(),
+      //               ),
+      //               _buildButton(
+      //                 context,
+      //                 "Energy Levels Info",
+      //                 const EarlyLutealPage(),
+      //               ),
+      //               _buildButton(
+      //                 context,
+      //                 "What to eat",
+      //                 const EarlyLutealPage(),
+      //               ),
+      //               _buildButton(
+      //                 context,
+      //                 "Foods and Recipes",
+      //                 const EarlyLutealPage(),
+      //               ),
+      //               _buildButton(
+      //                 context,
+      //                 "Concentration",
+      //                 const EarlyLutealPage(),
+      //               ),
+      //               _buildButton(
+      //                 context,
+      //                 "Health",
+      //                 const EarlyLutealPage(),
+      //               ),
+      //               _buildButton(
+      //                 context,
+      //                 "Mood",
+      //                 const EarlyLutealPage(),
+      //               ),
+      //               _buildButton(
+      //                 context,
+      //                 "Types of Vitamins",
+      //                 const EarlyLutealPage(),
+      //               ),
+      //               _buildButton(
+      //                 context,
+      //                 "Insights in the Brain",
+      //                 const EarlyLutealPage(),
+      //               ),
+      //               _buildButton(
+      //                 context,
+      //                 "Insights in the Ovaries",
+      //                 const EarlyLutealPage(),
+      //               ),
+      //               _buildButton(
+      //                 context,
+      //                 "Insights in the Uterus",
+      //                 const EarlyLutealPage(),
+      //               )
       
-                  ],
-                ),
-                )
-              ),
+      //             ],
+      //           ),
+      //           )
+      //         ),
             
             const SizedBox(height: 30),
             
@@ -805,7 +805,7 @@ backgroundColor: Colors.white,
               //isHighlighted: true,
             ),
             _infoTile(
-              title: selectedField,
+              title: "Today's Recap",
               value: Text(info).data!,
               icon: Icons.analytics,
             ),
