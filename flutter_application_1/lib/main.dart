@@ -817,6 +817,14 @@ class DailyTipsPage extends StatelessWidget {
       return const Center(child: CircularProgressIndicator());
     }
 
+  final info = (phase != null && dayOfPhase != null)
+      ? cycleData.getPhaseInfo(
+          phase: phase,
+          dayOfPhase: dayOfPhase,
+          field: selectedField,
+        )
+      : 'No data';
+
     // add this wherever need graph 
 List<FlSpot> estrogenSpots = [];
 double xEstrogen = 0;
@@ -1199,7 +1207,7 @@ final maxX = [
                 alignment: Alignment.centerLeft,
                 child:
                 Text(
-                'Title for info abt energy?', //change this
+                'Information', //change this
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
@@ -1212,26 +1220,20 @@ final maxX = [
 
               Padding(
                 padding: const EdgeInsets.only(top: 20.0),
-                child: SizedBox(height: 200,
-                // Next Period Card
                 child: 
                   _infoTile(
-                    //need to change what it shows and link to json file
-                    // value: nextPeriodDate != null
-                    //     ? 'info from json file - menstruation phase'
-                    //     : 'Not calculated',
-                    // no icon
-                    //icon: Icons.calendar_today,
-                    value: (phase != null && dayOfPhase != null)
-                    ? cycleData.getPhaseInfo(
-                        phase: phase,
-                        dayOfPhase: dayOfPhase,
-                        field: selectedField,
-                      )
-                    : 'No data', // fallback if phase or dayOfPhase is null
+                    title: selectedField,
+                    value: 
+                    // cycleData.getPhaseInfo(
+                    //     phase: phase,
+                    //     dayOfPhase: dayOfPhase,
+                    //     field: selectedField,
+                    Text(info).data!,
+                      
+                    // : 'No data'), // fallback if phase or dayOfPhase is null
                   ),
                   
-                ),
+              
               ),
 
               SizedBox(height: 10),
@@ -1295,7 +1297,7 @@ final maxX = [
 
   //this one doesnt need an icon
   Widget _infoTile({
-    //required String title,
+    required String title,
     required String value,
     //required IconData icon,
     bool isHighlighted = false,
@@ -1309,21 +1311,35 @@ final maxX = [
         border: Border.all(color: const Color.fromRGBO(54, 18, 58, 0.1)),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           //Icon(icon, color: const Color.fromARGB(255, 112, 161, 217)),
-          const SizedBox(width: 15),
-          Column(
+          // const SizedBox(width: 15),
+          Expanded(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              //Text(title, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-              Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Text(
+                title,
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+                softWrap: true,
+                maxLines: null,
+              ),
             ],
           ),
-        ],
-      ),
-    );
-  }
-
+        ),
+      ],
+    ),
+  );
+}
   Widget _buildButton(BuildContext context, String label, Widget page) {
     return Padding(
       padding: const EdgeInsets.only(right: 12),
@@ -1595,9 +1611,7 @@ Future<String> _loadMenstruationInfo(String selectedField) async {
 
              Padding(
   padding: const EdgeInsets.only(top: 20.0),
-  child: SizedBox(
-    height: 300,
-    child: FutureBuilder<String>(
+  child:  FutureBuilder<String>(
       future: _loadMenstruationInfo(selectedField),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -1614,7 +1628,7 @@ Future<String> _loadMenstruationInfo(String selectedField) async {
     
       },
       )
-    ),
+  
   ),
 ]
 )
