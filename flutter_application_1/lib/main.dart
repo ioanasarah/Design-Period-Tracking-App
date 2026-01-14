@@ -586,6 +586,7 @@ class PlaceholderPage extends StatelessWidget {
     final calc = context.watch<Calculate>();
     final nextPeriodDate = calc.nextPeriodDate;
     final difference = calc.difference;
+
     //final double totalDaysInCycle = calc.cycleLength.toDouble();
 
     // Calculate progress for the white dot
@@ -600,13 +601,13 @@ class PlaceholderPage extends StatelessWidget {
 
     // Calculate where the dot should sit (0.0 to 1.0)
     // If you are on Day 7 of 28, progress is 0.25 (exactly 1/4 of the way)
-    final double totalDaysInCycle = (calc.cycleLength ?? 28).toDouble(); // Adjust based on your logic
+    final double totalDaysInCycle = (calc.cycleLength ?? 28).toDouble(); // Adjust based on your research
     final double currentDay = (calc.difference ?? 0).toDouble();
     final double progress = (currentDay / totalDaysInCycle).clamp(0.0, 1.0);
 
   final phase = calc.phase;
   final dayOfPhase = calc.dayofphase;
-  final selectedField = cycleData.selectedField;
+  // final selectedField = cycleData.selectedField;
 
   final info = (phase != null && dayOfPhase != null)
     ? cycleData.getPhaseInfo(
@@ -615,7 +616,6 @@ class PlaceholderPage extends StatelessWidget {
         field: "Today's Recap",
       )
     : 'No data';
-
     return Scaffold(
 backgroundColor: Colors.white,
       body:  SingleChildScrollView(
@@ -676,7 +676,7 @@ backgroundColor: Colors.white,
                     painter: CyclePainter(
                       // Use your real progress logic here: 
                       // (dayOfCycle / totalDays)
-                      currentProgress: 0.2, 
+                      currentProgress: 0.2, phaseLengths: calc.phaseLengths, 
                     ),
                   ),
                 ),
@@ -992,6 +992,8 @@ class DailyTipsPage extends StatelessWidget {
   'Late Luteal',
 ];
 
+
+
     // data loaded into page 
     final calc = context.watch<Calculate>();
     // final nextPeriodDate = calc.nextPeriodDate;
@@ -1002,6 +1004,15 @@ class DailyTipsPage extends StatelessWidget {
 
     final cycleData = context.watch<CycleDataProvider>();
     final selectedField = cycleData.selectedField;
+
+final hormoneGraph = [
+  'Effects of Estrogen',
+  'Effects of Progesterone',
+  'Effects of LH',
+  'Effects of FSH',
+].contains(selectedField);
+
+final energyGraph = ["Energy Levels Info"].contains(selectedField);
 
     if (!cycleData.isLoaded) {
       return const Center(child: CircularProgressIndicator());
@@ -1016,11 +1027,21 @@ class DailyTipsPage extends StatelessWidget {
       : 'No data';
 
     // add this wherever need graph 
+
+
+
+final Map<String, double> phaseStartX = {};
+final Map<String, double> phaseEndX = {};
+
 List<FlSpot> estrogenSpots = [];
 double xEstrogen = 0;
 
 for (final phaseName in phasesInOrder) {
   final days = cycleData.getAllPhaseDays(phaseName);
+
+  if (days.isEmpty) continue;
+
+  phaseStartX[phaseName] = xEstrogen;
 
   for (final day in days) {
     final estrogen = day.getDouble('Level of Estrogen');
@@ -1029,7 +1050,10 @@ for (final phaseName in phasesInOrder) {
       xEstrogen += 1;
     }
   }
+
+  phaseEndX[phaseName] = xEstrogen - 1;
 }
+
 
 List<FlSpot> progesteroneSpots = [];
 double xProgesterone = 0;
@@ -1084,6 +1108,44 @@ final maxX = [
     .where((list) => list.isNotEmpty)
     .map((list) => list.last.x)
     .fold<double>(0.0, (prev, x) => x > prev ? x : prev);
+
+
+
+
+List<FlSpot> energySpots = [];
+double xEnergy = 0;
+
+for (final phaseName in phasesInOrder) {
+  final days = cycleData.getAllPhaseDays(phaseName);
+
+  for (final day in days) {
+    final energy = day.getDouble('Energy Levels');
+    if (energy != null) {
+      energySpots.add(FlSpot(xEnergy, energy));
+      xEnergy += 1;
+    }
+  }
+}
+
+
+final phaseColors = {
+  'Menstruation': const Color.fromRGBO(255, 182, 193, 0.25),
+  'Follicular': const Color.fromRGBO(173, 216, 230, 0.25),
+  'Ovulation': const Color.fromRGBO(144, 238, 144, 0.25), 
+  'Early Luteal': const Color.fromRGBO(221, 160, 221, 0.25),
+  'Late Luteal': const Color.fromRGBO(255, 228, 181, 0.25),
+};
+
+
+final phaseAnnotations = phaseStartX.containsKey(phase)
+    ? <VerticalRangeAnnotation>[
+      VerticalRangeAnnotation(
+        x1: phaseStartX[phase]!,
+        x2: phaseEndX[phase]!,
+        color: (phaseColors[phase] ?? Colors.grey).withOpacity(0.35)
+      )
+    ] : <VerticalRangeAnnotation>[];
+
 
     // design of page 
     return Scaffold(
@@ -1253,7 +1315,7 @@ final maxX = [
             ),
 
               SizedBox(height: 20),
-
+if (hormoneGraph)...[
               Align(
                 alignment: Alignment.centerLeft,
                 child:
@@ -1296,8 +1358,12 @@ final maxX = [
                         LineChartData(
                           minX: 0,
                           maxX: maxX,
-                      
                           minY: 0,
+
+rangeAnnotations: RangeAnnotations(
+  verticalRangeAnnotations: phaseAnnotations,
+),
+
                             titlesData: FlTitlesData(
                               topTitles: AxisTitles(
                                 sideTitles: SideTitles(showTitles: false),
@@ -1374,22 +1440,109 @@ final maxX = [
                     ),
                   ],
                 )
+                ),
+              ),],
+if (energyGraph)...[
+Align(
+                alignment: Alignment.centerLeft,
+                child:
+                Text(
+                'Graph',
+                style: TextStyle(
+                  color: const Color(0xFF404446),
+                  fontSize: 18,
+                  fontFamily: 'DM Sans',
+                  fontWeight: FontWeight.w700,
+                  height: 1.33,
+                  ),
+                  )
+              ),
 
-                  // _infoTile(
-                  //   //need to change what it shows - link to grapj
-                  //   value: (phase != null && dayOfPhase != null)
-                  //   ? cycleData.getPhaseInfo(
-                  //       phase: phase,
-                  //       dayOfPhase: dayOfPhase,
-                  //       field: 'Level of estrogen',
-                  //     )
-                  //   : 'No data', 
-                  //   // no icon
-                  //   //icon: Icons.calendar_today,
-                  // ),
-                  
+              SizedBox(
+                height: 350,
+                // padding: const EdgeInsets.only(top: 20.0),
+                child: SizedBox(height: 300,
+                child: 
+                Column(
+                  children: [
+                    Row(
+                      children: const [
+        _LegendItem(color:  Color.fromARGB(255, 40, 71, 227), label: 'Energy Level'),
+        SizedBox(width: 16),
+      ],
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height:300,
+                      child: LineChart(
+                      
+                        LineChartData(
+                          minX: 0,
+                          maxX: maxX,
+                          minY: 0,
+
+                          rangeAnnotations: RangeAnnotations(
+  verticalRangeAnnotations: phaseAnnotations,
+),
+
+                            titlesData: FlTitlesData(
+                              topTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              rightTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              bottomTitles: AxisTitles(
+                                axisNameWidget: const Padding(
+                                  padding: EdgeInsets.only(right: 20),
+                                  child: Text(
+                                    'Cycle Day',
+                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  interval: 5,
+                                  getTitlesWidget: (value, meta) {
+                                    return Text(value.toInt().toString());
+                                  },
+                                ),
+                              ),
+                              leftTitles: AxisTitles(
+                                axisNameWidget: const Padding(
+                                  padding: EdgeInsets.only(right: 20),
+                                  child: Text(
+                                    'Energy Level',
+                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  interval: 1,
+                                  reservedSize: 40,
+                                  getTitlesWidget: (value, meta) {
+                                    return Text(value.toInt().toString());
+                                  },
+                                ),
+                              ),
+                            ),
+                          lineBarsData: [
+                            LineChartBarData(
+                              spots: energySpots,
+                              isCurved: false,
+                              color: const Color.fromARGB(255, 40, 71, 227),
+                              dotData: FlDotData(show: false),
+                              barWidth: 3,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                )
                 ),
               ),
+],
 
               SizedBox(height: 10),
 
