@@ -149,6 +149,7 @@ class Calculate extends ChangeNotifier {
   String? phase;
   int? dayofphase;
   int cycleLength = 28;
+  int periodLength = 5;
 
   void updateCycleLength(int newLength) {
     cycleLength = newLength;
@@ -203,6 +204,18 @@ class Calculate extends ChangeNotifier {
     // return phase!;
     notifyListeners();
 }
+
+    List<int> get phaseLengths {
+      int ovulationDay = cycleLength - 14;
+      
+      int menstruation = periodLength;
+      int follicular = ovulationDay - periodLength - 1;
+      int ovulation = 1;
+      int earlyLuteal = 6;
+      int lateLuteal = cycleLength - (menstruation + follicular + ovulation + earlyLuteal);
+
+      return [menstruation, follicular, ovulation, earlyLuteal, lateLuteal];
+    }
 
   }
 
@@ -575,6 +588,10 @@ class PlaceholderPage extends StatelessWidget {
     final difference = calc.difference;
     //final double totalDaysInCycle = calc.cycleLength.toDouble();
 
+    // Calculate progress for the white dot
+    // (Today's day / Total days)
+    //final double progress = (calc.cycleDay / calc.cycleLength).clamp(0.0, 1.0);
+
     final cycleData = context.watch<CycleDataProvider>();
     
     if (!cycleData.isLoaded) {
@@ -883,8 +900,9 @@ backgroundColor: Colors.white,
 
 class CyclePainter extends CustomPainter {
   final double currentProgress;
+  final List<int> phaseLengths;
 
-  CyclePainter({required this.currentProgress});
+  CyclePainter({required this.currentProgress, required this.phaseLengths});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -906,23 +924,31 @@ class CyclePainter extends CustomPainter {
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
 
-    double totalSegments = 5;
-    double gap = 0.2; // Spacing between segments
-    double segmentAngle = (2 * pi / totalSegments) - gap;
+    // 1. Calculate the total cycle length from the segments
+    int totalDays = phaseLengths.fold(0, (sum, next) => sum + next);
+    
+    double gap = 0.2; // Gap in radians
+    double currentStartAngle = -pi / 2 + (gap / 2);
 
-    for (int i = 0; i < totalSegments; i++) {
+    // 2. Draw each arc based on its proportion of the total
+    for (int i = 0; i < phaseLengths.length; i++) {
+      // Calculate how much of the 360 degrees (2*pi) this phase takes
+      // We subtract the total gaps from the full circle first
+      double availableAngle = (2 * pi) - (gap * phaseLengths.length);
+      double sweepAngle = (phaseLengths[i] / totalDays) * availableAngle;
+
       paint.color = colors[i % colors.length];
-      
-      // Start from top (-pi/2)
-      double startAngle = -pi / 2 + (i * (segmentAngle + gap)) + (gap / 2);
 
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: radius),
-        startAngle,
-        segmentAngle,
+        currentStartAngle,
+        sweepAngle,
         false,
         paint,
       );
+
+      // Move the start angle forward for the next segment
+      currentStartAngle += sweepAngle + gap;
     }
 
     // Drawing the indicator dot
