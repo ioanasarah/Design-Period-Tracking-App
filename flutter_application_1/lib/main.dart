@@ -585,11 +585,6 @@ class PlaceholderPage extends StatelessWidget {
     final calc = context.watch<Calculate>();
     final nextPeriodDate = calc.nextPeriodDate;
     final difference = calc.difference;
-    //final double totalDaysInCycle = calc.cycleLength.toDouble();
-
-    // Calculate progress for the white dot
-    // (Today's day / Total days)
-    //final double progress = (calc.cycleDay / calc.cycleLength).clamp(0.0, 1.0);
 
     final cycleData = context.watch<CycleDataProvider>();
     
@@ -635,48 +630,59 @@ class PlaceholderPage extends StatelessWidget {
             ),
           ),
 
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              GestureDetector(
-                onTapDown: (details) {
-                  // Calculate the center of the 300x300 canvas
-                  const center = Offset(150, 150);
-                  final tapPos = details.localPosition;
-                  
-                  // Use atan2 to get the angle in radians
-                  double angle = atan2(tapPos.dy - center.dy, tapPos.dx - center.dx);
-                  
-                  // Adjust angle so 0 is at the top (-pi/2)
-                  angle = (angle + pi / 2) % (2 * pi);
-                  if (angle < 0) angle += 2 * pi;
+                Stack(
+              alignment: Alignment.center,
+              children: [
+                GestureDetector(
+                  onTapDown: (details) {
+                    const center = Offset(150, 150);
+                    final tapPos = details.localPosition;
+                    double angle = atan2(tapPos.dy - center.dy, tapPos.dx - center.dx);
+                    angle = (angle + pi / 2) % (2 * pi);
+                    if (angle < 0) angle += 2 * pi;
 
-                  // Determine segment (5 segments = 2*pi / 5 = ~1.25 radians each)
-                  int segmentIndex = (angle / (2 * pi / 5)).floor();
+                    int segmentIndex = (angle / (2 * pi / 5)).floor();
 
-                  // Navigate based on segment
-                  final List<Widget> pages = [
-                    const MenstruationPage(),
-                    const FolicularPage(),
-                    const OvulationPage(),
-                    const EarlyLutealPage(), 
-                    const LateLutealPage(), 
-                  ];
+                    final List<Widget> pages = [
+                      const MenstruationPage(),
+                      const FolicularPage(),
+                      const OvulationPage(),
+                      const EarlyLutealPage(),
+                      const EarlyLutealPage(), 
+                    ];
 
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => pages[segmentIndex]),
-                  );
-                },
-                child: CustomPaint(
-                  size: const Size(300, 300),
-                  painter: CyclePainter(
-                    // Use your real progress logic here: 
-                    // (dayOfCycle / totalDays)
-                    currentProgress: progress, 
+                    // Ensure the index is within bounds of your list
+                    if (segmentIndex >= 0 && segmentIndex < pages.length) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => pages[segmentIndex]),
+                      );
+                    }
+                  },
+                  // THIS IS THE FIX: Use 'child:' and remove the extra ')'
+                  child: CustomPaint(
+                    size: const Size(300, 300),
+                    painter: CyclePainter(
+                      currentProgress: progress,
+                      phaseLengths: calc.phaseLengths,
+                    ),
                   ),
+                ), // End of GestureDetector
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      "Day ${calc.dayofphase ?? 1}",
+                      style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      calc.phase ?? "Menstruation",
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                  ],
                 ),
-              ),
+              ],
+            ),
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
