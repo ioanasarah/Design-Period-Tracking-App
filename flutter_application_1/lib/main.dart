@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart' show rootBundle, TextInputFormatter, FilteringTextInputFormatter;
 import 'dart:convert';
-import 'package:flutter_svg/flutter_svg.dart';
-//import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 void main() {
   runApp(
@@ -42,13 +41,50 @@ const Map<String, String> phaseJsonFiles = {
 };
 
 
+class PhaseDayInfo {
+  final String phase;
+  final int dayOfPhase;
+  final Map<String, dynamic> values;
+
+  PhaseDayInfo({
+    required this.phase,
+    required this.dayOfPhase,
+    required this.values,
+  });
+
+  double? getDouble(String field) {
+    final raw = values[field];
+    if (raw == null) return null;
+    return double.tryParse(raw.toString()); // why double and not string
+  }
+}
+
+
+
 class CycleDataProvider extends ChangeNotifier {
   Map<String, List<Map<String, dynamic>>> _data = {};
   bool _loaded = false;
-  String _selectedField = 'Level of estrogen';
+  String _selectedField = 'Level of Estrogen';
 
   bool get isLoaded => _loaded;
   String get selectedField => _selectedField;
+
+
+// go through this and understand cause wtf
+  List<PhaseDayInfo> getAllPhaseDays(String phase) {
+  final phaseData = _data[phase];
+  if (phaseData == null || phaseData.isEmpty) return [];
+
+  return List.generate(
+    phaseData.length,
+    (index) => PhaseDayInfo(
+      phase: phase,
+      dayOfPhase: index + 1,
+      values: phaseData[index],
+    ),
+  );
+}
+
 
 
   Future<void> load() async {
@@ -87,6 +123,23 @@ class CycleDataProvider extends ChangeNotifier {
     final infoPerDayInPhase = (dayOfPhase - 1).clamp(0, infoPerPhase.length - 1); // toata ziua
     return infoPerPhase[infoPerDayInPhase][field]?.toString() ?? 'No data'; // fiecare cell din row ul ala
   }
+
+//   PhaseDayInfo? getPhaseDayInfo({
+//   required String phase,
+//   required int dayOfPhase,
+// }) {
+//   final infoPerPhase = _data[phase];
+//   if (infoPerPhase == null || infoPerPhase.isEmpty) return null;
+
+//   final index = (dayOfPhase - 1).clamp(0, infoPerPhase.length - 1);
+
+//   return PhaseDayInfo(
+//     phase: phase,
+//     dayOfPhase: dayOfPhase,
+//     values: infoPerPhase[index],
+//   );
+// }
+
 }
 
 class Calculate extends ChangeNotifier {
@@ -133,7 +186,7 @@ class Calculate extends ChangeNotifier {
       dayofphase = cycleDay - periodLength;
     } else if (cycleDay == ovulationDay) {
       phase = 'Ovulation';
-      dayofphase = ovulationDay;
+      dayofphase = ovulationDay; // shouldnt this be 1
     } else if (cycleDay <= ovulationDay + 6) {
       phase = 'Early Luteal';
       dayofphase = cycleDay - ovulationDay;
@@ -472,9 +525,9 @@ class _LogCalendarState extends State<LogCalendar> {
                     if (selectedDate == null) return;
 
                     final int periodLength =
-                        int.tryParse(periodLengthController.text) ?? 0;
+                        int.tryParse(periodLengthController.text) ?? 5; // edit based on research
                     final int cycleLength =
-                        int.tryParse(cycleLengthController.text) ?? 0;
+                        int.tryParse(cycleLengthController.text) ?? 28;
 
                     final calc = context.read<Calculate>();
 
@@ -565,24 +618,80 @@ class PlaceholderPage extends StatelessWidget {
                 children: [
                   _buildButton(
                     context,
-                    "Energy Levels Text",
+                    "Phase Info",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of Estrogen",
                     const MenstruationPage(),
                   ),
                   _buildButton(
                     context,
-                    "Level of progesterone",
+                    "Effects of Progesterone",
                     const FolicularPage(),
                   ),
                   _buildButton(
                     context,
-                    "Level of FSH",
+                    "Effects of FSH",
                     const OvulationPage(),
                   ),
                   _buildButton(
                     context,
-                    "Level of LH",
+                    "Effects of LH",
                     const EarlyLutealPage(),
                   ),
+                  _buildButton(
+                    context,
+                    "Energy Levels Info",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "What to eat",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Foods and Recipes",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Concentration",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Health",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Mood",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Types of Vitamins",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Insights in the Brain",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Insights in the Ovaries",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Insights in the Uterus",
+                    const EarlyLutealPage(),
+                  )
+
                 ],
               ),
               )
@@ -698,24 +807,107 @@ class PlaceholderPage extends StatelessWidget {
 
 class DailyTipsPage extends StatelessWidget {
   const DailyTipsPage({super.key});
+  static List<CycleDataProvider> estrogenData = [
+    CycleDataProvider() 
+  ];
 
+  
   @override
   Widget build(BuildContext context) {
+    
+    // for getting hormone data - add this wherever need graph
+    final phasesInOrder = [
+  'Menstruation',
+  'Follicular',
+  'Ovulation',
+  'Early Luteal',
+  'Late Luteal',
+];
+
     // data loaded into page 
     final calc = context.watch<Calculate>();
-    final nextPeriodDate = calc.nextPeriodDate;
-    final difference = calc.difference;
+    // final nextPeriodDate = calc.nextPeriodDate;
+    // final difference = calc.difference;
+    final phase = calc.phase;
+    final dayOfPhase = calc.dayofphase;
+    final today = DateTime.now();
 
     final cycleData = context.watch<CycleDataProvider>();
+    final selectedField = cycleData.selectedField;
 
     if (!cycleData.isLoaded) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    final phase = calc.phase;
-    final dayOfPhase = calc.dayofphase;
-    final today = DateTime.now();
-    final selectedField = cycleData.selectedField;
+    // add this wherever need graph 
+List<FlSpot> estrogenSpots = [];
+double xEstrogen = 0;
+
+for (final phaseName in phasesInOrder) {
+  final days = cycleData.getAllPhaseDays(phaseName);
+
+  for (final day in days) {
+    final estrogen = day.getDouble('Level of Estrogen');
+    if (estrogen != null) {
+      estrogenSpots.add(FlSpot(xEstrogen, estrogen));
+      xEstrogen += 1;
+    }
+  }
+}
+
+List<FlSpot> progesteroneSpots = [];
+double xProgesterone = 0;
+
+for (final phaseName in phasesInOrder) {
+  final days = cycleData.getAllPhaseDays(phaseName);
+
+  for (final day in days) {
+    final progesterone = day.getDouble('Level of Progesterone');
+    if (progesterone != null) {
+      progesteroneSpots.add(FlSpot(xProgesterone, progesterone));
+      xProgesterone += 1;
+    }
+  }
+}
+
+List<FlSpot> fshSpots = [];
+double xFsh = 0;
+
+for (final phaseName in phasesInOrder) {
+  final days = cycleData.getAllPhaseDays(phaseName);
+
+  for (final day in days) {
+    final fsh = day.getDouble('Level of FSH');
+    if (fsh != null) {
+      fshSpots.add(FlSpot(xFsh, fsh));
+      xFsh += 1;
+    }
+  }
+}
+
+List<FlSpot> lhSpots = [];
+double xLh = 0;
+
+for (final phaseName in phasesInOrder) {
+  final days = cycleData.getAllPhaseDays(phaseName);
+
+  for (final day in days) {
+    final lh = day.getDouble('Level of LH');
+    if (lh != null) {
+      lhSpots.add(FlSpot(xLh, lh));
+      xLh += 1;
+    }
+  }
+}
+final maxX = [
+  estrogenSpots,
+  progesteroneSpots,
+  fshSpots,
+  lhSpots,
+]
+    .where((list) => list.isNotEmpty)
+    .map((list) => list.last.x)
+    .fold<double>(0.0, (prev, x) => x > prev ? x : prev);
 
     // design of page 
     return Scaffold(
@@ -731,7 +923,7 @@ class DailyTipsPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 329,
+                width: 3299,
                 height: 89, // size of pink container
                 padding: const EdgeInsets.all(14.0),
                 decoration: BoxDecoration( // design of pink container
@@ -807,24 +999,79 @@ class DailyTipsPage extends StatelessWidget {
                 children: [
                   _buildButton(
                     context,
-                    "Energy Levels Text",
+                    "Phase Info",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of Estrogen",
                     const MenstruationPage(),
                   ),
                   _buildButton(
                     context,
-                    "Level of progesterone",
+                    "Effects of Progesterone",
                     const FolicularPage(),
                   ),
                   _buildButton(
                     context,
-                    "Level of FSH",
+                    "Effects of FSH",
                     const OvulationPage(),
                   ),
                   _buildButton(
                     context,
-                    "Level of LH",
+                    "Effects of LH",
                     const EarlyLutealPage(),
                   ),
+                  _buildButton(
+                    context,
+                    "Energy Levels Info",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "What to eat",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Foods and Recipes",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Concentration",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Health",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Mood",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Types of Vitamins",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Insights in the Brain",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Insights in the Ovaries",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Insights in the Uterus",
+                    const EarlyLutealPage(),
+                  )
                 ],
               ),
             ),
@@ -835,7 +1082,7 @@ class DailyTipsPage extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 child:
                 Text(
-                'Expected Energy Levels ',
+                'Graph',
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
@@ -846,19 +1093,124 @@ class DailyTipsPage extends StatelessWidget {
                   )
               ),
 
-              Padding(
-                padding: const EdgeInsets.only(top: 20.0),
+              SizedBox(
+                height: 350,
+                // padding: const EdgeInsets.only(top: 20.0),
                 child: SizedBox(height: 300,
-                // Next Period Card
+                
                 child: 
-                  _infoTile(
-                    //need to change what it shows - link to grapj
-                    value: nextPeriodDate != null
-                        ? 'this is where graph goes'
-                        : 'Not calculated',
-                    // no icon
-                    //icon: Icons.calendar_today,
-                  ),
+                Column(
+                  children: [
+                    Row(
+                      children: const [
+        _LegendItem(color:  Color.fromARGB(255, 230, 113, 152), label: 'Estrogen'),
+        SizedBox(width: 16),
+        _LegendItem(color: Colors.deepPurple, label: 'Progesterone'),
+        SizedBox(width: 16),
+               _LegendItem(color: Color.fromARGB(255, 114, 243, 107), label: 'FSH'),
+        SizedBox(width: 16),
+        _LegendItem(color: Color.fromARGB(255, 82, 102, 216), label: 'LH'),
+      ],
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height:300,
+                      child: LineChart(
+                      
+                        LineChartData(
+                          minX: 0,
+                          maxX: maxX,
+                      
+                          minY: 0,
+                            titlesData: FlTitlesData(
+                              topTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              rightTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              bottomTitles: AxisTitles(
+                                axisNameWidget: const Padding(
+                                  padding: EdgeInsets.only(right: 20),
+                                  child: Text(
+                                    'Cycle Day',
+                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  interval: 5,
+                                  getTitlesWidget: (value, meta) {
+                                    return Text(value.toInt().toString());
+                                  },
+                                ),
+                              ),
+                              leftTitles: AxisTitles(
+                                axisNameWidget: const Padding(
+                                  padding: EdgeInsets.only(right: 20),
+                                  child: Text(
+                                    'Hormone Level',
+                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  interval: 1,
+                                  reservedSize: 40,
+                                  getTitlesWidget: (value, meta) {
+                                    return Text(value.toInt().toString());
+                                  },
+                                ),
+                              ),
+                            ),
+                          lineBarsData: [
+                            LineChartBarData(
+                              spots: estrogenSpots,
+                              isCurved: false,
+                              color: const Color.fromARGB(255, 230, 113, 152),
+                              dotData: FlDotData(show: false),
+                              barWidth: 3,
+                            ),
+                            LineChartBarData(
+                      spots: progesteroneSpots,
+                              isCurved: false,
+                              barWidth: 3,
+                              color: Colors.deepPurple,
+                              dotData: FlDotData(show: false),
+                            ), 
+                            LineChartBarData(
+                              spots: lhSpots,
+                              isCurved: false,
+                              color: const Color.fromARGB(255, 111, 174, 237),
+                              dotData: FlDotData(show: false),
+                              barWidth: 3,
+                            ),
+                            LineChartBarData(
+                              spots: fshSpots,
+                              isCurved: false,
+                              color: const Color.fromARGB(255, 114, 243, 107),
+                              dotData: FlDotData(show: false),
+                              barWidth: 3,
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+
+                  // _infoTile(
+                  //   //need to change what it shows - link to grapj
+                  //   value: (phase != null && dayOfPhase != null)
+                  //   ? cycleData.getPhaseInfo(
+                  //       phase: phase,
+                  //       dayOfPhase: dayOfPhase,
+                  //       field: 'Level of estrogen',
+                  //     )
+                  //   : 'No data', 
+                  //   // no icon
+                  //   //icon: Icons.calendar_today,
+                  // ),
                   
                 ),
               ),
@@ -2753,6 +3105,34 @@ class HorizontalScrollButtonPhases extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _LegendItem extends StatelessWidget {
+  final Color color;
+  final String label;
+
+  const _LegendItem({
+    required this.color,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(label),
+      ],
     );
   }
 }
