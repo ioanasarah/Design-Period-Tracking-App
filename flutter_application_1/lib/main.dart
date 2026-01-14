@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter/services.dart' show rootBundle, TextInputFormatter, FilteringTextInputFormatter;
 import 'dart:convert';
 import 'package:fl_chart/fl_chart.dart';
+import 'dart:math';
 
 void main() {
   runApp(
@@ -604,6 +605,66 @@ class PlaceholderPage extends StatelessWidget {
               color: Color.fromRGBO(54, 18, 58, 1),
             ),
           ),
+
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              GestureDetector(
+                onTapDown: (details) {
+                  // Calculate the center of the 300x300 canvas
+                  const center = Offset(150, 150);
+                  final tapPos = details.localPosition;
+                  
+                  // Use atan2 to get the angle in radians
+                  double angle = atan2(tapPos.dy - center.dy, tapPos.dx - center.dx);
+                  
+                  // Adjust angle so 0 is at the top (-pi/2)
+                  angle = (angle + pi / 2) % (2 * pi);
+                  if (angle < 0) angle += 2 * pi;
+
+                  // Determine segment (5 segments = 2*pi / 5 = ~1.25 radians each)
+                  int segmentIndex = (angle / (2 * pi / 5)).floor();
+
+                  // Navigate based on segment
+                  final List<Widget> pages = [
+                    const MenstruationPage(),
+                    const FolicularPage(),
+                    const OvulationPage(),
+                    const EarlyLutealPage(), 
+                    const LateLutealPage(), 
+                  ];
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => pages[segmentIndex]),
+                  );
+                },
+                child: CustomPaint(
+                  size: const Size(300, 300),
+                  painter: CyclePainter(
+                    // Use your real progress logic here: 
+                    // (dayOfCycle / totalDays)
+                    currentProgress: 0.2, 
+                  ),
+                ),
+              ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "Day ${dayOfPhase ?? 1}", 
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)
+                  ),
+                  Text(
+                    phase ?? "Menstruation", 
+                    style: const TextStyle(fontSize: 18)
+                  ),
+                ],
+              ),
+            ],
+          ),
+
+
           const SizedBox(height: 16),
 
             SizedBox(
@@ -802,6 +863,71 @@ class PlaceholderPage extends StatelessWidget {
       ),
     );
   }
+}
+
+class CyclePainter extends CustomPainter {
+  final double currentProgress;
+
+  CyclePainter({required this.currentProgress});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (size.width / 2) - 20; // Padding for the dot
+    const strokeWidth = 22.0;
+
+    // Colors matching your UI image
+    final colors = [
+      const Color(0xFFF6A3A3),
+      const Color(0xFFF9D5FF), 
+      const Color(0xFFC1E5FF), 
+      const Color(0xFFFFE6C4), 
+      const Color(0xFFD0D4FF), 
+    ];
+
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    double totalSegments = 5;
+    double gap = 0.2; // Spacing between segments
+    double segmentAngle = (2 * pi / totalSegments) - gap;
+
+    for (int i = 0; i < totalSegments; i++) {
+      paint.color = colors[i % colors.length];
+      
+      // Start from top (-pi/2)
+      double startAngle = -pi / 2 + (i * (segmentAngle + gap)) + (gap / 2);
+
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        startAngle,
+        segmentAngle,
+        false,
+        paint,
+      );
+    }
+
+    // Drawing the indicator dot
+    final indicatorPaint = Paint()..color = Colors.white;
+    final dotShadow = Paint()
+      ..color = Colors.black26
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
+
+    double currentAngle = -pi / 2 + (2 * pi * currentProgress);
+    Offset dotCenter = Offset(
+      center.dx + radius * cos(currentAngle),
+      center.dy + radius * sin(currentAngle),
+    );
+
+    canvas.drawCircle(dotCenter, 8, dotShadow);
+    canvas.drawCircle(dotCenter, 7, indicatorPaint);
+  }
+
+  @override
+  bool shouldRepaint(CyclePainter oldDelegate) => 
+      oldDelegate.currentProgress != currentProgress;
 }
 
 
