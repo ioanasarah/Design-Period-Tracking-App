@@ -885,10 +885,10 @@ class CyclePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = (size.width / 2) - 20; // Padding for the dot
+    final radius = (size.width / 2) - 20; // padding for the dot
     const strokeWidth = 22.0;
 
-    // Colors matching your UI image
+    // Colors matching the design
     final colors = [
       const Color(0xFFF6A3A3),
       const Color(0xFFF9D5FF), 
