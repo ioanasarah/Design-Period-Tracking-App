@@ -567,12 +567,19 @@ class PlaceholderPage extends StatelessWidget {
     final calc = context.watch<Calculate>();
     final nextPeriodDate = calc.nextPeriodDate;
     final difference = calc.difference;
+    //final double totalDaysInCycle = calc.cycleLength.toDouble();
 
     final cycleData = context.watch<CycleDataProvider>();
     
     if (!cycleData.isLoaded) {
       return const Center(child: CircularProgressIndicator());
     }
+
+    // Calculate where the dot should sit (0.0 to 1.0)
+    // If you are on Day 7 of 28, progress is 0.25 (exactly 1/4 of the way)
+    final double totalDaysInCycle = 28; // Adjust based on your logic
+    final double currentDay = (calc.difference ?? 0).toDouble();
+    final double progress = (currentDay / totalDaysInCycle).clamp(0.0, 1.0);
 
   final phase = calc.phase;
   final dayOfPhase = calc.dayofphase;
@@ -644,7 +651,7 @@ class PlaceholderPage extends StatelessWidget {
                   painter: CyclePainter(
                     // Use your real progress logic here: 
                     // (dayOfCycle / totalDays)
-                    currentProgress: 0.2, 
+                    currentProgress: progress, 
                   ),
                 ),
               ),
