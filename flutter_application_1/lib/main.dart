@@ -148,7 +148,12 @@ class Calculate extends ChangeNotifier {
   int? difference;
   String? phase;
   int? dayofphase;
+  int cycleLength = 28;
 
+  void updateCycleLength(int newLength) {
+    cycleLength = newLength;
+    notifyListeners(); // This tells PlaceholderPage to rebuild
+  }
 
   void calculateNextPeriod(DateTime lastPeriodDate, int cycleLength) {
     nextPeriodDate = lastPeriodDate.add(Duration(days: cycleLength));
@@ -568,12 +573,19 @@ class PlaceholderPage extends StatelessWidget {
     final calc = context.watch<Calculate>();
     final nextPeriodDate = calc.nextPeriodDate;
     final difference = calc.difference;
+    //final double totalDaysInCycle = calc.cycleLength.toDouble();
 
     final cycleData = context.watch<CycleDataProvider>();
     
     if (!cycleData.isLoaded) {
       return const Center(child: CircularProgressIndicator());
     }
+
+    // Calculate where the dot should sit (0.0 to 1.0)
+    // If you are on Day 7 of 28, progress is 0.25 (exactly 1/4 of the way)
+    final double totalDaysInCycle = (calc.cycleLength ?? 28).toDouble(); // Adjust based on your logic
+    final double currentDay = (calc.difference ?? 0).toDouble();
+    final double progress = (currentDay / totalDaysInCycle).clamp(0.0, 1.0);
 
   final phase = calc.phase;
   final dayOfPhase = calc.dayofphase;
@@ -877,10 +889,10 @@ class CyclePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = (size.width / 2) - 20; // Padding for the dot
+    final radius = (size.width / 2) - 20; // padding for the dot
     const strokeWidth = 22.0;
 
-    // Colors matching your UI image
+    // Colors matching the design
     final colors = [
       const Color(0xFFF6A3A3),
       const Color(0xFFF9D5FF), 
