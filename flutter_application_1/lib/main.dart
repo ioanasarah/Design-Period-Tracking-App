@@ -887,8 +887,6 @@ final maxX = [
     .map((list) => list.last.x)
     .fold<double>(0.0, (prev, x) => x > prev ? x : prev);
 
-
-
     // design of page 
     return Scaffold(
       // appBar: AppBar(
@@ -1083,13 +1081,13 @@ final maxX = [
                   children: [
                     Row(
                       children: const [
-        _LegendItem(color: Colors.pink, label: 'Estrogen'),
+        _LegendItem(color:  Color.fromARGB(255, 230, 113, 152), label: 'Estrogen'),
         SizedBox(width: 16),
         _LegendItem(color: Colors.deepPurple, label: 'Progesterone'),
         SizedBox(width: 16),
-               _LegendItem(color: Color.fromARGB(255, 30, 233, 74), label: '?'),
+               _LegendItem(color: Color.fromARGB(255, 114, 243, 107), label: 'FSH'),
         SizedBox(width: 16),
-        _LegendItem(color: Color.fromARGB(255, 82, 102, 216), label: 'ceva'),
+        _LegendItem(color: Color.fromARGB(255, 82, 102, 216), label: 'LH'),
       ],
                     ),
                     const SizedBox(height: 12),
