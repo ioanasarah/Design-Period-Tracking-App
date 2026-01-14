@@ -150,8 +150,8 @@ class Calculate extends ChangeNotifier {
   int? dayofphase;
 
 
-  void calculateNextPeriod(DateTime lastPeriodDate, int periodLength) {
-    nextPeriodDate = lastPeriodDate.add(Duration(days: periodLength));
+  void calculateNextPeriod(DateTime lastPeriodDate, int cycleLength) {
+    nextPeriodDate = lastPeriodDate.add(Duration(days: cycleLength));
     notifyListeners();
   }
   
@@ -187,7 +187,7 @@ class Calculate extends ChangeNotifier {
       dayofphase = cycleDay - periodLength;
     } else if (cycleDay == ovulationDay) {
       phase = 'Ovulation';
-      dayofphase = ovulationDay; // shouldnt this be 1
+      dayofphase = 1; // shouldnt this be 1
     } else if (cycleDay <= ovulationDay + 6) {
       phase = 'Early Luteal';
       dayofphase = cycleDay - ovulationDay;
@@ -390,6 +390,7 @@ class LogPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text("Log your Period Details!"),
       ),
@@ -586,218 +587,221 @@ class PlaceholderPage extends StatelessWidget {
       )
     : 'No data';
 
-    return SingleChildScrollView(
-      padding:const EdgeInsets.all(16),
-      child:
-      SafeArea(child:
-    Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const Text(
-            'Cycle Overview',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Color.fromRGBO(54, 18, 58, 1),
+    return Scaffold(
+backgroundColor: Colors.white,
+      body:  SingleChildScrollView(
+        padding:const EdgeInsets.all(16),
+        child:
+        SafeArea(child:
+      Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Text(
+              'Cycle Overview',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Color.fromRGBO(54, 18, 58, 1),
+              ),
             ),
-          ),
-
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              GestureDetector(
-                onTapDown: (details) {
-                  // Calculate the center of the 300x300 canvas
-                  const center = Offset(150, 150);
-                  final tapPos = details.localPosition;
-                  
-                  // Use atan2 to get the angle in radians
-                  double angle = atan2(tapPos.dy - center.dy, tapPos.dx - center.dx);
-                  
-                  // Adjust angle so 0 is at the top (-pi/2)
-                  angle = (angle + pi / 2) % (2 * pi);
-                  if (angle < 0) angle += 2 * pi;
-
-                  // Determine segment (5 segments = 2*pi / 5 = ~1.25 radians each)
-                  int segmentIndex = (angle / (2 * pi / 5)).floor();
-
-                  // Navigate based on segment
-                  final List<Widget> pages = [
-                    const MenstruationPage(),
-                    const FolicularPage(),
-                    const OvulationPage(),
-                    const EarlyLutealPage(), 
-                    const LateLutealPage(), 
-                  ];
-
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => pages[segmentIndex]),
-                  );
-                },
-                child: CustomPaint(
-                  size: const Size(300, 300),
-                  painter: CyclePainter(
-                    // Use your real progress logic here: 
-                    // (dayOfCycle / totalDays)
-                    currentProgress: 0.2, 
+      
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                GestureDetector(
+                  onTapDown: (details) {
+                    // Calculate the center of the 300x300 canvas
+                    const center = Offset(150, 150);
+                    final tapPos = details.localPosition;
+                    
+                    // Use atan2 to get the angle in radians
+                    double angle = atan2(tapPos.dy - center.dy, tapPos.dx - center.dx);
+                    
+                    // Adjust angle so 0 is at the top (-pi/2)
+                    angle = (angle + pi / 2) % (2 * pi);
+                    if (angle < 0) angle += 2 * pi;
+      
+                    // Determine segment (5 segments = 2*pi / 5 = ~1.25 radians each)
+                    int segmentIndex = (angle / (2 * pi / 5)).floor();
+      
+                    // Navigate based on segment
+                    final List<Widget> pages = [
+                      const MenstruationPage(),
+                      const FolicularPage(),
+                      const OvulationPage(),
+                      const EarlyLutealPage(), 
+                      const LateLutealPage(), 
+                    ];
+      
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => pages[segmentIndex]),
+                    );
+                  },
+                  child: CustomPaint(
+                    size: const Size(300, 300),
+                    painter: CyclePainter(
+                      // Use your real progress logic here: 
+                      // (dayOfCycle / totalDays)
+                      currentProgress: 0.2, 
+                    ),
                   ),
                 ),
-              ),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    "Day ${dayOfPhase ?? 1}", 
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)
-                  ),
-                  Text(
-                    phase ?? "Menstruation", 
-                    style: const TextStyle(fontSize: 18)
-                  ),
-                ],
-              ),
-            ],
-          ),
-
-
-          const SizedBox(height: 16),
-
-            SizedBox(
-              height: 120, // controls button size
-              child: GestureDetector(
-    behavior: HitTestBehavior.opaque,
-    onHorizontalDragUpdate: (_) {},
-    child: ListView(
-                scrollDirection: Axis.horizontal,
-                primary: false,
-                physics: const BouncingScrollPhysics(),
-                children: [
-                  _buildButton(
-                    context,
-                    "Phase Info",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Effects of Estrogen",
-                    const MenstruationPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Effects of Progesterone",
-                    const FolicularPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Effects of FSH",
-                    const OvulationPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Effects of LH",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Energy Levels Info",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "What to eat",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Foods and Recipes",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Concentration",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Health",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Mood",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Types of Vitamins",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Insights in the Brain",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Insights in the Ovaries",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Insights in the Uterus",
-                    const EarlyLutealPage(),
-                  )
-
-                ],
-              ),
-              )
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      "Day ${difference ?? 1}", 
+                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)
+                    ),
+                    Text(
+                      phase ?? "Menstruation", 
+                      style: const TextStyle(fontSize: 18)
+                    ),
+                  ],
+                ),
+              ],
             ),
-          
-          const SizedBox(height: 30),
-          
-          // Next Period Card
-          _infoTile(
-            title: 'Next Expected Period',
-            value: nextPeriodDate != null
-                ? '${nextPeriodDate.day}/${nextPeriodDate.month}/${nextPeriodDate.year}'
-                : 'Not calculated',
-            icon: Icons.calendar_today,
-          ),
-
-          // Day of Cycle Card
-          _infoTile(
-            title: 'Days Since Last Period',
-            value: difference != null ? '$difference Days' : 'Pending',
-            icon: Icons.timer,
-          ),
-
-          // Current Phase Card
-          // _infoTile(
-          //   title: 'Current Phase',
-          //   value: phase ?? 'Data missing',
-          //   icon: Icons.home,
-          //   //isHighlighted: true,
-          // ),
-          _infoTile(
-            title: 'Day Of $phase Phase',
-            value: dayOfPhase != null ? '$dayOfPhase' : 'Data missing',
-            icon: Icons.heart_broken,
-            //isHighlighted: true,
-          ),
-          _infoTile(
-            title: selectedField,
-            value: Text(info).data!,
-            icon: Icons.analytics,
-          ),
-
-        ],
-      ),
-    )),);
+      
+      
+            const SizedBox(height: 16),
+      
+              SizedBox(
+                height: 120, // controls button size
+                child: GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onHorizontalDragUpdate: (_) {},
+      child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  primary: false,
+                  physics: const BouncingScrollPhysics(),
+                  children: [
+                    _buildButton(
+                      context,
+                      "Phase Info",
+                      const EarlyLutealPage(),
+                    ),
+                    _buildButton(
+                      context,
+                      "Effects of Estrogen",
+                      const MenstruationPage(),
+                    ),
+                    _buildButton(
+                      context,
+                      "Effects of Progesterone",
+                      const FolicularPage(),
+                    ),
+                    _buildButton(
+                      context,
+                      "Effects of FSH",
+                      const OvulationPage(),
+                    ),
+                    _buildButton(
+                      context,
+                      "Effects of LH",
+                      const EarlyLutealPage(),
+                    ),
+                    _buildButton(
+                      context,
+                      "Energy Levels Info",
+                      const EarlyLutealPage(),
+                    ),
+                    _buildButton(
+                      context,
+                      "What to eat",
+                      const EarlyLutealPage(),
+                    ),
+                    _buildButton(
+                      context,
+                      "Foods and Recipes",
+                      const EarlyLutealPage(),
+                    ),
+                    _buildButton(
+                      context,
+                      "Concentration",
+                      const EarlyLutealPage(),
+                    ),
+                    _buildButton(
+                      context,
+                      "Health",
+                      const EarlyLutealPage(),
+                    ),
+                    _buildButton(
+                      context,
+                      "Mood",
+                      const EarlyLutealPage(),
+                    ),
+                    _buildButton(
+                      context,
+                      "Types of Vitamins",
+                      const EarlyLutealPage(),
+                    ),
+                    _buildButton(
+                      context,
+                      "Insights in the Brain",
+                      const EarlyLutealPage(),
+                    ),
+                    _buildButton(
+                      context,
+                      "Insights in the Ovaries",
+                      const EarlyLutealPage(),
+                    ),
+                    _buildButton(
+                      context,
+                      "Insights in the Uterus",
+                      const EarlyLutealPage(),
+                    )
+      
+                  ],
+                ),
+                )
+              ),
+            
+            const SizedBox(height: 30),
+            
+            // Next Period Card
+            _infoTile(
+              title: 'Next Expected Period',
+              value: nextPeriodDate != null
+                  ? '${nextPeriodDate.day}/${nextPeriodDate.month}/${nextPeriodDate.year}   (+/- 5.3 days)'
+                  : 'Not calculated',
+              icon: Icons.calendar_today,
+            ),
+      
+            // Day of Cycle Card
+            // _infoTile(
+            //   title: 'Days Since Last Period',
+            //   value: difference != null ? '$difference Days' : 'Pending',
+            //   icon: Icons.timer,
+            // ),
+      
+            // Current Phase Card
+            // _infoTile(
+            //   title: 'Current Phase',
+            //   value: phase ?? 'Data missing',
+            //   icon: Icons.home,
+            //   //isHighlighted: true,
+            // ),
+            _infoTile(
+              title: 'Day Of $phase Phase',
+              value: dayOfPhase != null ? '$dayOfPhase' : 'Data missing',
+              icon: Icons.heart_broken,
+              //isHighlighted: true,
+            ),
+            _infoTile(
+              title: selectedField,
+              value: Text(info).data!,
+              icon: Icons.analytics,
+            ),
+      
+          ],
+        ),
+      )),),
+    );
   }
 
   // Helper widget to keep the code clean
@@ -1571,9 +1575,9 @@ Future<String> _loadMenstruationInfo(String selectedField) async {
   @override
   Widget build(BuildContext context) {
 
-    final calc = context.watch<Calculate>();
-    final nextPeriodDate = calc.nextPeriodDate;
-    final difference = calc.difference;
+    // final calc = context.watch<Calculate>();
+    // final nextPeriodDate = calc.nextPeriodDate;
+    // final difference = calc.difference;
 
     final cycleData = context.watch<CycleDataProvider>();
     
@@ -1581,19 +1585,20 @@ Future<String> _loadMenstruationInfo(String selectedField) async {
       return const Center(child: CircularProgressIndicator());
     }
 
-    final phase = calc.phase;
-    final dayOfPhase = calc.dayofphase;
+    // final phase = calc.phase;
+    // final dayOfPhase = calc.dayofphase;
     final selectedField = cycleData.selectedField;
 
-    final info = (phase != null && dayOfPhase != null)
-      ? cycleData.getPhaseInfo(
-          phase: phase,
-          dayOfPhase: dayOfPhase,
-          field: selectedField,
-        )
-      : 'No data';
+    // final info = (phase != null && dayOfPhase != null)
+    //   ? cycleData.getPhaseInfo(
+    //       phase: phase,
+    //       dayOfPhase: dayOfPhase,
+    //       field: selectedField,
+    //     )
+    //   : 'No data';
 
     return Scaffold(
+      backgroundColor: Colors.white, // change to phase color
       body: SafeArea(
       child:
       SingleChildScrollView(
@@ -1738,7 +1743,9 @@ Future<String> _loadMenstruationInfo(String selectedField) async {
   padding: const EdgeInsets.only(top: 20.0),
   child: Padding(
   padding: const EdgeInsets.only(top: 20.0),
-  child: _infoTile(value: 'graph'))
+  child: _infoTile(
+    title: selectedField,
+    value: 'graph'))
   ),
  SizedBox(height:10),
 
@@ -1767,10 +1774,13 @@ Future<String> _loadMenstruationInfo(String selectedField) async {
         }
 
         if (snapshot.hasError) {
-          return _infoTile(value: 'Error loading data');
+          return _infoTile(
+            title: selectedField,
+            value: 'Error loading data');
         }
 
         return _infoTile(
+          title: selectedField,
           value: snapshot.data ?? 'No data',
         );
     
@@ -1785,8 +1795,8 @@ Future<String> _loadMenstruationInfo(String selectedField) async {
 }
 
 //this one doesnt need an icon
-  Widget _infoTile({
-    //required String title,
+    Widget _infoTile({
+    required String title,
     required String value,
     //required IconData icon,
     bool isHighlighted = false,
@@ -1800,24 +1810,35 @@ Future<String> _loadMenstruationInfo(String selectedField) async {
         border: Border.all(color: const Color.fromRGBO(54, 18, 58, 0.1)),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           //Icon(icon, color: const Color.fromARGB(255, 112, 161, 217)),
-          const SizedBox(width: 15),
+          // const SizedBox(width: 15),
           Expanded(
-            child: 
-            Column(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              //Text(title, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-              Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Text(
+                title,
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+                softWrap: true,
+                maxLines: null,
+              ),
             ],
           ),
-          ),
-        ],
-      ),
-    );
-  }
-
+        ),
+      ],
+    ),
+  );
+}
   Widget _buildButton(BuildContext context, String label, Widget page) {
     return Padding(
       padding: const EdgeInsets.only(right: 12),
@@ -2023,7 +2044,9 @@ final calc = context.watch<Calculate>();
   padding: const EdgeInsets.only(top: 20.0),
   child: Padding(
   padding: const EdgeInsets.only(top: 20.0),
-  child: _infoTile(value: 'graph'))
+  child: _infoTile(
+    title: selectedField,
+    value: 'graph'))
   ),
  SizedBox(height:10),
 
@@ -2044,9 +2067,7 @@ final calc = context.watch<Calculate>();
 
              Padding(
   padding: const EdgeInsets.only(top: 20.0),
-  child: SizedBox(
-    height: 200,
-    child: FutureBuilder<String>(
+  child: FutureBuilder<String>(
       future: _loadMenstruationInfo(selectedField),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -2054,16 +2075,17 @@ final calc = context.watch<Calculate>();
         }
 
         if (snapshot.hasError) {
-          return _infoTile(value: 'Error loading data');
+          return _infoTile(title: selectedField, value: 'Error loading data');
         }
 
         return _infoTile(
+          title: selectedField,
           value: snapshot.data ?? 'No data',
         );
     
       },
       )
-    ),
+    
   ),
 ]
 )
@@ -2073,7 +2095,7 @@ final calc = context.watch<Calculate>();
 
 //this one doesnt need an icon
   Widget _infoTile({
-    //required String title,
+    required String title,
     required String value,
     //required IconData icon,
     bool isHighlighted = false,
@@ -2087,23 +2109,36 @@ final calc = context.watch<Calculate>();
         border: Border.all(color: const Color.fromRGBO(54, 18, 58, 0.1)),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           //Icon(icon, color: const Color.fromARGB(255, 112, 161, 217)),
-          const SizedBox(width: 15),
+          // const SizedBox(width: 15),
           Expanded(
-            child: 
-            Column(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              //Text(title, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-              Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Text(
+                title,
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+                softWrap: true,
+                maxLines: null,
+              ),
             ],
           ),
-          ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
+
 
   Widget _buildButton(BuildContext context, String label, Widget page) {
     return Padding(
@@ -2327,9 +2362,7 @@ final calc = context.watch<Calculate>();
 
              Padding(
   padding: const EdgeInsets.only(top: 20.0),
-  child: SizedBox(
-    height: 200,
-    child: FutureBuilder<String>(
+  child: FutureBuilder<String>(
       future: _loadOvulationInfo(selectedField),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -2346,7 +2379,7 @@ final calc = context.watch<Calculate>();
     
       },
       )
-    ),
+  
   ),
 ]
 )
@@ -2387,6 +2420,7 @@ final calc = context.watch<Calculate>();
       ),
     );
   }
+
 
   Widget _buildButton(BuildContext context, String label, Widget page) {
     return Padding(
@@ -2612,7 +2646,9 @@ final calc = context.watch<Calculate>();
   padding: const EdgeInsets.only(top: 20.0),
   child: Padding(
   padding: const EdgeInsets.only(top: 20.0),
-  child: _infoTile(value: 'graph'))
+  child: _infoTile(
+    title: selectedField,
+    value: 'graph'))
   ),
  SizedBox(height:10),
 
@@ -2633,9 +2669,7 @@ final calc = context.watch<Calculate>();
 
              Padding(
   padding: const EdgeInsets.only(top: 20.0),
-  child: SizedBox(
-    height: 200,
-    child: FutureBuilder<String>(
+  child: FutureBuilder<String>(
       future: _loadEarlyLutealInfo(selectedField),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -2643,16 +2677,19 @@ final calc = context.watch<Calculate>();
         }
 
         if (snapshot.hasError) {
-          return _infoTile(value: 'Error loading data');
+          return _infoTile(
+            title: selectedField,
+            value: 'Error loading data');
         }
 
         return _infoTile(
+          title: selectedField,
           value: snapshot.data ?? 'No data',
         );
     
       },
       )
-    ),
+    
   ),
 ]
 )
@@ -2661,8 +2698,8 @@ final calc = context.watch<Calculate>();
 }
 
 //this one doesnt need an icon
-  Widget _infoTile({
-    //required String title,
+      Widget _infoTile({
+    required String title,
     required String value,
     //required IconData icon,
     bool isHighlighted = false,
@@ -2676,23 +2713,36 @@ final calc = context.watch<Calculate>();
         border: Border.all(color: const Color.fromRGBO(54, 18, 58, 0.1)),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           //Icon(icon, color: const Color.fromARGB(255, 112, 161, 217)),
-          const SizedBox(width: 15),
+          // const SizedBox(width: 15),
           Expanded(
-            child: 
-            Column(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              //Text(title, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-              Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Text(
+                title,
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+                softWrap: true,
+                maxLines: null,
+              ),
             ],
           ),
-          ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
+
 
   Widget _buildButton(BuildContext context, String label, Widget page) {
     return Padding(
@@ -2901,7 +2951,9 @@ final calc = context.watch<Calculate>();
   padding: const EdgeInsets.only(top: 20.0),
   child: Padding(
   padding: const EdgeInsets.only(top: 20.0),
-  child: _infoTile(value: 'graph'))
+  child: _infoTile(
+    title: selectedField,
+    value: 'graph'))
   ),
  SizedBox(height:10),
 
@@ -2922,9 +2974,7 @@ final calc = context.watch<Calculate>();
 
              Padding(
   padding: const EdgeInsets.only(top: 20.0),
-  child: SizedBox(
-    height: 200,
-    child: FutureBuilder<String>(
+  child: FutureBuilder<String>(
       future: _loadLateLutealInfo(selectedField),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -2932,16 +2982,19 @@ final calc = context.watch<Calculate>();
         }
 
         if (snapshot.hasError) {
-          return _infoTile(value: 'Error loading data');
+          return _infoTile(
+            title: selectedField,
+            value: 'Error loading data');
         }
 
         return _infoTile(
+          title: selectedField,
           value: snapshot.data ?? 'No data',
         );
     
       },
       )
-    ),
+  
   ),
 ]
 )
@@ -2951,7 +3004,7 @@ final calc = context.watch<Calculate>();
 
 //this one doesnt need an icon
   Widget _infoTile({
-    //required String title,
+    required String title,
     required String value,
     //required IconData icon,
     bool isHighlighted = false,
@@ -2965,23 +3018,35 @@ final calc = context.watch<Calculate>();
         border: Border.all(color: const Color.fromRGBO(54, 18, 58, 0.1)),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           //Icon(icon, color: const Color.fromARGB(255, 112, 161, 217)),
-          const SizedBox(width: 15),
+          // const SizedBox(width: 15),
           Expanded(
-            child: 
-            Column(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              //Text(title, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-              Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Text(
+                title,
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+                softWrap: true,
+                maxLines: null,
+              ),
             ],
           ),
-          ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
 
   Widget _buildButton(BuildContext context, String label, Widget page) {
     return Padding(
