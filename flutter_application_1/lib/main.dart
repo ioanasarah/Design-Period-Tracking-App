@@ -149,7 +149,11 @@ class Calculate extends ChangeNotifier {
   String? phase;
   int? dayofphase;
   int cycleLength = 28;
-  int periodLength = 5;
+  int periodLength = 7;
+
+
+  //so the function for the lengths of the phases that changes the length of the cirle is based on the original valyes, 28 and 7
+  //have to figure out a way to update them with the input values from the user
 
   void updateCycleLength(int newLength) {
     cycleLength = newLength;
