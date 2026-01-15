@@ -689,7 +689,7 @@ class PlaceholderPage extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    "Day ${dayOfPhase ?? 1}", 
+                    "Day ${difference ?? 1}", 
                     style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)
                   ),
                   Text(
@@ -991,7 +991,7 @@ class DailyTipsPage extends StatelessWidget {
     // data loaded into page 
     final calc = context.watch<Calculate>();
     // final nextPeriodDate = calc.nextPeriodDate;
-    // final difference = calc.difference;
+    final difference = calc.difference;
     final phase = calc.phase;
     final dayOfPhase = calc.dayofphase;
     final today = DateTime.now();
@@ -1169,7 +1169,7 @@ final phaseAnnotations = phaseStartX.containsKey(phase)
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Day $dayOfPhase',
+                            'Day $difference',
                             style: TextStyle(fontSize: 25, 
                             fontWeight: FontWeight.w700,),
                           ),
