@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:fl_chart/fl_chart.dart';
 import 'dart:math';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:intl/intl.dart';
 
 void main() {
   runApp(
@@ -149,6 +150,7 @@ class Calculate extends ChangeNotifier {
   int? difference;
   String? phase;
   int? dayofphase;
+
   int cycleLength = 28;
   int periodLength = 5;
 
@@ -218,10 +220,13 @@ class Calculate extends ChangeNotifier {
     List<int> get getUpdatedPhaseLengths {
     int ovulationDay = cycleLength - 14;
     int menstruation = periodLength;
+
     int follicular = (ovulationDay - periodLength - 1).clamp(1, 31);
     int ovulation = 1;
     int earlyLuteal = 6;
-    int lateLuteal = (cycleLength - (menstruation + follicular + ovulation + earlyLuteal)).clamp(1, 31);
+    int lateLuteal = (cycleLength - (menstruation + follicular + ovulation + earlyLuteal)).clamp(1, 35);
+    
+    //clamp means that, if the value is lower than 1 it returns 1 and if it's higher than the second value it returns that value
 
     return [menstruation, follicular, ovulation, earlyLuteal, lateLuteal];
   }
@@ -560,12 +565,15 @@ class _LogCalendarState extends State<LogCalendar> {
 
                     final calc = context.read<Calculate>();
 
-                    calc.calculateNextPeriod(selectedDate!, cycleLength);
+                    calc.updateCycleLength(cycleLength);
+                    calc.updateperiodLength(periodLength);
+
+                    calc.calculateNextPeriod(selectedDate!, calc.cycleLength);
                     calc.calculateDayOfCycle(selectedDate!);
                     calc.determinePhase(
                       cycleDay: calc.difference!,
-                      cycleLength: cycleLength,
-                      periodLength: periodLength,
+                      cycleLength: calc.cycleLength,
+                      periodLength: calc.periodLength,
                     );
                     // await calc.calculatePhase();
 
@@ -591,10 +599,13 @@ class PlaceholderPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final calc = context.watch<Calculate>();
+    final phaseLengths = calc.getUpdatedPhaseLengths;
+
     final nextPeriodDate = calc.nextPeriodDate;
     final difference = calc.difference;
     final newcyclelength = calc.updateCycleLength;
     final newperiodlength = calc.updateperiodLength;
+    String formattedDate = DateFormat('EEEE, MMM d').format(DateTime.now());
 
 
     //final double totalDaysInCycle = calc.cycleLength.toDouble();
@@ -638,17 +649,18 @@ class PlaceholderPage extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(20.0),
       child: Column(
+        //backgroundColor: Colors.white, - this doesnt work for some reason
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const Text(
-            'Cycle Overview',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Color.fromRGBO(54, 18, 58, 1),
-            ),
-          ),
+          // const Text(
+          //   'Cycle Overview',
+          //   style: TextStyle(
+          //     fontSize: 24,
+          //     fontWeight: FontWeight.bold,
+          //     color: Color.fromRGBO(54, 18, 58, 1),
+          //   ),
+          // ),
 
           Stack(
             alignment: Alignment.center,
@@ -689,7 +701,8 @@ class PlaceholderPage extends StatelessWidget {
                     // Use your real progress logic here: 
                     // (dayOfCycle / totalDays)
                     currentProgress: progress, 
-                    phaseLengths: context.read<Calculate>().getUpdatedPhaseLengths,
+                    // phaseLengths: context.read<Calculate>().getUpdatedPhaseLengths,
+                    phaseLengths: phaseLengths,
                   ),
                 ),
               ),
@@ -698,48 +711,110 @@ class PlaceholderPage extends StatelessWidget {
                 children: [
                   Text(
                     "Day ${difference ?? 1}", 
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)
+                    style: TextStyle(
+                      color: const Color(0xFF303437),
+                      fontSize: 24,
+                      fontFamily: 'DMSans',
+                      fontWeight: FontWeight.w700,
+                      height: 1.46,
+                      ),
                   ),
                   Text(
                     phase ?? "Menstruation", 
-                    style: const TextStyle(fontSize: 18)
+                    style: TextStyle(
+                      color: const Color(0xFF303437),
+                      fontSize: 24,
+                      fontFamily: 'DMSans',
+                      fontWeight: FontWeight.w700,
+                      height: 1.46,
+                      ),
+                  ),
+                  const SizedBox(height: 8), // Adds a little breathing room
+                  Text(
+                    formattedDate, 
+                    style: TextStyle(
+                      color: const Color(0xFF72777A),
+                      fontSize: 12,
+                      fontFamily: 'DMSans',
+                      fontWeight: FontWeight.w500,
+                      height: 1.33,
+                      ),
+                  ),
+                  SizedBox(height: 10),
+                  Positioned(
+                    top: -80,   // Adjust these to get the exact "sit" you want
+                    right: -5,
+                    child: Image.asset(
+                      'assets/girl-pointing.png',
+                      width: 35, // Adjust size based on your asset
+                    ),
+                  ),
+                    ],
                   ),
                 ],
               ),
-            ],
-          ),
           
-          const SizedBox(height: 30),
-          
-          // Next Period Card
+          const SizedBox(height: 40),
+
           _infoTile(
             title: 'Next Expected Period',
             value: nextPeriodDate != null
                 ? '${nextPeriodDate.day}/${nextPeriodDate.month}/${nextPeriodDate.year}'
                 : 'Not calculated',
             icon: Icons.calendar_today,
+            ),
+
+          Stack(
+          clipBehavior: Clip.none,
+          children: [
+            _infoTile(
+            title: 'Current Phase',
+            value: phase ?? 'Data missing',
+            icon: Icons.home,
+            //isHighlighted: true,
           ),
+            
+            Positioned(
+              top: -80,   // Adjust these to get the exact "sit" you want
+              right: -5,
+              child: Image.asset(
+                'assets/girl-sitting.png',
+                width: 100, // Adjust size based on your asset
+              ),
+            ),
+          ],
+        ),
+          
+          // Next Period Card
+          // _infoTile(
+          //   title: 'Next Expected Period',
+          //   value: nextPeriodDate != null
+          //       ? '${nextPeriodDate.day}/${nextPeriodDate.month}/${nextPeriodDate.year}'
+          //       : 'Not calculated',
+          //   icon: Icons.calendar_today,
+          // ),
 
           // Day of Cycle Card
-          _infoTile(
-            title: 'Days Since Last Period',
-            value: difference != null ? '$difference Days' : 'Pending',
-            icon: Icons.timer,
-          ),
+          // _infoTile(
+          //   title: 'Days Since Last Period',
+          //   value: difference != null ? '$difference Days' : 'Pending',
+          //   icon: Icons.timer,
+          // ),
 
-          // Current Phase Card
+          //Current Phase Card
           // _infoTile(
           //   title: 'Current Phase',
           //   value: phase ?? 'Data missing',
           //   icon: Icons.home,
           //   //isHighlighted: true,
           // ),
-          _infoTile(
-            title: 'Day Of $phase Phase',
-            value: dayOfPhase != null ? '$dayOfPhase' : 'Data missing',
-            icon: Icons.heart_broken,
-            //isHighlighted: true,
-          ),
+
+          // _infoTile(
+          //   title: 'Day Of $phase Phase',
+          //   value: dayOfPhase != null ? '$dayOfPhase' : 'Data missing',
+          //   icon: Icons.heart_broken,
+          //   //isHighlighted: true,
+          // ),
           _infoTile(
             title: "Today's Recap",
             value: Text(info).data!,
@@ -777,16 +852,24 @@ class PlaceholderPage extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style:
-                      const TextStyle(fontSize: 12, color: Colors.grey),
+                  style: TextStyle(
+                    color: const Color(0xFF303437),
+                    fontSize: 14,
+                    fontFamily: 'DM Sans',
+                    fontWeight: FontWeight.w700,
+                    height: 1.43,
+                    ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   value,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(
+                    color: const Color(0xFF303437),
+                    fontSize: 14,
+                    fontFamily: 'DM Sans',
+                    fontWeight: FontWeight.w400,
+                    height: 1.79,
+                    ),
                   softWrap: true,
                 ),
               ],
@@ -844,17 +927,20 @@ class CyclePainter extends CustomPainter {
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
 
-    // FIX: Use the total sum of the passed phaseLengths
+    // 1. Calculate the actual total days from the current phase list
     int totalDays = phaseLengths.fold(0, (sum, next) => sum + next);
-    //final totalDays = context.read<Calculate>().updatedCycleLength;
-        // final length = context.read<Calculate>().updateCycleLength;
+    if (totalDays <= 0) totalDays = 28; // Fallback to avoid division by zero
     
-    double gap = 0.2; 
+    // 2. Define the gaps between segments
+    double gap = 0.2; // Radians
+    double totalGapSpace = gap * phaseLengths.length;
+    double availableAngle = (2 * pi) - totalGapSpace; 
+
+   // 3. Start at the top (-90 degrees)
     double currentStartAngle = -pi / 2 + (gap / 2);
 
     for (int i = 0; i < phaseLengths.length; i++) {
-      // Subtract total gaps from 360 degrees to get available drawing space
-      double availableAngle = (2 * pi) - (gap * phaseLengths.length);
+      // Calculate angle relative to available space
       double sweepAngle = (phaseLengths[i] / totalDays) * availableAngle;
 
       paint.color = colors[i % colors.length];
@@ -867,14 +953,25 @@ class CyclePainter extends CustomPainter {
         paint,
       );
 
+      // Advance the start angle for the next segment
       currentStartAngle += sweepAngle + gap;
     }
 
-    // Indicator Dot logic (remains the same)
+    // 4. Draw the White Progress Indicator Dot
     final indicatorPaint = Paint()..color = Colors.white;
-    double currentAngle = -pi / 2 + (2 * pi * currentProgress);
-    Offset dotCenter = Offset(center.dx + radius * cos(currentAngle), center.dy + radius * sin(currentAngle));
-    canvas.drawCircle(dotCenter, 7, indicatorPaint);
+    //double currentAngle = -pi / 2 + (2 * pi * currentProgress);
+
+    // Map progress (0.0 to 1.0) to a full circle rotation
+    double indicatorAngle = -pi / 2 + (2 * pi * currentProgress);
+
+    Offset dotCenter = Offset(
+      center.dx + radius * cos(indicatorAngle),
+      center.dy + radius * sin(indicatorAngle),
+    );
+    
+    // Add a small shadow to the dot to make it pop
+    canvas.drawShadow(Path()..addOval(Rect.fromCircle(center: dotCenter, radius: 8)), Colors.black, 3, false);
+    canvas.drawCircle(dotCenter, 8, indicatorPaint);
   }
 
   @override
@@ -895,12 +992,12 @@ class DailyTipsPage extends StatelessWidget {
     final length = context.read<Calculate>().updateCycleLength;
     // for getting hormone data - add this wherever need graph
     final phasesInOrder = [
-  'Menstruation',
-  'Follicular',
-  'Ovulation',
-  'Early Luteal',
-  'Late Luteal',
-];
+      'Menstruation',
+      'Follicular',
+      'Ovulation',
+      'Early Luteal',
+      'Late Luteal',
+    ];
 
 
 
@@ -915,12 +1012,12 @@ class DailyTipsPage extends StatelessWidget {
     final cycleData = context.watch<CycleDataProvider>();
     final selectedField = cycleData.selectedField;
 
-final hormoneGraph = [
-  'Effects of Estrogen',
-  'Effects of Progesterone',
-  'Effects of LH',
-  'Effects of FSH',
-].contains(selectedField);
+    final hormoneGraph = [
+      'Effects of Estrogen',
+      'Effects of Progesterone',
+      'Effects of LH',
+      'Effects of FSH',
+    ].contains(selectedField);
 
 final energyGraph = ["Energy Levels Info"].contains(selectedField);
 
