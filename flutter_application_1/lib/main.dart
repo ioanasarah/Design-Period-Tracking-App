@@ -265,7 +265,7 @@ class CustomNavigationBar extends StatelessWidget {
           _NavButton(
             label: 'Log Page',
             // icon: 'assets/images/vector.svg',
-            icon: Icons.heart_broken, // icon for tabs 
+            icon: Icons.heart_broken, // icon for tabs design
             isSelected: selectedIndex == 0,
             onTap: () => onItemSelected(0),
           ),
@@ -341,7 +341,7 @@ class _NavButton extends StatelessWidget {
               Text(
                 label,
                 style: const TextStyle(
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans-Regular',
                   fontSize: 14,
                   color: Color.fromRGBO(242, 243, 244, 1),
                 ),
@@ -910,7 +910,7 @@ class CyclePainter extends CustomPainter {
     final radius = (size.width / 2) - 20; // padding for the dot
     const strokeWidth = 22.0;
 
-    // Colors matching the design
+    // Colors matching the design - for circle already matched
     final colors = [
       const Color(0xFFF6A3A3),
       const Color(0xFFF9D5FF), 
@@ -1408,28 +1408,28 @@ rangeAnnotations: RangeAnnotations(
                           lineBarsData: [
                             LineChartBarData(
                               spots: estrogenSpots,
-                              isCurved: false,
+                              isCurved: true,
                               color: const Color.fromARGB(255, 230, 113, 152),
                               dotData: FlDotData(show: false),
                               barWidth: 3,
                             ),
                             LineChartBarData(
                       spots: progesteroneSpots,
-                              isCurved: false,
+                              isCurved: true,
                               barWidth: 3,
                               color: Colors.deepPurple,
                               dotData: FlDotData(show: false),
                             ), 
                             LineChartBarData(
                               spots: lhSpots,
-                              isCurved: false,
+                              isCurved: true,
                               color: const Color.fromARGB(255, 111, 174, 237),
                               dotData: FlDotData(show: false),
                               barWidth: 3,
                             ),
                             LineChartBarData(
                               spots: fshSpots,
-                              isCurved: false,
+                              isCurved: true,
                               color: const Color.fromARGB(255, 114, 243, 107),
                               dotData: FlDotData(show: false),
                               barWidth: 3,
@@ -1939,6 +1939,7 @@ Future<String> _loadMenstruationInfo(String selectedField) async {
     value: 'graph'))
   ),
  SizedBox(height:10),
+
 
           Align(
             alignment: Alignment.centerLeft,
@@ -3396,7 +3397,7 @@ class HorizontalScrollButton extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 alignment: Alignment.center,
-                child: const Icon(
+                child: const Icon( // change icon of the horizontal scroll buttons - design team
                   Icons.favorite, // replace later if needed
                   size: 16,
                   color: Color(0xFF5454CA),
