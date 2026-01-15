@@ -205,17 +205,16 @@ class Calculate extends ChangeNotifier {
     notifyListeners();
 }
 
-    List<int> get phaseLengths {
-      int ovulationDay = cycleLength - 14;
-      
-      int menstruation = periodLength;
-      int follicular = ovulationDay - periodLength - 1;
-      int ovulation = 1;
-      int earlyLuteal = 6;
-      int lateLuteal = cycleLength - (menstruation + follicular + ovulation + earlyLuteal);
+    List<int> get getUpdatedPhaseLengths {
+    int ovulationDay = cycleLength - 14;
+    int menstruation = periodLength;
+    int follicular = (ovulationDay - periodLength - 1).clamp(1, 31);
+    int ovulation = 1;
+    int earlyLuteal = 6;
+    int lateLuteal = (cycleLength - (menstruation + follicular + ovulation + earlyLuteal)).clamp(1, 31);
 
-      return [menstruation, follicular, ovulation, earlyLuteal, lateLuteal];
-    }
+    return [menstruation, follicular, ovulation, earlyLuteal, lateLuteal];
+  }
 
   }
 
@@ -577,265 +576,251 @@ class _LogCalendarState extends State<LogCalendar> {
 
 class PlaceholderPage extends StatelessWidget {
   const PlaceholderPage({super.key});
- // var info = menstrual[0]['Level of estrogen'];
 
   @override
   Widget build(BuildContext context) {
-    // Accessing the data from your Calculate provider
     final calc = context.watch<Calculate>();
     final nextPeriodDate = calc.nextPeriodDate;
     final difference = calc.difference;
 
     final cycleData = context.watch<CycleDataProvider>();
-    
+
     if (!cycleData.isLoaded) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    // Calculate where the dot should sit (0.0 to 1.0)
-    // If you are on Day 7 of 28, progress is 0.25 (exactly 1/4 of the way)
-    final double totalDaysInCycle = (calc.cycleLength ?? 28).toDouble(); // Adjust based on your logic
+    final List<int> currentPhaseLengths = calc.getUpdatedPhaseLengths;
+    final double totalDaysInCycle = (calc.cycleLength ?? 28).toDouble();
     final double currentDay = (calc.difference ?? 0).toDouble();
-    final double progress = (currentDay / totalDaysInCycle).clamp(0.0, 1.0);
+    final double progress =
+        (currentDay / totalDaysInCycle).clamp(0.0, 1.0);
 
-  final phase = calc.phase;
-  final dayOfPhase = calc.dayofphase;
-  final selectedField = cycleData.selectedField;
+    print('Current Phase Lengths: $currentPhaseLengths');
 
-  final info = (phase != null && dayOfPhase != null)
-    ? cycleData.getPhaseInfo(
-        phase: phase,
-        dayOfPhase: dayOfPhase,
-        field: selectedField,
-      )
-    : 'No data';
+    final phase = calc.phase;
+    final dayOfPhase = calc.dayofphase;
+    final selectedField = cycleData.selectedField;
+
+    final info = (phase != null && dayOfPhase != null)
+        ? cycleData.getPhaseInfo(
+            phase: phase,
+            dayOfPhase: dayOfPhase,
+            field: selectedField,
+          )
+        : 'No data';
 
     return SingleChildScrollView(
-      padding:const EdgeInsets.all(16),
-      child:
-      SafeArea(child:
-    Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const Text(
-            'Cycle Overview',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Color.fromRGBO(54, 18, 58, 1),
-            ),
-          ),
+      padding: const EdgeInsets.all(16),
+      child: SafeArea(
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Text(
+                'Cycle Overview',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Color.fromRGBO(54, 18, 58, 1),
+                ),
+              ),
 
-                Stack(
+              const SizedBox(height: 16),
+
+              Stack(
               alignment: Alignment.center,
               children: [
                 GestureDetector(
                   onTapDown: (details) {
                     const center = Offset(150, 150);
                     final tapPos = details.localPosition;
-                    double angle = atan2(tapPos.dy - center.dy, tapPos.dx - center.dx);
-                    angle = (angle + pi / 2) % (2 * pi);
-                    if (angle < 0) angle += 2 * pi;
+                    double tapAngle = atan2(tapPos.dy - center.dy, tapPos.dx - center.dx);
+                    tapAngle = (tapAngle + pi / 2) % (2 * pi);
+                    if (tapAngle < 0) tapAngle += 2 * pi;
 
-                    int segmentIndex = (angle / (2 * pi / 5)).floor();
+                    // Navigate based on custom segment sizes
+                    double cumulativeAngle = 0;
+                    int tappedIndex = -1;
+                    int totalDays = currentPhaseLengths.fold(0, (a, b) => a + b);
+
+                    for (int i = 0; i < currentPhaseLengths.length; i++) {
+                      double sweep = (currentPhaseLengths[i] / totalDays) * (2 * pi);
+                      cumulativeAngle += sweep;
+                      if (tapAngle <= cumulativeAngle) {
+                        tappedIndex = i;
+                        break;
+                      }
+                    }
 
                     final List<Widget> pages = [
                       const MenstruationPage(),
                       const FolicularPage(),
                       const OvulationPage(),
                       const EarlyLutealPage(),
-                      const EarlyLutealPage(), 
+                      const LateLutealPage(),
                     ];
 
-                    // Ensure the index is within bounds of your list
-                    if (segmentIndex >= 0 && segmentIndex < pages.length) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => pages[segmentIndex]),
-                      );
+                    if (tappedIndex != -1) {
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => pages[tappedIndex]));
                     }
                   },
-                  // THIS IS THE FIX: Use 'child:' and remove the extra ')'
                   child: CustomPaint(
                     size: const Size(300, 300),
                     painter: CyclePainter(
                       currentProgress: progress,
-                      phaseLengths: calc.phaseLengths,
+                      phaseLengths: currentPhaseLengths,
                     ),
                   ),
-                ), // End of GestureDetector
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      "Day ${calc.dayofphase ?? 1}",
-                      style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      calc.phase ?? "Menstruation",
-                      style: const TextStyle(fontSize: 18),
-                    ),
-                  ],
                 ),
-              ],
-            ),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    "Day ${dayOfPhase ?? 1}", 
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)
-                  ),
-                  Text(
-                    phase ?? "Menstruation", 
-                    style: const TextStyle(fontSize: 18)
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        "Day ${calc.dayofphase ?? 1}",
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        calc.phase ?? "Menstruation",
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                    ],
                   ),
                 ],
+              ),
+
+
+              const SizedBox(height: 16),
+
+              SizedBox(
+                height: 120,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onHorizontalDragUpdate: (_) {},
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    primary: false,
+                    physics: const BouncingScrollPhysics(),
+                    children: [
+                      _buildButton(
+                        context,
+                        "Phase Info",
+                        const EarlyLutealPage(),
+                      ),
+                      _buildButton(
+                        context,
+                        "Effects of Estrogen",
+                        const MenstruationPage(),
+                      ),
+                      _buildButton(
+                        context,
+                        "Effects of Progesterone",
+                        const FolicularPage(),
+                      ),
+                      _buildButton(
+                        context,
+                        "Effects of FSH",
+                        const OvulationPage(),
+                      ),
+                      _buildButton(
+                        context,
+                        "Effects of LH",
+                        const EarlyLutealPage(),
+                      ),
+                      _buildButton(
+                        context,
+                        "Energy Levels Info",
+                        const EarlyLutealPage(),
+                      ),
+                      _buildButton(
+                        context,
+                        "What to eat",
+                        const EarlyLutealPage(),
+                      ),
+                      _buildButton(
+                        context,
+                        "Foods and Recipes",
+                        const EarlyLutealPage(),
+                      ),
+                      _buildButton(
+                        context,
+                        "Concentration",
+                        const EarlyLutealPage(),
+                      ),
+                      _buildButton(
+                        context,
+                        "Health",
+                        const EarlyLutealPage(),
+                      ),
+                      _buildButton(
+                        context,
+                        "Mood",
+                        const EarlyLutealPage(),
+                      ),
+                      _buildButton(
+                        context,
+                        "Types of Vitamins",
+                        const EarlyLutealPage(),
+                      ),
+                      _buildButton(
+                        context,
+                        "Insights in the Brain",
+                        const EarlyLutealPage(),
+                      ),
+                      _buildButton(
+                        context,
+                        "Insights in the Ovaries",
+                        const EarlyLutealPage(),
+                      ),
+                      _buildButton(
+                        context,
+                        "Insights in the Uterus",
+                        const EarlyLutealPage(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 30),
+
+              _infoTile(
+                title: 'Next Expected Period',
+                value: nextPeriodDate != null
+                    ? '${nextPeriodDate.day}/${nextPeriodDate.month}/${nextPeriodDate.year}'
+                    : 'Not calculated',
+                icon: Icons.calendar_today,
+              ),
+
+              _infoTile(
+                title: 'Days Since Last Period',
+                value: difference != null ? '$difference Days' : 'Pending',
+                icon: Icons.timer,
+              ),
+
+              _infoTile(
+                title: 'Day Of $phase Phase',
+                value: dayOfPhase != null ? '$dayOfPhase' : 'Data missing',
+                icon: Icons.heart_broken,
+              ),
+
+              _infoTile(
+                title: selectedField,
+                value: info,
+                icon: Icons.analytics,
               ),
             ],
           ),
-
-
-          const SizedBox(height: 16),
-
-            SizedBox(
-              height: 120, // controls button size
-              child: GestureDetector(
-    behavior: HitTestBehavior.opaque,
-    onHorizontalDragUpdate: (_) {},
-    child: ListView(
-                scrollDirection: Axis.horizontal,
-                primary: false,
-                physics: const BouncingScrollPhysics(),
-                children: [
-                  _buildButton(
-                    context,
-                    "Phase Info",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Effects of Estrogen",
-                    const MenstruationPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Effects of Progesterone",
-                    const FolicularPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Effects of FSH",
-                    const OvulationPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Effects of LH",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Energy Levels Info",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "What to eat",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Foods and Recipes",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Concentration",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Health",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Mood",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Types of Vitamins",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Insights in the Brain",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Insights in the Ovaries",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Insights in the Uterus",
-                    const EarlyLutealPage(),
-                  )
-
-                ],
-              ),
-              )
-            ),
-          
-          const SizedBox(height: 30),
-          
-          // Next Period Card
-          _infoTile(
-            title: 'Next Expected Period',
-            value: nextPeriodDate != null
-                ? '${nextPeriodDate.day}/${nextPeriodDate.month}/${nextPeriodDate.year}'
-                : 'Not calculated',
-            icon: Icons.calendar_today,
-          ),
-
-          // Day of Cycle Card
-          _infoTile(
-            title: 'Days Since Last Period',
-            value: difference != null ? '$difference Days' : 'Pending',
-            icon: Icons.timer,
-          ),
-
-          // Current Phase Card
-          // _infoTile(
-          //   title: 'Current Phase',
-          //   value: phase ?? 'Data missing',
-          //   icon: Icons.home,
-          //   //isHighlighted: true,
-          // ),
-          _infoTile(
-            title: 'Day Of $phase Phase',
-            value: dayOfPhase != null ? '$dayOfPhase' : 'Data missing',
-            icon: Icons.heart_broken,
-            //isHighlighted: true,
-          ),
-          _infoTile(
-            title: selectedField,
-            value: Text(info).data!,
-            icon: Icons.analytics,
-          ),
-
-        ],
+        ),
       ),
-    )),);
+    );
   }
 
-  // Helper widget to keep the code clean
   Widget _infoTile({
     required String title,
     required String value,
@@ -846,7 +831,9 @@ class PlaceholderPage extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isHighlighted ? const Color.fromRGBO(54, 18, 58, 0.05) : Colors.white,
+        color: isHighlighted
+            ? const Color.fromRGBO(54, 18, 58, 0.05)
+            : Colors.white,
         borderRadius: BorderRadius.circular(15),
         border: Border.all(color: const Color.fromRGBO(54, 18, 58, 0.1)),
       ),
@@ -854,51 +841,52 @@ class PlaceholderPage extends StatelessWidget {
         children: [
           Icon(icon, color: const Color.fromRGBO(54, 18, 58, 1)),
           const SizedBox(width: 15),
-          
           Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style:
+                      const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
-                softWrap: true,
-              ),
-            ],
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  softWrap: true,
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
-    ),
-  );
-}
+        ],
+      ),
+    );
+  }
 
-
-  Widget _buildButton(BuildContext context, String label, Widget page) {
+  Widget _buildButton(
+      BuildContext context, String label, Widget page) {
     return Padding(
       padding: const EdgeInsets.only(right: 12),
       child: SizedBox(
-        width: 160, // controls how many buttons fit on screen
-        child: HorizontalScrollButton( // make a new class with a different deign for these
+        width: 160,
+        child: HorizontalScrollButton(
           label: label,
           onPressed: () {
             context.read<CycleDataProvider>().selectField(label);
-            // Navigator.push();
-            //MaterialPageRoute(builder: (_) => page),
-            
+            // Navigator.push(context,
+            //   MaterialPageRoute(builder: (_) => page),
+            // );
           },
         ),
       ),
     );
   }
 }
+
 
 class CyclePainter extends CustomPainter {
   final double currentProgress;
@@ -909,10 +897,9 @@ class CyclePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = (size.width / 2) - 20; // padding for the dot
+    final radius = (size.width / 2) - 20; 
     const strokeWidth = 22.0;
 
-    // Colors matching the design
     final colors = [
       const Color(0xFFF6A3A3),
       const Color(0xFFF9D5FF), 
@@ -926,16 +913,14 @@ class CyclePainter extends CustomPainter {
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
 
-    // 1. Calculate the total cycle length from the segments
+    // FIX: Use the total sum of the passed phaseLengths
     int totalDays = phaseLengths.fold(0, (sum, next) => sum + next);
     
-    double gap = 0.2; // Gap in radians
+    double gap = 0.2; 
     double currentStartAngle = -pi / 2 + (gap / 2);
 
-    // 2. Draw each arc based on its proportion of the total
     for (int i = 0; i < phaseLengths.length; i++) {
-      // Calculate how much of the 360 degrees (2*pi) this phase takes
-      // We subtract the total gaps from the full circle first
+      // Subtract total gaps from 360 degrees to get available drawing space
       double availableAngle = (2 * pi) - (gap * phaseLengths.length);
       double sweepAngle = (phaseLengths[i] / totalDays) * availableAngle;
 
@@ -949,29 +934,19 @@ class CyclePainter extends CustomPainter {
         paint,
       );
 
-      // Move the start angle forward for the next segment
       currentStartAngle += sweepAngle + gap;
     }
 
-    // Drawing the indicator dot
+    // Indicator Dot logic (remains the same)
     final indicatorPaint = Paint()..color = Colors.white;
-    final dotShadow = Paint()
-      ..color = Colors.black26
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
-
     double currentAngle = -pi / 2 + (2 * pi * currentProgress);
-    Offset dotCenter = Offset(
-      center.dx + radius * cos(currentAngle),
-      center.dy + radius * sin(currentAngle),
-    );
-
-    canvas.drawCircle(dotCenter, 8, dotShadow);
+    Offset dotCenter = Offset(center.dx + radius * cos(currentAngle), center.dy + radius * sin(currentAngle));
     canvas.drawCircle(dotCenter, 7, indicatorPaint);
   }
 
   @override
   bool shouldRepaint(CyclePainter oldDelegate) => 
-      oldDelegate.currentProgress != currentProgress;
+      oldDelegate.currentProgress != currentProgress || oldDelegate.phaseLengths != phaseLengths;
 }
 
 
