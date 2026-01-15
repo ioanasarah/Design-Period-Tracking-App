@@ -1135,7 +1135,7 @@ final phaseColors = {
   'Early Luteal': const Color.fromRGBO(221, 160, 221, 0.25),
   'Late Luteal': const Color.fromRGBO(255, 228, 181, 0.25),
 };
-
+// design change these to match color scheme
 
 final phaseAnnotations = phaseStartX.containsKey(phase)
     ? <VerticalRangeAnnotation>[
@@ -1340,8 +1340,7 @@ if (hormoneGraph)...[
                 Column(
                   children: [
                     Row(
-                      children: const [
-                        //colors for the legend - design
+                      children: const [ // design
         _LegendItem(color:  Color.fromARGB(255, 230, 113, 152), label: 'Estrogen'),
         SizedBox(width: 16),
         _LegendItem(color: Colors.deepPurple, label: 'Progesterone'),
@@ -1407,7 +1406,6 @@ rangeAnnotations: RangeAnnotations(
                               ),
                             ),
                           lineBarsData: [
-                            //colors for the graphs //design
                             LineChartBarData(
                               spots: estrogenSpots,
                               isCurved: true,
