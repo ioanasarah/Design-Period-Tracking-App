@@ -1127,9 +1127,8 @@ for (final phaseName in phasesInOrder) {
   }
 }
 
-
 final phaseColors = {
-  'Menstruation': const Color.fromRGBO(255, 182, 193, 0.25),
+  'Menstruation': const Color.fromARGB(64, 217, 28, 56),
   'Follicular': const Color.fromRGBO(173, 216, 230, 0.25),
   'Ovulation': const Color.fromRGBO(144, 238, 144, 0.25), 
   'Early Luteal': const Color.fromRGBO(221, 160, 221, 0.25),
