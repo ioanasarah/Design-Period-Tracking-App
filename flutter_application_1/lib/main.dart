@@ -4,6 +4,7 @@ import 'package:flutter/services.dart' show rootBundle, TextInputFormatter, Filt
 import 'dart:convert';
 import 'package:fl_chart/fl_chart.dart';
 import 'dart:math';
+import 'package:table_calendar/table_calendar.dart';
 
 void main() {
   runApp(
@@ -151,6 +152,10 @@ class Calculate extends ChangeNotifier {
   int cycleLength = 28;
   int periodLength = 5;
 
+
+  //so the function for the lengths of the phases that changes the length of the cirle is based on the original valyes, 28 and 7
+  //have to figure out a way to update them with the input values from the user
+
   void updateCycleLength(int newLength) {
     cycleLength = newLength;
     notifyListeners(); // This tells PlaceholderPage to rebuild
@@ -205,17 +210,16 @@ class Calculate extends ChangeNotifier {
     notifyListeners();
 }
 
-    List<int> get phaseLengths {
-      int ovulationDay = cycleLength - 14;
-      
-      int menstruation = periodLength;
-      int follicular = ovulationDay - periodLength - 1;
-      int ovulation = 1;
-      int earlyLuteal = 6;
-      int lateLuteal = cycleLength - (menstruation + follicular + ovulation + earlyLuteal);
+    List<int> get getUpdatedPhaseLengths {
+    int ovulationDay = cycleLength - 14;
+    int menstruation = periodLength;
+    int follicular = (ovulationDay - periodLength - 1).clamp(1, 31);
+    int ovulation = 1;
+    int earlyLuteal = 6;
+    int lateLuteal = (cycleLength - (menstruation + follicular + ovulation + earlyLuteal)).clamp(1, 31);
 
-      return [menstruation, follicular, ovulation, earlyLuteal, lateLuteal];
-    }
+    return [menstruation, follicular, ovulation, earlyLuteal, lateLuteal];
+  }
 
   }
 
@@ -265,7 +269,7 @@ class CustomNavigationBar extends StatelessWidget {
           _NavButton(
             label: 'Log Page',
             // icon: 'assets/images/vector.svg',
-            icon: Icons.heart_broken, // icon for tabs 
+            icon: Icons.heart_broken, // icon for tabs design
             isSelected: selectedIndex == 0,
             onTap: () => onItemSelected(0),
           ),
@@ -341,7 +345,7 @@ class _NavButton extends StatelessWidget {
               Text(
                 label,
                 style: const TextStyle(
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontSize: 14,
                   color: Color.fromRGBO(242, 243, 244, 1),
                 ),
@@ -498,7 +502,7 @@ class _LogCalendarState extends State<LogCalendar> {
               style: TextStyle(
                 color: Colors.black,
                 fontSize: 16,
-                fontFamily: 'DM Sans',
+                fontFamily: 'DMSans',
                 fontWeight: FontWeight.w700,
                 height: 2,
                 ),),
@@ -513,7 +517,7 @@ class _LogCalendarState extends State<LogCalendar> {
                     style: TextStyle(
                       color: const Color(0xFF8C8888),
                       fontSize: 16,
-                      fontFamily: 'DM Sans',
+                      fontFamily: 'DMSans',
                       fontWeight: FontWeight.w700,
                       height: 2,
                       ),
@@ -578,11 +582,9 @@ class _LogCalendarState extends State<LogCalendar> {
 
 class PlaceholderPage extends StatelessWidget {
   const PlaceholderPage({super.key});
- // var info = menstrual[0]['Level of estrogen'];
 
   @override
   Widget build(BuildContext context) {
-    // Accessing the data from your Calculate provider
     final calc = context.watch<Calculate>();
     final nextPeriodDate = calc.nextPeriodDate;
     final difference = calc.difference;
@@ -594,7 +596,7 @@ class PlaceholderPage extends StatelessWidget {
     //final double progress = (calc.cycleDay / calc.cycleLength).clamp(0.0, 1.0);
 
     final cycleData = context.watch<CycleDataProvider>();
-    
+
     if (!cycleData.isLoaded) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -603,237 +605,238 @@ class PlaceholderPage extends StatelessWidget {
     // If you are on Day 7 of 28, progress is 0.25 (exactly 1/4 of the way)
     final double totalDaysInCycle = (calc.cycleLength ?? 28).toDouble(); // Adjust based on your research
     final double currentDay = (calc.difference ?? 0).toDouble();
-    final double progress = (currentDay / totalDaysInCycle).clamp(0.0, 1.0);
+    final double progress =
+        (currentDay / totalDaysInCycle).clamp(0.0, 1.0);
 
-  final phase = calc.phase;
-  final dayOfPhase = calc.dayofphase;
-  // final selectedField = cycleData.selectedField;
+    //print('Current Phase Lengths: $currentPhaseLengths');
+
+    final phase = calc.phase;
+    final dayOfPhase = calc.dayofphase;
+    final selectedField = cycleData.selectedField;
 
   final info = (phase != null && dayOfPhase != null)
     ? cycleData.getPhaseInfo(
         phase: phase,
         dayOfPhase: dayOfPhase,
-        field: "Today's Recap",
+        field: selectedField,
       )
     : 'No data';
-    return Scaffold(
-backgroundColor: Colors.white,
-      body:  SingleChildScrollView(
-        padding:const EdgeInsets.all(16),
-        child:
-        SafeArea(child:
-      Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const Text(
-              'Cycle Overview',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Color.fromRGBO(54, 18, 58, 1),
-              ),
+
+    return SingleChildScrollView(
+      padding:const EdgeInsets.all(16),
+      child:
+      SafeArea(child:
+    Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const Text(
+            'Cycle Overview',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Color.fromRGBO(54, 18, 58, 1),
             ),
-      
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                GestureDetector(
-                  onTapDown: (details) {
-                    // Calculate the center of the 300x300 canvas
-                    const center = Offset(150, 150);
-                    final tapPos = details.localPosition;
-                    
-                    // Use atan2 to get the angle in radians
-                    double angle = atan2(tapPos.dy - center.dy, tapPos.dx - center.dx);
-                    
-                    // Adjust angle so 0 is at the top (-pi/2)
-                    angle = (angle + pi / 2) % (2 * pi);
-                    if (angle < 0) angle += 2 * pi;
-      
-                    // Determine segment (5 segments = 2*pi / 5 = ~1.25 radians each)
-                    int segmentIndex = (angle / (2 * pi / 5)).floor();
-      
-                    // Navigate based on segment
-                    final List<Widget> pages = [
-                      const MenstruationPage(),
-                      const FolicularPage(),
-                      const OvulationPage(),
-                      const EarlyLutealPage(), 
-                      const LateLutealPage(), 
-                    ];
-      
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => pages[segmentIndex]),
-                    );
-                  },
-                  child: CustomPaint(
-                    size: const Size(300, 300),
-                    painter: CyclePainter(
-                      // Use your real progress logic here: 
-                      // (dayOfCycle / totalDays)
-                      currentProgress: 0.2, phaseLengths: calc.phaseLengths, 
-                    ),
+          ),
+
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              GestureDetector(
+                onTapDown: (details) {
+                  // Calculate the center of the 300x300 canvas
+                  const center = Offset(150, 150);
+                  final tapPos = details.localPosition;
+                  
+                  // Use atan2 to get the angle in radians
+                  double angle = atan2(tapPos.dy - center.dy, tapPos.dx - center.dx);
+                  
+                  // Adjust angle so 0 is at the top (-pi/2)
+                  angle = (angle + pi / 2) % (2 * pi);
+                  if (angle < 0) angle += 2 * pi;
+
+                  // Determine segment (5 segments = 2*pi / 5 = ~1.25 radians each)
+                  int segmentIndex = (angle / (2 * pi / 5)).floor();
+
+                  // Navigate based on segment
+                  final List<Widget> pages = [
+                    const MenstruationPage(),
+                    const FolicularPage(),
+                    const OvulationPage(),
+                    const EarlyLutealPage(), 
+                    const LateLutealPage(), 
+                  ];
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => pages[segmentIndex]),
+                  );
+                },
+                child: CustomPaint(
+                  size: const Size(300, 300),
+                  painter: CyclePainter(
+                    // Use your real progress logic here: 
+                    // (dayOfCycle / totalDays)
+                    currentProgress: progress, 
+                    phaseLengths: context.read<Calculate>().getUpdatedPhaseLengths,
                   ),
                 ),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      "Day ${difference ?? 1}", 
-                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)
-                    ),
-                    Text(
-                      phase ?? "Menstruation", 
-                      style: const TextStyle(fontSize: 18)
-                    ),
-                  ],
-                ),
-              ],
+              ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "Day ${dayOfPhase ?? 1}", 
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)
+                  ),
+                  Text(
+                    phase ?? "Menstruation", 
+                    style: const TextStyle(fontSize: 18)
+                  ),
+                ],
+              ),
+            ],
+          ),
+
+
+          const SizedBox(height: 16),
+
+            SizedBox(
+              height: 120, // controls button size
+              child: GestureDetector(
+    behavior: HitTestBehavior.opaque,
+    onHorizontalDragUpdate: (_) {},
+    child: ListView(
+                scrollDirection: Axis.horizontal,
+                primary: false,
+                physics: const BouncingScrollPhysics(),
+                children: [
+                  _buildButton(
+                    context,
+                    "Phase Info",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of Estrogen",
+                    const MenstruationPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of Progesterone",
+                    const FolicularPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of FSH",
+                    const OvulationPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of LH",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Energy Levels Info",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "What to eat",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Foods and Recipes",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Concentration",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Health",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Mood",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Types of Vitamins",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Insights in the Brain",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Insights in the Ovaries",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Insights in the Uterus",
+                    const EarlyLutealPage(),
+                  )
+
+                ],
+              ),
+              )
             ),
-      
-      
-      //       const SizedBox(height: 16),
-      
-      //         SizedBox(
-      //           height: 120, // controls button size
-      //           child: GestureDetector(
-      // behavior: HitTestBehavior.opaque,
-      // onHorizontalDragUpdate: (_) {},
-      // child: ListView(
-      //             scrollDirection: Axis.horizontal,
-      //             primary: false,
-      //             physics: const BouncingScrollPhysics(),
-      //             children: [
-      //               _buildButton(
-      //                 context,
-      //                 "Phase Info",
-      //                 const EarlyLutealPage(),
-      //               ),
-      //               _buildButton(
-      //                 context,
-      //                 "Effects of Estrogen",
-      //                 const MenstruationPage(),
-      //               ),
-      //               _buildButton(
-      //                 context,
-      //                 "Effects of Progesterone",
-      //                 const FolicularPage(),
-      //               ),
-      //               _buildButton(
-      //                 context,
-      //                 "Effects of FSH",
-      //                 const OvulationPage(),
-      //               ),
-      //               _buildButton(
-      //                 context,
-      //                 "Effects of LH",
-      //                 const EarlyLutealPage(),
-      //               ),
-      //               _buildButton(
-      //                 context,
-      //                 "Energy Levels Info",
-      //                 const EarlyLutealPage(),
-      //               ),
-      //               _buildButton(
-      //                 context,
-      //                 "What to eat",
-      //                 const EarlyLutealPage(),
-      //               ),
-      //               _buildButton(
-      //                 context,
-      //                 "Foods and Recipes",
-      //                 const EarlyLutealPage(),
-      //               ),
-      //               _buildButton(
-      //                 context,
-      //                 "Concentration",
-      //                 const EarlyLutealPage(),
-      //               ),
-      //               _buildButton(
-      //                 context,
-      //                 "Health",
-      //                 const EarlyLutealPage(),
-      //               ),
-      //               _buildButton(
-      //                 context,
-      //                 "Mood",
-      //                 const EarlyLutealPage(),
-      //               ),
-      //               _buildButton(
-      //                 context,
-      //                 "Types of Vitamins",
-      //                 const EarlyLutealPage(),
-      //               ),
-      //               _buildButton(
-      //                 context,
-      //                 "Insights in the Brain",
-      //                 const EarlyLutealPage(),
-      //               ),
-      //               _buildButton(
-      //                 context,
-      //                 "Insights in the Ovaries",
-      //                 const EarlyLutealPage(),
-      //               ),
-      //               _buildButton(
-      //                 context,
-      //                 "Insights in the Uterus",
-      //                 const EarlyLutealPage(),
-      //               )
-      
-      //             ],
-      //           ),
-      //           )
-      //         ),
-            
-            const SizedBox(height: 30),
-            
-            // Next Period Card
-            _infoTile(
-              title: 'Next Expected Period',
-              value: nextPeriodDate != null
-                  ? '${nextPeriodDate.day}/${nextPeriodDate.month}/${nextPeriodDate.year}   (+/- 5.3 days)'
-                  : 'Not calculated',
-              icon: Icons.calendar_today,
-            ),
-      
-            // Day of Cycle Card
-            // _infoTile(
-            //   title: 'Days Since Last Period',
-            //   value: difference != null ? '$difference Days' : 'Pending',
-            //   icon: Icons.timer,
-            // ),
-      
-            // Current Phase Card
-            // _infoTile(
-            //   title: 'Current Phase',
-            //   value: phase ?? 'Data missing',
-            //   icon: Icons.home,
-            //   //isHighlighted: true,
-            // ),
-            _infoTile(
-              title: 'Day Of $phase Phase',
-              value: dayOfPhase != null ? '$dayOfPhase' : 'Data missing',
-              icon: Icons.heart_broken,
-              //isHighlighted: true,
-            ),
-            _infoTile(
-              title: "Today's Recap",
-              value: Text(info).data!,
-              icon: Icons.analytics,
-            ),
-      
-          ],
-        ),
-      )),),
-    );
+          
+          const SizedBox(height: 30),
+          
+          // Next Period Card
+          _infoTile(
+            title: 'Next Expected Period',
+            value: nextPeriodDate != null
+                ? '${nextPeriodDate.day}/${nextPeriodDate.month}/${nextPeriodDate.year}'
+                : 'Not calculated',
+            icon: Icons.calendar_today,
+          ),
+
+          // Day of Cycle Card
+          _infoTile(
+            title: 'Days Since Last Period',
+            value: difference != null ? '$difference Days' : 'Pending',
+            icon: Icons.timer,
+          ),
+
+          // Current Phase Card
+          // _infoTile(
+          //   title: 'Current Phase',
+          //   value: phase ?? 'Data missing',
+          //   icon: Icons.home,
+          //   //isHighlighted: true,
+          // ),
+          _infoTile(
+            title: 'Day Of $phase Phase',
+            value: dayOfPhase != null ? '$dayOfPhase' : 'Data missing',
+            icon: Icons.heart_broken,
+            //isHighlighted: true,
+          ),
+          _infoTile(
+            title: selectedField,
+            value: Text(info).data!,
+            icon: Icons.analytics,
+          ),
+
+        ],
+      ),
+    )),);
   }
 
-  // Helper widget to keep the code clean
   Widget _infoTile({
     required String title,
     required String value,
@@ -844,7 +847,9 @@ backgroundColor: Colors.white,
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isHighlighted ? const Color.fromRGBO(54, 18, 58, 0.05) : Colors.white,
+        color: isHighlighted
+            ? const Color.fromRGBO(54, 18, 58, 0.05)
+            : Colors.white,
         borderRadius: BorderRadius.circular(15),
         border: Border.all(color: const Color.fromRGBO(54, 18, 58, 0.1)),
       ),
@@ -852,51 +857,52 @@ backgroundColor: Colors.white,
         children: [
           Icon(icon, color: const Color.fromRGBO(54, 18, 58, 1)),
           const SizedBox(width: 15),
-          
           Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style:
+                      const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
-                softWrap: true,
-              ),
-            ],
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  softWrap: true,
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
-    ),
-  );
-}
+        ],
+      ),
+    );
+  }
 
-
-  Widget _buildButton(BuildContext context, String label, Widget page) {
+  Widget _buildButton(
+      BuildContext context, String label, Widget page) {
     return Padding(
       padding: const EdgeInsets.only(right: 12),
       child: SizedBox(
-        width: 160, // controls how many buttons fit on screen
-        child: HorizontalScrollButton( // make a new class with a different deign for these
+        width: 160,
+        child: HorizontalScrollButton(
           label: label,
           onPressed: () {
             context.read<CycleDataProvider>().selectField(label);
-            // Navigator.push();
-            //MaterialPageRoute(builder: (_) => page),
-            
+            // Navigator.push(context,
+            //   MaterialPageRoute(builder: (_) => page),
+            // );
           },
         ),
       ),
     );
   }
 }
+
 
 class CyclePainter extends CustomPainter {
   final double currentProgress;
@@ -907,7 +913,7 @@ class CyclePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = (size.width / 2) - 20; // padding for the dot
+    final radius = (size.width / 2) - 20; 
     const strokeWidth = 22.0;
 
     // Colors matching the design
@@ -924,16 +930,14 @@ class CyclePainter extends CustomPainter {
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
 
-    // 1. Calculate the total cycle length from the segments
+    // FIX: Use the total sum of the passed phaseLengths
     int totalDays = phaseLengths.fold(0, (sum, next) => sum + next);
     
-    double gap = 0.2; // Gap in radians
+    double gap = 0.2; 
     double currentStartAngle = -pi / 2 + (gap / 2);
 
-    // 2. Draw each arc based on its proportion of the total
     for (int i = 0; i < phaseLengths.length; i++) {
-      // Calculate how much of the 360 degrees (2*pi) this phase takes
-      // We subtract the total gaps from the full circle first
+      // Subtract total gaps from 360 degrees to get available drawing space
       double availableAngle = (2 * pi) - (gap * phaseLengths.length);
       double sweepAngle = (phaseLengths[i] / totalDays) * availableAngle;
 
@@ -947,29 +951,19 @@ class CyclePainter extends CustomPainter {
         paint,
       );
 
-      // Move the start angle forward for the next segment
       currentStartAngle += sweepAngle + gap;
     }
 
-    // Drawing the indicator dot
+    // Indicator Dot logic (remains the same)
     final indicatorPaint = Paint()..color = Colors.white;
-    final dotShadow = Paint()
-      ..color = Colors.black26
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
-
     double currentAngle = -pi / 2 + (2 * pi * currentProgress);
-    Offset dotCenter = Offset(
-      center.dx + radius * cos(currentAngle),
-      center.dy + radius * sin(currentAngle),
-    );
-
-    canvas.drawCircle(dotCenter, 8, dotShadow);
+    Offset dotCenter = Offset(center.dx + radius * cos(currentAngle), center.dy + radius * sin(currentAngle));
     canvas.drawCircle(dotCenter, 7, indicatorPaint);
   }
 
   @override
   bool shouldRepaint(CyclePainter oldDelegate) => 
-      oldDelegate.currentProgress != currentProgress;
+      oldDelegate.currentProgress != currentProgress || oldDelegate.phaseLengths != phaseLengths;
 }
 
 
@@ -1127,15 +1121,14 @@ for (final phaseName in phasesInOrder) {
   }
 }
 
-
 final phaseColors = {
-  'Menstruation': const Color.fromRGBO(255, 182, 193, 0.25),
+  'Menstruation': const Color.fromARGB(64, 217, 28, 56),
   'Follicular': const Color.fromRGBO(173, 216, 230, 0.25),
   'Ovulation': const Color.fromRGBO(144, 238, 144, 0.25), 
   'Early Luteal': const Color.fromRGBO(221, 160, 221, 0.25),
   'Late Luteal': const Color.fromRGBO(255, 228, 181, 0.25),
 };
-
+// design change these to match color scheme
 
 final phaseAnnotations = phaseStartX.containsKey(phase)
     ? <VerticalRangeAnnotation>[
@@ -1186,7 +1179,7 @@ final phaseAnnotations = phaseStartX.containsKey(phase)
                               style: TextStyle(
                                 color: const Color(0xFF5454CA),
                                 fontSize: 13,
-                                fontFamily: 'DM Sans',
+                                fontFamily: 'DMSans',
                                 fontWeight: FontWeight.w700,
                                 height: 1.20,
                                 letterSpacing: 0.40,
@@ -1221,7 +1214,7 @@ final phaseAnnotations = phaseStartX.containsKey(phase)
                 style: TextStyle(
                     color: const Color(0xFF404446),
                     fontSize: 18,
-                    fontFamily: 'DM Sans',
+                    fontFamily: 'DMSans',
                     fontWeight: FontWeight.w700,
                     height: 1.33,
                 ),
@@ -1324,7 +1317,7 @@ if (hormoneGraph)...[
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                   ),
@@ -1340,7 +1333,7 @@ if (hormoneGraph)...[
                 Column(
                   children: [
                     Row(
-                      children: const [
+                      children: const [ // design
         _LegendItem(color:  Color.fromARGB(255, 230, 113, 152), label: 'Estrogen'),
         SizedBox(width: 16),
         _LegendItem(color: Colors.deepPurple, label: 'Progesterone'),
@@ -1408,28 +1401,28 @@ rangeAnnotations: RangeAnnotations(
                           lineBarsData: [
                             LineChartBarData(
                               spots: estrogenSpots,
-                              isCurved: false,
+                              isCurved: true,
                               color: const Color.fromARGB(255, 230, 113, 152),
                               dotData: FlDotData(show: false),
                               barWidth: 3,
                             ),
                             LineChartBarData(
                       spots: progesteroneSpots,
-                              isCurved: false,
+                              isCurved: true,
                               barWidth: 3,
                               color: Colors.deepPurple,
                               dotData: FlDotData(show: false),
                             ), 
                             LineChartBarData(
                               spots: lhSpots,
-                              isCurved: false,
+                              isCurved: true,
                               color: const Color.fromARGB(255, 111, 174, 237),
                               dotData: FlDotData(show: false),
                               barWidth: 3,
                             ),
                             LineChartBarData(
                               spots: fshSpots,
-                              isCurved: false,
+                              isCurved: true,
                               color: const Color.fromARGB(255, 114, 243, 107),
                               dotData: FlDotData(show: false),
                               barWidth: 3,
@@ -1451,7 +1444,7 @@ Align(
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                   ),
@@ -1554,7 +1547,7 @@ Align(
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                   ),
@@ -1589,7 +1582,7 @@ Align(
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans-Regular',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                   ),
@@ -1722,17 +1715,71 @@ Align(
 
 
 
-class CalendarPage extends StatelessWidget{
+class CalendarPage extends StatefulWidget {
   const CalendarPage({super.key});
+
+  @override
+  State<CalendarPage> createState() => _CalendarPageState();
+}
+
+class _CalendarPageState extends State<CalendarPage> {
+  // Set the focused day to today
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Calendar'),
+        centerTitle: true,
       ),
-      body: const Center(
-        child: Text('Calendar Content Goes Here'),
+      body: Column(
+        children: [
+          TableCalendar(
+            // Set the start constraint to today
+            firstDay: DateTime.now(), 
+            // Set the end constraint (e.g., 5 years from now)
+            lastDay: DateTime.now().add(const Duration(days: 365 * 5)), 
+            focusedDay: _focusedDay,
+            
+            // Interaction logic
+            selectedDayPredicate: (day) {
+              return isSameDay(_selectedDay, day);
+            },
+            onDaySelected: (selectedDay, focusedDay) {
+              setState(() {
+                _selectedDay = selectedDay;
+                _focusedDay = focusedDay; 
+              });
+            },
+
+            // Visual Styling
+            calendarStyle: const CalendarStyle(
+              todayDecoration: BoxDecoration(
+                color: Colors.blueAccent,
+                shape: BoxShape.circle,
+              ),
+              selectedDecoration: BoxDecoration(
+                color: Colors.deepPurple,
+                shape: BoxShape.circle,
+              ),
+            ),
+            headerStyle: const HeaderStyle(
+              formatButtonVisible: false,
+              titleCentered: true,
+            ),
+          ),
+          const SizedBox(height: 20),
+          // Center(
+          //   child: Text(
+          //     _selectedDay == null 
+          //       ? 'Select a date' 
+          //       : 'Selected: ${_selectedDay!.toLocal()}'.split(' ')[0],
+          //     style: const TextStyle(fontSize: 18),
+          //   ),
+          // ),
+        ],
       ),
     );
   }
@@ -1807,7 +1854,7 @@ Future<String> _loadMenstruationInfo(String selectedField) async {
               style: TextStyle(
                 color: const Color(0xFF5454CA),
                 fontSize: 36,
-                fontFamily: 'DM Sans',
+                fontFamily: 'DMSans-Regular',
                 fontWeight: FontWeight.w700,
                 height: 0.67,
                 letterSpacing: 1.44,
@@ -1939,6 +1986,7 @@ Future<String> _loadMenstruationInfo(String selectedField) async {
     value: 'graph'))
   ),
  SizedBox(height:10),
+
 
           Align(
             alignment: Alignment.centerLeft,
@@ -2420,7 +2468,7 @@ final calc = context.watch<Calculate>();
                 style: TextStyle(
                   color:  Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                 ),
@@ -2522,7 +2570,7 @@ final calc = context.watch<Calculate>();
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                   ),
@@ -2544,7 +2592,7 @@ final calc = context.watch<Calculate>();
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                   ),
@@ -2710,7 +2758,7 @@ final calc = context.watch<Calculate>();
               style: TextStyle(
                 color: const Color(0xFF5454CA),
                 fontSize: 36,
-                fontFamily: 'DM Sans',
+                fontFamily: 'DMSans',
                 fontWeight: FontWeight.w700,
                 height: 0.67,
                 letterSpacing: 1.44,
@@ -2725,7 +2773,7 @@ final calc = context.watch<Calculate>();
                 style: TextStyle(
                   color:  Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                 ),
@@ -2827,7 +2875,7 @@ final calc = context.watch<Calculate>();
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                   ),
@@ -2851,7 +2899,7 @@ final calc = context.watch<Calculate>();
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                   ),
@@ -3015,7 +3063,7 @@ final calc = context.watch<Calculate>();
               style: TextStyle(
                 color: const Color(0xFF5454CA),
                 fontSize: 36,
-                fontFamily: 'DM Sans',
+                fontFamily: 'DMSans',
                 fontWeight: FontWeight.w700,
                 height: 0.67,
                 letterSpacing: 1.44,
@@ -3030,7 +3078,7 @@ final calc = context.watch<Calculate>();
                 style: TextStyle(
                   color:  Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                 ),
@@ -3132,7 +3180,7 @@ final calc = context.watch<Calculate>();
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                   ),
@@ -3156,7 +3204,7 @@ final calc = context.watch<Calculate>();
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                   ),
@@ -3291,7 +3339,7 @@ class SelectButton extends StatelessWidget {
                 style: const TextStyle( // design
                 color: Colors.white,// design
                 fontSize: 16,
-                fontFamily: 'DM Sans'
+                fontFamily: 'DMSans'
                           ),
                           ),
               ],
@@ -3326,7 +3374,7 @@ class TextBox extends StatelessWidget {
         style: TextStyle(
           color: const Color(0xFF1E1E1E) /* Text-Default-Default */,
           fontSize: 16,
-          fontFamily: 'DM Sans',
+          fontFamily: 'DMSans',
           fontWeight: FontWeight.w700,
           height: 1.40,
           ),),
@@ -3342,7 +3390,7 @@ class TextBox extends StatelessWidget {
               hintText: hint,
               hintStyle: TextStyle(
                 color: const Color(0xFF1E1E1E),
-                fontFamily: 'DM Sans',)
+                fontFamily: 'DMSans',)
             ),
           ),
         ),
@@ -3396,7 +3444,7 @@ class HorizontalScrollButton extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 alignment: Alignment.center,
-                child: const Icon(
+                child: const Icon( // change icon of the horizontal scroll buttons - design team
                   Icons.favorite, // replace later if needed
                   size: 16,
                   color: Color(0xFF5454CA),
@@ -3411,7 +3459,7 @@ class HorizontalScrollButton extends StatelessWidget {
                 style: const TextStyle(
                   color: Color(0xFF303437),
                   fontSize: 14,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.43,
                 ),
@@ -3491,7 +3539,7 @@ class HorizontalScrollButtonPhases extends StatelessWidget {
                 style: TextStyle(
                   color: const Color(0xFF5454CA),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 0.67,
                   letterSpacing: 0.72,
