@@ -161,6 +161,11 @@ class Calculate extends ChangeNotifier {
     notifyListeners(); // This tells PlaceholderPage to rebuild
   }
 
+  void updateperiodLength(int newLength) {
+    periodLength = newLength;
+    notifyListeners(); // This tells PlaceholderPage to rebuild
+  }
+
   void calculateNextPeriod(DateTime lastPeriodDate, int cycleLength) {
     nextPeriodDate = lastPeriodDate.add(Duration(days: cycleLength));
     notifyListeners();
@@ -588,6 +593,9 @@ class PlaceholderPage extends StatelessWidget {
     final calc = context.watch<Calculate>();
     final nextPeriodDate = calc.nextPeriodDate;
     final difference = calc.difference;
+    final newcyclelength = calc.updateCycleLength;
+    final newperiodlength = calc.updateperiodLength;
+
 
     //final double totalDaysInCycle = calc.cycleLength.toDouble();
 
@@ -838,6 +846,8 @@ class CyclePainter extends CustomPainter {
 
     // FIX: Use the total sum of the passed phaseLengths
     int totalDays = phaseLengths.fold(0, (sum, next) => sum + next);
+    //final totalDays = context.read<Calculate>().updatedCycleLength;
+        // final length = context.read<Calculate>().updateCycleLength;
     
     double gap = 0.2; 
     double currentStartAngle = -pi / 2 + (gap / 2);
@@ -882,7 +892,7 @@ class DailyTipsPage extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
-    
+    final length = context.read<Calculate>().updateCycleLength;
     // for getting hormone data - add this wherever need graph
     final phasesInOrder = [
   'Menstruation',
