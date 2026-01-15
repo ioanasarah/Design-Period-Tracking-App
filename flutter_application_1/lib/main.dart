@@ -4,6 +4,7 @@ import 'package:flutter/services.dart' show rootBundle, TextInputFormatter, Filt
 import 'dart:convert';
 import 'package:fl_chart/fl_chart.dart';
 import 'dart:math';
+import 'package:table_calendar/table_calendar.dart';
 
 void main() {
   runApp(
@@ -341,7 +342,7 @@ class _NavButton extends StatelessWidget {
               Text(
                 label,
                 style: const TextStyle(
-                  fontFamily: 'DMSans-Regular',
+                  fontFamily: 'DMSans',
                   fontSize: 14,
                   color: Color.fromRGBO(242, 243, 244, 1),
                 ),
@@ -498,7 +499,7 @@ class _LogCalendarState extends State<LogCalendar> {
               style: TextStyle(
                 color: Colors.black,
                 fontSize: 16,
-                fontFamily: 'DM Sans',
+                fontFamily: 'DMSans',
                 fontWeight: FontWeight.w700,
                 height: 2,
                 ),),
@@ -513,7 +514,7 @@ class _LogCalendarState extends State<LogCalendar> {
                     style: TextStyle(
                       color: const Color(0xFF8C8888),
                       fontSize: 16,
-                      fontFamily: 'DM Sans',
+                      fontFamily: 'DMSans',
                       fontWeight: FontWeight.w700,
                       height: 2,
                       ),
@@ -1185,7 +1186,7 @@ final phaseAnnotations = phaseStartX.containsKey(phase)
                               style: TextStyle(
                                 color: const Color(0xFF5454CA),
                                 fontSize: 13,
-                                fontFamily: 'DM Sans',
+                                fontFamily: 'DMSans',
                                 fontWeight: FontWeight.w700,
                                 height: 1.20,
                                 letterSpacing: 0.40,
@@ -1220,7 +1221,7 @@ final phaseAnnotations = phaseStartX.containsKey(phase)
                 style: TextStyle(
                     color: const Color(0xFF404446),
                     fontSize: 18,
-                    fontFamily: 'DM Sans',
+                    fontFamily: 'DMSans',
                     fontWeight: FontWeight.w700,
                     height: 1.33,
                 ),
@@ -1323,7 +1324,7 @@ if (hormoneGraph)...[
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                   ),
@@ -1450,7 +1451,7 @@ Align(
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                   ),
@@ -1553,7 +1554,7 @@ Align(
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                   ),
@@ -1588,7 +1589,7 @@ Align(
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans-Regular',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                   ),
@@ -1721,17 +1722,71 @@ Align(
 
 
 
-class CalendarPage extends StatelessWidget{
+class CalendarPage extends StatefulWidget {
   const CalendarPage({super.key});
+
+  @override
+  State<CalendarPage> createState() => _CalendarPageState();
+}
+
+class _CalendarPageState extends State<CalendarPage> {
+  // Set the focused day to today
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Calendar'),
+        centerTitle: true,
       ),
-      body: const Center(
-        child: Text('Calendar Content Goes Here'),
+      body: Column(
+        children: [
+          TableCalendar(
+            // Set the start constraint to today
+            firstDay: DateTime.now(), 
+            // Set the end constraint (e.g., 5 years from now)
+            lastDay: DateTime.now().add(const Duration(days: 365 * 5)), 
+            focusedDay: _focusedDay,
+            
+            // Interaction logic
+            selectedDayPredicate: (day) {
+              return isSameDay(_selectedDay, day);
+            },
+            onDaySelected: (selectedDay, focusedDay) {
+              setState(() {
+                _selectedDay = selectedDay;
+                _focusedDay = focusedDay; 
+              });
+            },
+
+            // Visual Styling
+            calendarStyle: const CalendarStyle(
+              todayDecoration: BoxDecoration(
+                color: Colors.blueAccent,
+                shape: BoxShape.circle,
+              ),
+              selectedDecoration: BoxDecoration(
+                color: Colors.deepPurple,
+                shape: BoxShape.circle,
+              ),
+            ),
+            headerStyle: const HeaderStyle(
+              formatButtonVisible: false,
+              titleCentered: true,
+            ),
+          ),
+          const SizedBox(height: 20),
+          // Center(
+          //   child: Text(
+          //     _selectedDay == null 
+          //       ? 'Select a date' 
+          //       : 'Selected: ${_selectedDay!.toLocal()}'.split(' ')[0],
+          //     style: const TextStyle(fontSize: 18),
+          //   ),
+          // ),
+        ],
       ),
     );
   }
@@ -1806,7 +1861,7 @@ Future<String> _loadMenstruationInfo(String selectedField) async {
               style: TextStyle(
                 color: const Color(0xFF5454CA),
                 fontSize: 36,
-                fontFamily: 'DM Sans',
+                fontFamily: 'DMSans-Regular',
                 fontWeight: FontWeight.w700,
                 height: 0.67,
                 letterSpacing: 1.44,
@@ -2420,7 +2475,7 @@ final calc = context.watch<Calculate>();
                 style: TextStyle(
                   color:  Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                 ),
@@ -2522,7 +2577,7 @@ final calc = context.watch<Calculate>();
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                   ),
@@ -2544,7 +2599,7 @@ final calc = context.watch<Calculate>();
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                   ),
@@ -2710,7 +2765,7 @@ final calc = context.watch<Calculate>();
               style: TextStyle(
                 color: const Color(0xFF5454CA),
                 fontSize: 36,
-                fontFamily: 'DM Sans',
+                fontFamily: 'DMSans',
                 fontWeight: FontWeight.w700,
                 height: 0.67,
                 letterSpacing: 1.44,
@@ -2725,7 +2780,7 @@ final calc = context.watch<Calculate>();
                 style: TextStyle(
                   color:  Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                 ),
@@ -2827,7 +2882,7 @@ final calc = context.watch<Calculate>();
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                   ),
@@ -2851,7 +2906,7 @@ final calc = context.watch<Calculate>();
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                   ),
@@ -3015,7 +3070,7 @@ final calc = context.watch<Calculate>();
               style: TextStyle(
                 color: const Color(0xFF5454CA),
                 fontSize: 36,
-                fontFamily: 'DM Sans',
+                fontFamily: 'DMSans',
                 fontWeight: FontWeight.w700,
                 height: 0.67,
                 letterSpacing: 1.44,
@@ -3030,7 +3085,7 @@ final calc = context.watch<Calculate>();
                 style: TextStyle(
                   color:  Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                 ),
@@ -3132,7 +3187,7 @@ final calc = context.watch<Calculate>();
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                   ),
@@ -3156,7 +3211,7 @@ final calc = context.watch<Calculate>();
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                   ),
@@ -3291,7 +3346,7 @@ class SelectButton extends StatelessWidget {
                 style: const TextStyle( // design
                 color: Colors.white,// design
                 fontSize: 16,
-                fontFamily: 'DM Sans'
+                fontFamily: 'DMSans'
                           ),
                           ),
               ],
@@ -3326,7 +3381,7 @@ class TextBox extends StatelessWidget {
         style: TextStyle(
           color: const Color(0xFF1E1E1E) /* Text-Default-Default */,
           fontSize: 16,
-          fontFamily: 'DM Sans',
+          fontFamily: 'DMSans',
           fontWeight: FontWeight.w700,
           height: 1.40,
           ),),
@@ -3342,7 +3397,7 @@ class TextBox extends StatelessWidget {
               hintText: hint,
               hintStyle: TextStyle(
                 color: const Color(0xFF1E1E1E),
-                fontFamily: 'DM Sans',)
+                fontFamily: 'DMSans',)
             ),
           ),
         ),
@@ -3411,7 +3466,7 @@ class HorizontalScrollButton extends StatelessWidget {
                 style: const TextStyle(
                   color: Color(0xFF303437),
                   fontSize: 14,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.43,
                 ),
@@ -3491,7 +3546,7 @@ class HorizontalScrollButtonPhases extends StatelessWidget {
                 style: TextStyle(
                   color: const Color(0xFF5454CA),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 0.67,
                   letterSpacing: 0.72,
