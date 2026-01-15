@@ -4,7 +4,7 @@
     "Day": 1,
     "Level of Estrogen": 3,
     "Level of Progesterone": 3,
-    "Level of FSH": 2,
+    "Level of FSH": 1.5,
     "Level of LH": 2,
     "Effects of Estrogen": "The corpus luteum produces a moderate amount of estrogen. It supports the lining of the endometrium.",
     "Effects of Progesterone": "The corpus luteum produces progesterone, which becomes the dominant hormone. Progesterone helps the endometrium to become receptive to implantation. It also produces a negative feedback on the brain, decreasing the production of LH and FSH.",

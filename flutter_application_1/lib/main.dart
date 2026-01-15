@@ -1341,6 +1341,7 @@ if (hormoneGraph)...[
                   children: [
                     Row(
                       children: const [
+                        //colors for the legend - design
         _LegendItem(color:  Color.fromARGB(255, 230, 113, 152), label: 'Estrogen'),
         SizedBox(width: 16),
         _LegendItem(color: Colors.deepPurple, label: 'Progesterone'),
@@ -1406,6 +1407,7 @@ rangeAnnotations: RangeAnnotations(
                               ),
                             ),
                           lineBarsData: [
+                            //colors for the graphs //design
                             LineChartBarData(
                               spots: estrogenSpots,
                               isCurved: false,
