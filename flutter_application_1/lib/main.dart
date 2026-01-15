@@ -608,11 +608,11 @@ class PlaceholderPage extends StatelessWidget {
     final double progress =
         (currentDay / totalDaysInCycle).clamp(0.0, 1.0);
 
-    print('Current Phase Lengths: $currentPhaseLengths');
+    //print('Current Phase Lengths: $currentPhaseLengths');
 
     final phase = calc.phase;
     final dayOfPhase = calc.dayofphase;
-    // final selectedField = cycleData.selectedField;
+    final selectedField = cycleData.selectedField;
 
   final info = (phase != null && dayOfPhase != null)
     ? cycleData.getPhaseInfo(
@@ -681,6 +681,7 @@ class PlaceholderPage extends StatelessWidget {
                     // Use your real progress logic here: 
                     // (dayOfCycle / totalDays)
                     currentProgress: progress, 
+                    phaseLengths: context.read<Calculate>().getUpdatedPhaseLengths,
                   ),
                 ),
               ),
