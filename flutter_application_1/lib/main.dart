@@ -776,7 +776,7 @@ class PlaceholderPage extends StatelessWidget {
             
             Positioned(
               top: -80,   // Adjust these to get the exact "sit" you want
-              right: -5,
+              right: -12,
               child: Image.asset(
                 'assets/girl-sitting.png',
                 width: 100, // Adjust size based on your asset
