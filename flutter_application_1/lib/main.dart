@@ -1825,58 +1825,56 @@ class CalendarPage extends StatefulWidget {
 
     DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
 
-    @override
-    void didChangeDependencies() {
-      super.didChangeDependencies();
-      _computeFuturePeriods();
-    }
+    // @override
+    // void didChangeDependencies() {
+    //   super.didChangeDependencies();
+    //   _computeFuturePeriods();
+    // }
 
-    @override
-    void initState() {
-      super.initState();
+    // @override
+    // void initState() {
+    //   super.initState();
 
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        final calc = context.read<Calculate>();
-        calc.addListener(_onCalcUpdated);
-        _computeFuturePeriods();
-        setState(() {});
-      });
-    }
+    //   WidgetsBinding.instance.addPostFrameCallback((_) {
+    //     final calc = context.read<Calculate>();
+    //     calc.addListener(_onCalcUpdated);
+    //     _computeFuturePeriods();
+    //     setState(() {});
+    //   });
+    // }
 
-    void _onCalcUpdated() {
-      _computeFuturePeriods();
-      setState(() {});
-    }
+    // void _onCalcUpdated() {
+    //   _computeFuturePeriods();
+    //   setState(() {});
+    // }
 
-    @override
-    void dispose() {
-      context.read<Calculate>().removeListener(_onCalcUpdated);
-      super.dispose();
-    }
+    // @override
+    // void dispose() {
+    //   context.read<Calculate>().removeListener(_onCalcUpdated);
+    //   super.dispose();
+    // }
 
     // ------------------ PERIOD PREDICTION ------------------
 
-    void _computeFuturePeriods() {
-      final calc = context.read<Calculate>();
+    void _computeFuturePeriods(Calculate calc) {
+    _predictedPeriodDays.clear();
 
-      _predictedPeriodDays.clear();
+    if (calc.nextPeriodDate == null) return;
 
-      if (calc.nextPeriodDate == null) return;
+    DateTime predictedStart = _dateOnly(calc.nextPeriodDate!);
+    int cycleLength = calc.cycleLength;
+    int periodLength = calc.periodLength;
 
-      DateTime predictedStart = _dateOnly(calc.nextPeriodDate!);
-      int cycleLength = calc.cycleLength;
-      int periodLength = calc.periodLength;
-
-      // predict next ~6 cycles
-      for (int i = 0; i < 6; i++) {
-        for (int j = 0; j < periodLength; j++) {
-          _predictedPeriodDays.add(
-            _dateOnly(predictedStart.add(Duration(days: j))),
-          );
-        }
-        predictedStart = predictedStart.add(Duration(days: cycleLength));
+    for (int i = 0; i < 6; i++) {
+      for (int j = 0; j < periodLength; j++) {
+        _predictedPeriodDays.add(
+          _dateOnly(predictedStart.add(Duration(days: j))),
+        );
       }
+      predictedStart = predictedStart.add(Duration(days: cycleLength));
     }
+  }
+
 
     bool _isPredictedPeriod(DateTime day) {
       return _predictedPeriodDays.any((d) => isSameDay(d, day));
@@ -1897,6 +1895,8 @@ class CalendarPage extends StatefulWidget {
 
     @override
     Widget build(BuildContext context) {
+      final calc = context.watch<Calculate>();
+      _computeFuturePeriods(calc);
       return Scaffold(
         appBar: AppBar(
           title: const Text(
