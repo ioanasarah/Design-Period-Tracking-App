@@ -258,7 +258,7 @@ class Calculate extends ChangeNotifier {
       dayofphase = cycleDay - ovulationDay - 6;
     }
     // return phase!;
-    notifyListeners();
+    //notifyListeners();
 }
 
     List<int> get getUpdatedPhaseLengths {
@@ -1825,11 +1825,19 @@ class CalendarPage extends StatefulWidget {
 
     DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
 
-    // @override
-    // void didChangeDependencies() {
-    //   super.didChangeDependencies();
-    //   _computeFuturePeriods();
-    // }
+    List<DateTime> _predictedPeriodDaysStart = [];
+
+    @override
+    void didChangeDependencies() {
+      super.didChangeDependencies();
+      // Read your Calculate provider
+      final calc = context.read<Calculate>();
+
+      // Compute predicted periods using your function
+      _computeFuturePeriods(calc);
+    }
+
+
 
     // @override
     // void initState() {
@@ -1858,6 +1866,7 @@ class CalendarPage extends StatefulWidget {
 
     void _computeFuturePeriods(Calculate calc) {
     _predictedPeriodDays.clear();
+    _predictedPeriodDaysStart.clear();
 
     if (calc.nextPeriodDate == null) return;
 
@@ -1866,6 +1875,7 @@ class CalendarPage extends StatefulWidget {
     int periodLength = calc.periodLength;
 
     for (int i = 0; i < 6; i++) {
+      _predictedPeriodDaysStart.add(predictedStart);
       for (int j = 0; j < periodLength; j++) {
         _predictedPeriodDays.add(
           _dateOnly(predictedStart.add(Duration(days: j))),
@@ -1893,9 +1903,25 @@ class CalendarPage extends StatefulWidget {
       return false;
     }
 
+
     @override
     Widget build(BuildContext context) {
       final calc = context.watch<Calculate>();
+      String selectedPhase = '';
+      if (_selectedDay != null && calc.nextPeriodDate != null) {
+        // compute cycle day relative to last period
+        final lastPeriodDate = calc.nextPeriodDate!.subtract(Duration(days: calc.cycleLength));
+        final cycleDay = (_selectedDay!.difference(lastPeriodDate).inDays % calc.cycleLength) + 1;
+
+        // determine phase for that day
+        calc.determinePhase(
+          cycleDay: cycleDay,
+          cycleLength: calc.cycleLength,
+          periodLength: calc.periodLength,
+        );
+
+        selectedPhase = calc.phase ?? '';
+      }
       _computeFuturePeriods(calc);
       return Scaffold(
         appBar: AppBar(
@@ -1951,6 +1977,39 @@ class CalendarPage extends StatefulWidget {
                     );
                   }
 
+                  final calc = context.read<Calculate>();
+
+                  // for (final periodStart in _predictedPeriodDaysStart) {
+                  //   DateTime ovulation = periodStart.add(Duration(days: calc.cycleLength - 14-1));
+                  //   if (isSameDay(day, ovulation)) {
+                  //     return _buildCircle(day, color: Color(0xFFC1E5FF), textColor: Color(0xFF72777A));
+                  //   }
+                  // }
+
+                  for (final periodStart in _predictedPeriodDaysStart) {
+                    DateTime ovulation = periodStart.add(Duration(days: calc.cycleLength - 14-1));
+                    if (isSameDay(day, ovulation)) {
+                      return Container(
+                        margin: const EdgeInsets.all(6),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFC1E5FF),
+                          shape: BoxShape.circle,
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          '${day.day}',
+                          style: const TextStyle(
+                            color: Color(0xFF72777A),
+                            fontSize: 16,
+                            fontFamily: 'DMSans',
+                            fontWeight: FontWeight.w400,
+                            height: 1.40,
+                          ),
+                        ),
+                      );
+                    }
+                  }
+
                   // uncertainty
                   if (isWithin5Days(day)) {
                     return Container(
@@ -1995,17 +2054,20 @@ class CalendarPage extends StatefulWidget {
             ),
 
             const SizedBox(height: 20),
+
+            if (_selectedDay != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 20),
+                child: Text(
+                  'Phase on ${_selectedDay!.day}/${_selectedDay!.month}: $selectedPhase',
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                ),
+              ),
           ],
         ),
       );
     }
 }
-
-
-
-
-
-
 
 
 class MenstruationPage extends StatelessWidget{
