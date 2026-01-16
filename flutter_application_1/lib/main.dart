@@ -836,7 +836,7 @@ class PlaceholderPage extends StatelessWidget {
           _infoTile(
             title: 'Next Expected Period',
             value: nextPeriodDate != null
-                ? '${nextPeriodDate.day}/${nextPeriodDate.month}/${nextPeriodDate.year}'
+                ? '${nextPeriodDate.day}/${nextPeriodDate.month}/${nextPeriodDate.year} (+/- 5.3 days)'
                 : 'Not calculated',
             icon: Icons.calendar_today,
             ),
@@ -1818,11 +1818,69 @@ class _CalendarPageState extends State<CalendarPage> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
 
+  // Store the predicted period days
+  Set<DateTime> _predictedPeriodDays = {};
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _computeFuturePeriods();
+  }
+
+  //calculates the predicted periods using our 3 periods
+  void _computeFuturePeriods() {
+    final calc = context.read<Calculate>();
+
+    // Clear previous predictions
+    _predictedPeriodDays.clear();
+
+    if (calc.nextPeriodDate == null) return;
+
+    DateTime predictedStart = calc.nextPeriodDate!;
+    int cycleLength = calc.cycleLength;
+    int periodLength = calc.periodLength;
+
+    DateTime today = DateTime.now();
+
+    // Generate predicted period starts for the next 6 months (adjust as needed)
+    for (int i = 0; i < 6; i++) {
+      for (int j = 0; j < periodLength; j++) {
+        _predictedPeriodDays.add(predictedStart.add(Duration(days: j)));
+      }
+      predictedStart = predictedStart.add(Duration(days: cycleLength));
+    }
+  }
+
+  bool _isPredictedPeriod(DateTime day) {
+    return _predictedPeriodDays.any((d) => isSameDay(d, day));
+  }
+
+  /// Checks if the given day is within ±5 days of any predicted period day
+  bool isWithin5Days(DateTime day) {
+    for (int offset = -5; offset <= 5; offset++) {
+      if (_predictedPeriodDays.any((predicted) =>
+          isSameDay(predicted, day.add(Duration(days: offset))))) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Calendar'),
+        title: const Text(
+        'Calendar',
+        style: TextStyle(
+          color: Color(0xFF202325),
+          fontSize: 18,
+          fontFamily: 'DMSans', // remove spaces
+          fontWeight: FontWeight.w700,
+          height: 1.33,
+        ),
+      ),
+
         centerTitle: true,
       ),
       body: Column(
@@ -1845,10 +1903,60 @@ class _CalendarPageState extends State<CalendarPage> {
               });
             },
 
+            //highlights predicted period days in pink.
+            calendarBuilders: CalendarBuilders(
+              defaultBuilder: (context, day, focusedDay) {
+                //if day is predictes is as a period day, highlight it - uses isPredictedPeriod
+                if (_isPredictedPeriod(day)) {
+                  return Container(
+                    margin: const EdgeInsets.all(6),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFF5757B), // pink highlight
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      '${day.day}',
+                      style: TextStyle(
+                        //color: const Color(0xFF303030) /* Text-Neutral-Default */,
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontFamily: 'DMSans',
+                        fontWeight: FontWeight.w400,
+                        height: 1.40,
+                        ),
+                    ),
+                  );
+                }
+                // if it's within 5 days highlight it witg pink
+                if (isWithin5Days(day)) {
+                  return Container(
+                    margin: const EdgeInsets.all(6),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFFBE3E4), // pink highlight for +-5 days
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      '${day.day}',
+                      style: const TextStyle(
+                        color: Color(0xFF72777A),
+                        fontSize: 16,
+                        fontFamily: 'DMSans',
+                        fontWeight: FontWeight.w400,
+                        height: 1.40,
+                      ),
+                    ),
+                  );
+                }
+                return null; // default
+              },
+            ),
+
             // Visual Styling
             calendarStyle: const CalendarStyle(
               todayDecoration: BoxDecoration(
-                color: Colors.blueAccent,
+                color: Color(0xFF303437),
                 shape: BoxShape.circle,
               ),
               selectedDecoration: BoxDecoration(
