@@ -836,7 +836,7 @@ class PlaceholderPage extends StatelessWidget {
           _infoTile(
             title: 'Next Expected Period',
             value: nextPeriodDate != null
-                ? '${nextPeriodDate.day}/${nextPeriodDate.month}/${nextPeriodDate.year}'
+                ? '${nextPeriodDate.day}/${nextPeriodDate.month}/${nextPeriodDate.year} (+/- 5.3 days)'
                 : 'Not calculated',
             icon: Icons.calendar_today,
             ),
