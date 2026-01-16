@@ -962,12 +962,14 @@ class PlaceholderPage extends StatelessWidget {
 
   Widget _buildButton(
       BuildContext context, String label, Widget page) {
+    final selectedField = context.watch<CycleDataProvider>().selectedField;
     return Padding(
       padding: const EdgeInsets.only(right: 12),
       child: SizedBox(
         width: 160,
         child: HorizontalScrollButton(
           label: label,
+          isSelected: selectedField == label,
           onPressed: () {
             context.read<CycleDataProvider>().selectField(label);
             // Navigator.push(context,
@@ -1771,12 +1773,14 @@ Align(
   );
 }
   Widget _buildButton(BuildContext context, String label, Widget page) {
+    final selectedField = context.watch<CycleDataProvider>().selectedField;
     return Padding(
       padding: const EdgeInsets.only(right: 12),
       child: SizedBox(
         width: 160, // controls how many buttons fit on screen
         child: HorizontalScrollButton( // make a new class with a different deign for these
           label: label,
+          isSelected: selectedField == label,
           onPressed: () {
             context.read<CycleDataProvider>().selectField(label);
             // Navigator.push();
@@ -1908,6 +1912,25 @@ class CalendarPage extends StatefulWidget {
     @override
     Widget build(BuildContext context) {
       final calc = context.watch<Calculate>();
+
+    final cycleData = context.watch<CycleDataProvider>();
+
+    if (!cycleData.isLoaded) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final phase = calc.phase;
+    final dayOfPhase = calc.dayofphase;
+
+
+      final info = (phase != null && dayOfPhase != null)
+          ? cycleData.getPhaseInfo(
+              phase: phase,
+              dayOfPhase: dayOfPhase,
+              field: "Today's Recap",
+            )
+          : 'No data';
+
       String selectedPhase = '';
       if (_selectedDay != null && calc.nextPeriodDate != null) {
         // compute cycle day relative to last period
@@ -2070,10 +2093,75 @@ class CalendarPage extends StatefulWidget {
                     ),
                 ),
               ),
+
+            const SizedBox(height: 10),
+
+            Padding(
+              padding: const EdgeInsets.all(18.0),
+              child: _infoTile(
+              title: "Today's Recap",
+              value: Text(info).data!,
+              icon: Icons.analytics,
+                        ),
+            ),
           ],
         ),
       );
     }
+
+    Widget _infoTile({
+    required String title,
+    required String value,
+    required IconData icon,
+    bool isHighlighted = false,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isHighlighted
+            ? const Color.fromRGBO(54, 18, 58, 0.05)
+            : Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: const Color.fromRGBO(54, 18, 58, 0.1)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: const Color.fromRGBO(54, 18, 58, 1)),
+          const SizedBox(width: 15),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: const Color(0xFF303437),
+                    fontSize: 14,
+                    fontFamily: 'DM Sans',
+                    fontWeight: FontWeight.w700,
+                    height: 1.43,
+                    ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: TextStyle(
+                    color: const Color(0xFF303437),
+                    fontSize: 14,
+                    fontFamily: 'DM Sans',
+                    fontWeight: FontWeight.w400,
+                    height: 1.79,
+                    ),
+                  softWrap: true,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 
@@ -2367,12 +2455,14 @@ Future<String> _loadMenstruationInfo(String selectedField) async {
   );
 }
   Widget _buildButton(BuildContext context, String label, Widget page) {
+    final selectedField = context.watch<CycleDataProvider>().selectedField;
     return Padding(
       padding: const EdgeInsets.only(right: 12),
       child: SizedBox(
         width: 160, // controls how many buttons fit on screen
         child: HorizontalScrollButton( // make a new class with a different deign for these
           label: label,
+          isSelected: selectedField == label,
           onPressed: () {
             context.read<CycleDataProvider>().selectField(label);
             // Navigator.push();
@@ -2668,12 +2758,14 @@ final calc = context.watch<Calculate>();
 
 
   Widget _buildButton(BuildContext context, String label, Widget page) {
+    final selectedField = context.watch<CycleDataProvider>().selectedField;
     return Padding(
       padding: const EdgeInsets.only(right: 12),
       child: SizedBox(
         width: 160, // controls how many buttons fit on screen
         child: HorizontalScrollButton( // make a new class with a different deign for these
           label: label,
+          isSelected: selectedField == label,
           onPressed: () {
             context.read<CycleDataProvider>().selectField(label);
             // Navigator.push();
@@ -2950,11 +3042,13 @@ final calc = context.watch<Calculate>();
 
 
   Widget _buildButton(BuildContext context, String label, Widget page) {
+    final selectedField = context.watch<CycleDataProvider>().selectedField;
     return Padding(
       padding: const EdgeInsets.only(right: 12),
       child: SizedBox(
         width: 160, // controls how many buttons fit on screen
-        child: HorizontalScrollButton( // make a new class with a different deign for these
+        child: HorizontalScrollButton( 
+          isSelected: selectedField == label,// make a new class with a different deign for these
           label: label,
           onPressed: () {
             context.read<CycleDataProvider>().selectField(label);
@@ -2969,12 +3063,14 @@ final calc = context.watch<Calculate>();
 }
 
   Widget _buildButton(BuildContext context, String label, Widget page) {
+    final selectedField = context.watch<CycleDataProvider>().selectedField;
     return Padding(
       padding: const EdgeInsets.only(right: 12),
       child: SizedBox(
         width: 160, // controls how many buttons fit on screen
         child: HorizontalScrollButton( // make a new class with a different deign for these
           label: label,
+          isSelected: selectedField == label,
           onPressed: () {
             context.read<CycleDataProvider>().selectField(label);
             // Navigator.push();
@@ -3272,17 +3368,19 @@ final calc = context.watch<Calculate>();
 
 
   Widget _buildButton(BuildContext context, String label, Widget page) {
+    final selectedField = context.watch<CycleDataProvider>().selectedField;
     return Padding(
       padding: const EdgeInsets.only(right: 12),
       child: SizedBox(
         width: 160, // controls how many buttons fit on screen
         child: HorizontalScrollButton( // make a new class with a different deign for these
           label: label,
+          isSelected: selectedField == label,
           onPressed: () {
             context.read<CycleDataProvider>().selectField(label);
-            // Navigator.push();
+            //Navigator.push();
             //MaterialPageRoute(builder: (_) => page),
-            
+
           },
         ),
       ),
@@ -3310,6 +3408,7 @@ class LateLutealPage extends StatelessWidget{
   return data ?? 'No data';
 }
 
+  bool selected = false;
   
   @override
   Widget build(BuildContext context) {
@@ -3582,6 +3681,7 @@ final calc = context.watch<Calculate>();
         width: 160, // controls how many buttons fit on screen
         child: HorizontalScrollButton( // make a new class with a different deign for these
           label: label,
+          isSelected: selected,
           onPressed: () {
             context.read<CycleDataProvider>().selectField(label);
             // Navigator.push();
@@ -3691,15 +3791,19 @@ class TextBox extends StatelessWidget {
 class HorizontalScrollButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
+  final bool isSelected;
 
   const HorizontalScrollButton({
     super.key,
     required this.label,
     required this.onPressed,
+    required this.isSelected,
   });
+
 
   @override
   Widget build(BuildContext context) {
+
     return SizedBox(
       width: 137,
       height: 120,
@@ -3709,7 +3813,9 @@ class HorizontalScrollButton extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: isSelected
+              ? const Color.fromARGB(255, 228, 48, 251)
+              : Colors.white,
             borderRadius: BorderRadius.circular(24),
             boxShadow: const [
               BoxShadow(
