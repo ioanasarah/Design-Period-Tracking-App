@@ -1818,6 +1818,43 @@ class _CalendarPageState extends State<CalendarPage> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
 
+  // Store the predicted period days
+  Set<DateTime> _predictedPeriodDays = {};
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _computeFuturePeriods();
+  }
+
+  //calculates the predicted periods using our 3 periods
+  void _computeFuturePeriods() {
+    final calc = context.read<Calculate>();
+
+    // Clear previous predictions
+    _predictedPeriodDays.clear();
+
+    if (calc.nextPeriodDate == null) return;
+
+    DateTime predictedStart = calc.nextPeriodDate!;
+    int cycleLength = calc.cycleLength;
+    int periodLength = calc.periodLength;
+
+    DateTime today = DateTime.now();
+
+    // Generate predicted period starts for the next 6 months (adjust as needed)
+    for (int i = 0; i < 6; i++) {
+      for (int j = 0; j < periodLength; j++) {
+        _predictedPeriodDays.add(predictedStart.add(Duration(days: j)));
+      }
+      predictedStart = predictedStart.add(Duration(days: cycleLength));
+    }
+  }
+
+  bool _isPredictedPeriod(DateTime day) {
+    return _predictedPeriodDays.any((d) => isSameDay(d, day));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -1844,6 +1881,34 @@ class _CalendarPageState extends State<CalendarPage> {
                 _focusedDay = focusedDay; 
               });
             },
+
+            //highlights predicted period days in pink.
+            calendarBuilders: CalendarBuilders(
+              defaultBuilder: (context, day, focusedDay) {
+                if (_isPredictedPeriod(day)) {
+                  return Container(
+                    margin: const EdgeInsets.all(6),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFF5757B), // pink highlight
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      '${day.day}',
+                      style: TextStyle(
+                        //color: const Color(0xFF303030) /* Text-Neutral-Default */,
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w400,
+                        height: 1.40,
+                        ),
+                    ),
+                  );
+                }
+                return null; // default
+              },
+            ),
 
             // Visual Styling
             calendarStyle: const CalendarStyle(
