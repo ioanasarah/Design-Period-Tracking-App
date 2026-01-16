@@ -415,7 +415,8 @@ class _NavButton extends StatelessWidget {
 
 class _MainNavigationBarState extends State<MainNavigationBar> {
 
-  int _selectedIndex = 0;
+  //this changes which page opens first
+  int _selectedIndex = 1;
 
   // Top-level pages only
   List<Widget> get _pages => [
@@ -2053,14 +2054,20 @@ class CalendarPage extends StatefulWidget {
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 30),
 
             if (_selectedDay != null)
               Padding(
                 padding: const EdgeInsets.only(top: 20),
                 child: Text(
-                  'Phase on ${_selectedDay!.day}/${_selectedDay!.month}: $selectedPhase',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                  '$selectedPhase',
+                  style: TextStyle(
+                    color: const Color(0xFF303437),
+                    fontSize: 30,
+                    fontFamily: 'DM Sans',
+                    fontWeight: FontWeight.w700,
+                    height: 1.33,
+                    ),
                 ),
               ),
           ],
