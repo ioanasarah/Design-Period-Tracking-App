@@ -1815,176 +1815,194 @@ class CalendarPage extends StatefulWidget {
   State<CalendarPage> createState() => _CalendarPageState();
 }
 
-class _CalendarPageState extends State<CalendarPage> {
-  // Set the focused day to today
-  DateTime _focusedDay = DateTime.now();
-  DateTime? _selectedDay;
+  class _CalendarPageState extends State<CalendarPage> {
+    // Focused & selected days
+    DateTime _focusedDay = DateTime.now();
+    DateTime? _selectedDay;
 
-  // Store the predicted period days
-  Set<DateTime> _predictedPeriodDays = {};
+    // Predicted period days
+    final Set<DateTime> _predictedPeriodDays = {};
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _computeFuturePeriods();
-  }
+    DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
 
-  //calculates the predicted periods using our 3 periods
-  void _computeFuturePeriods() {
-    final calc = context.read<Calculate>();
-
-    // Clear previous predictions
-    _predictedPeriodDays.clear();
-
-    if (calc.nextPeriodDate == null) return;
-
-    DateTime predictedStart = calc.nextPeriodDate!;
-    int cycleLength = calc.cycleLength;
-    int periodLength = calc.periodLength;
-
-    DateTime today = DateTime.now();
-
-    // Generate predicted period starts for the next 6 months (adjust as needed)
-    for (int i = 0; i < 6; i++) {
-      for (int j = 0; j < periodLength; j++) {
-        _predictedPeriodDays.add(predictedStart.add(Duration(days: j)));
-      }
-      predictedStart = predictedStart.add(Duration(days: cycleLength));
+    @override
+    void didChangeDependencies() {
+      super.didChangeDependencies();
+      _computeFuturePeriods();
     }
-  }
 
-  bool _isPredictedPeriod(DateTime day) {
-    return _predictedPeriodDays.any((d) => isSameDay(d, day));
-  }
+    @override
+    void initState() {
+      super.initState();
 
-  /// Checks if the given day is within ±5 days of any predicted period day
-  bool isWithin5Days(DateTime day) {
-    for (int offset = -5; offset <= 5; offset++) {
-      if (_predictedPeriodDays.any((predicted) =>
-          isSameDay(predicted, day.add(Duration(days: offset))))) {
-        return true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final calc = context.read<Calculate>();
+        calc.addListener(_onCalcUpdated);
+        _computeFuturePeriods();
+        setState(() {});
+      });
+    }
+
+    void _onCalcUpdated() {
+      _computeFuturePeriods();
+      setState(() {});
+    }
+
+    @override
+    void dispose() {
+      context.read<Calculate>().removeListener(_onCalcUpdated);
+      super.dispose();
+    }
+
+    // ------------------ PERIOD PREDICTION ------------------
+
+    void _computeFuturePeriods() {
+      final calc = context.read<Calculate>();
+
+      _predictedPeriodDays.clear();
+
+      if (calc.nextPeriodDate == null) return;
+
+      DateTime predictedStart = _dateOnly(calc.nextPeriodDate!);
+      int cycleLength = calc.cycleLength;
+      int periodLength = calc.periodLength;
+
+      // predict next ~6 cycles
+      for (int i = 0; i < 6; i++) {
+        for (int j = 0; j < periodLength; j++) {
+          _predictedPeriodDays.add(
+            _dateOnly(predictedStart.add(Duration(days: j))),
+          );
+        }
+        predictedStart = predictedStart.add(Duration(days: cycleLength));
       }
     }
-    return false;
-  }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-        'Calendar',
-        style: TextStyle(
-          color: Color(0xFF202325),
-          fontSize: 18,
-          fontFamily: 'DMSans', // remove spaces
-          fontWeight: FontWeight.w700,
-          height: 1.33,
-        ),
-      ),
+    bool _isPredictedPeriod(DateTime day) {
+      return _predictedPeriodDays.any((d) => isSameDay(d, day));
+    }
 
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          TableCalendar(
-            // Set the start constraint to today
-            firstDay: DateTime.now(), 
-            // Set the end constraint (e.g., 5 years from now)
-            lastDay: DateTime.now().add(const Duration(days: 365 * 5)), 
-            focusedDay: _focusedDay,
-            
-            // Interaction logic
-            selectedDayPredicate: (day) {
-              return isSameDay(_selectedDay, day);
-            },
-            onDaySelected: (selectedDay, focusedDay) {
-              setState(() {
-                _selectedDay = selectedDay;
-                _focusedDay = focusedDay; 
-              });
-            },
+    /// within ±5 days of predicted period
+    bool isWithin5Days(DateTime day) {
+      for (int offset = -5; offset <= 5; offset++) {
+        if (_predictedPeriodDays.any(
+          (predicted) =>
+              isSameDay(predicted, day.add(Duration(days: offset))),
+        )) {
+          return true;
+        }
+      }
+      return false;
+    }
 
-            //highlights predicted period days in pink.
-            calendarBuilders: CalendarBuilders(
-              defaultBuilder: (context, day, focusedDay) {
-                //if day is predictes is as a period day, highlight it - uses isPredictedPeriod
-                if (_isPredictedPeriod(day)) {
-                  return Container(
-                    margin: const EdgeInsets.all(6),
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFF5757B), // pink highlight
-                      shape: BoxShape.circle,
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      '${day.day}',
-                      style: TextStyle(
-                        //color: const Color(0xFF303030) /* Text-Neutral-Default */,
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontFamily: 'DMSans',
-                        fontWeight: FontWeight.w400,
-                        height: 1.40,
-                        ),
-                    ),
-                  );
-                }
-                // if it's within 5 days highlight it witg pink
-                if (isWithin5Days(day)) {
-                  return Container(
-                    margin: const EdgeInsets.all(6),
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFFBE3E4), // pink highlight for +-5 days
-                      shape: BoxShape.circle,
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      '${day.day}',
-                      style: const TextStyle(
-                        color: Color(0xFF72777A),
-                        fontSize: 16,
-                        fontFamily: 'DMSans',
-                        fontWeight: FontWeight.w400,
-                        height: 1.40,
-                      ),
-                    ),
-                  );
-                }
-                return null; // default
-              },
-            ),
-
-            // Visual Styling
-            calendarStyle: const CalendarStyle(
-              todayDecoration: BoxDecoration(
-                color: Color(0xFF303437),
-                shape: BoxShape.circle,
-              ),
-              selectedDecoration: BoxDecoration(
-                color: Colors.deepPurple,
-                shape: BoxShape.circle,
-              ),
-            ),
-            headerStyle: const HeaderStyle(
-              formatButtonVisible: false,
-              titleCentered: true,
+    @override
+    Widget build(BuildContext context) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text(
+            'Calendar',
+            style: TextStyle(
+              color: Color(0xFF202325),
+              fontSize: 18,
+              fontFamily: 'DMSans',
+              fontWeight: FontWeight.w700,
+              height: 1.33,
             ),
           ),
-          const SizedBox(height: 20),
-          // Center(
-          //   child: Text(
-          //     _selectedDay == null 
-          //       ? 'Select a date' 
-          //       : 'Selected: ${_selectedDay!.toLocal()}'.split(' ')[0],
-          //     style: const TextStyle(fontSize: 18),
-          //   ),
-          // ),
-        ],
-      ),
-    );
-  }
+          centerTitle: true,
+        ),
+        body: Column(
+          children: [
+            TableCalendar(
+              firstDay: DateTime.now(),
+              lastDay: DateTime.now().add(const Duration(days: 365 * 5)),
+              focusedDay: _focusedDay,
+
+              selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+
+              onDaySelected: (selectedDay, focusedDay) {
+                setState(() {
+                  _selectedDay = selectedDay;
+                  _focusedDay = focusedDay;
+                });
+              },
+
+              calendarBuilders: CalendarBuilders(
+                defaultBuilder: (context, day, focusedDay) {
+                  //predicted period
+                  if (_isPredictedPeriod(day)) {
+                    return Container(
+                      margin: const EdgeInsets.all(6),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFF5757B),
+                        shape: BoxShape.circle,
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        '${day.day}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontFamily: 'DMSans',
+                          fontWeight: FontWeight.w400,
+                          height: 1.40,
+                        ),
+                      ),
+                    );
+                  }
+
+                  // uncertainty
+                  if (isWithin5Days(day)) {
+                    return Container(
+                      margin: const EdgeInsets.all(6),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFFBE3E4),
+                        shape: BoxShape.circle,
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        '${day.day}',
+                        style: const TextStyle(
+                          color: Color(0xFF72777A),
+                          fontSize: 16,
+                          fontFamily: 'DMSans',
+                          fontWeight: FontWeight.w400,
+                          height: 1.40,
+                        ),
+                      ),
+                    );
+                  }
+
+                  return null;
+                },
+              ),
+
+              calendarStyle: const CalendarStyle(
+                todayDecoration: BoxDecoration(
+                  color: Color(0xFF303437),
+                  shape: BoxShape.circle,
+                ),
+                selectedDecoration: BoxDecoration(
+                  color: Color(0xFF5454CA),
+                  shape: BoxShape.circle,
+                ),
+              ),
+
+              headerStyle: const HeaderStyle(
+                formatButtonVisible: false,
+                titleCentered: true,
+              ),
+            ),
+
+            const SizedBox(height: 20),
+          ],
+        ),
+      );
+    }
 }
+
+
+
 
 
 
