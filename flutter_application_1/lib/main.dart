@@ -1979,10 +1979,34 @@ class CalendarPage extends StatefulWidget {
 
                   final calc = context.read<Calculate>();
 
+                  // for (final periodStart in _predictedPeriodDaysStart) {
+                  //   DateTime ovulation = periodStart.add(Duration(days: calc.cycleLength - 14-1));
+                  //   if (isSameDay(day, ovulation)) {
+                  //     return _buildCircle(day, color: Color(0xFFC1E5FF), textColor: Color(0xFF72777A));
+                  //   }
+                  // }
+
                   for (final periodStart in _predictedPeriodDaysStart) {
                     DateTime ovulation = periodStart.add(Duration(days: calc.cycleLength - 14-1));
                     if (isSameDay(day, ovulation)) {
-                      return _buildCircle(day, color: Colors.lightGreen, textColor: Colors.white);
+                      return Container(
+                        margin: const EdgeInsets.all(6),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFC1E5FF),
+                          shape: BoxShape.circle,
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          '${day.day}',
+                          style: const TextStyle(
+                            color: Color(0xFF72777A),
+                            fontSize: 16,
+                            fontFamily: 'DMSans',
+                            fontWeight: FontWeight.w400,
+                            height: 1.40,
+                          ),
+                        ),
+                      );
                     }
                   }
 
@@ -2040,26 +2064,6 @@ class CalendarPage extends StatefulWidget {
                 ),
               ),
           ],
-        ),
-      );
-    }
-    Widget _buildCircle(DateTime day, {required Color color, required Color textColor}) {
-      return Container(
-        margin: const EdgeInsets.all(6),
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          '${day.day}',
-          style: TextStyle(
-            color: textColor,
-            fontSize: 16,
-            fontFamily: 'DMSans',
-            fontWeight: FontWeight.w400,
-            height: 1.40,
-          ),
         ),
       );
     }
