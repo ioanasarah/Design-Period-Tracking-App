@@ -1908,6 +1908,25 @@ class CalendarPage extends StatefulWidget {
     @override
     Widget build(BuildContext context) {
       final calc = context.watch<Calculate>();
+
+    final cycleData = context.watch<CycleDataProvider>();
+
+    if (!cycleData.isLoaded) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final phase = calc.phase;
+    final dayOfPhase = calc.dayofphase;
+
+
+      final info = (phase != null && dayOfPhase != null)
+          ? cycleData.getPhaseInfo(
+              phase: phase,
+              dayOfPhase: dayOfPhase,
+              field: "Today's Recap",
+            )
+          : 'No data';
+
       String selectedPhase = '';
       if (_selectedDay != null && calc.nextPeriodDate != null) {
         // compute cycle day relative to last period
@@ -2070,10 +2089,75 @@ class CalendarPage extends StatefulWidget {
                     ),
                 ),
               ),
+
+            const SizedBox(height: 10),
+
+            Padding(
+              padding: const EdgeInsets.all(18.0),
+              child: _infoTile(
+              title: "Today's Recap",
+              value: Text(info).data!,
+              icon: Icons.analytics,
+                        ),
+            ),
           ],
         ),
       );
     }
+
+    Widget _infoTile({
+    required String title,
+    required String value,
+    required IconData icon,
+    bool isHighlighted = false,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isHighlighted
+            ? const Color.fromRGBO(54, 18, 58, 0.05)
+            : Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: const Color.fromRGBO(54, 18, 58, 0.1)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: const Color.fromRGBO(54, 18, 58, 1)),
+          const SizedBox(width: 15),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: const Color(0xFF303437),
+                    fontSize: 14,
+                    fontFamily: 'DM Sans',
+                    fontWeight: FontWeight.w700,
+                    height: 1.43,
+                    ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: TextStyle(
+                    color: const Color(0xFF303437),
+                    fontSize: 14,
+                    fontFamily: 'DM Sans',
+                    fontWeight: FontWeight.w400,
+                    height: 1.79,
+                    ),
+                  softWrap: true,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 
