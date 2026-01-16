@@ -69,6 +69,8 @@ flutter:
     - assets/Ovulation_Phase.json
     - assets/All_Phases.json
     - assets/clip-woman-doing-exercises.png
+    - assets/girl-sitting.png
+    - assets/girl-pointing.png
 
   fonts:
     - family: DMSans
