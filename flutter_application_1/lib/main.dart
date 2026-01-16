@@ -6,12 +6,23 @@ import 'package:fl_chart/fl_chart.dart';
 import 'dart:math';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // allows async code in main
+
+  // 1️ Create Calculate instance
+  final calc = Calculate();
+
+  // 2️ Load saved period data
+  await calc.loadData();
+
+  // 3️ Run the app with providers
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => Calculate()),
+        ChangeNotifierProvider(create: (_) => calc),
         ChangeNotifierProvider(
           create: (_) => CycleDataProvider()..load(),
         ),
@@ -20,6 +31,7 @@ void main() {
     ),
   );
 }
+
 
 
 class MyApp extends StatelessWidget {
@@ -154,6 +166,38 @@ class Calculate extends ChangeNotifier {
   int cycleLength = 28;
   int periodLength = 5;
 
+  //save data
+
+  Future<void> saveData(DateTime lastPeriodDate) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('lastPeriodDate', lastPeriodDate.toIso8601String());
+    await prefs.setInt('cycleLength', cycleLength);
+    await prefs.setInt('periodLength', periodLength);
+  }
+
+  Future<void> loadData() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    String? dateString = prefs.getString('lastPeriodDate');
+    int? savedCycleLength = prefs.getInt('cycleLength');
+    int? savedPeriodLength = prefs.getInt('periodLength');
+
+    if (dateString != null && savedCycleLength != null && savedPeriodLength != null) {
+      final lastPeriodDate = DateTime.parse(dateString);
+      cycleLength = savedCycleLength;
+      periodLength = savedPeriodLength;
+
+      calculateNextPeriod(lastPeriodDate, cycleLength);
+      calculateDayOfCycle(lastPeriodDate);
+      determinePhase(
+        cycleDay: difference!,
+        cycleLength: cycleLength,
+        periodLength: periodLength,
+      );
+
+      notifyListeners();
+    }
+  }
 
   //so the function for the lengths of the phases that changes the length of the cirle is based on the original valyes, 28 and 7
   //have to figure out a way to update them with the input values from the user
@@ -476,6 +520,38 @@ class _LogCalendarState extends State<LogCalendar> {
   final TextEditingController periodLengthController = TextEditingController();
   final TextEditingController cycleLengthController = TextEditingController();
 
+  Future<void> savePeriodData() async {
+    if (selectedDate == null) return;
+
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setString('lastPeriodDate', selectedDate!.toIso8601String());
+    await prefs.setInt('periodLength', int.tryParse(periodLengthController.text) ?? 5);
+    await prefs.setInt('cycleLength', int.tryParse(cycleLengthController.text) ?? 28);
+  }
+
+  Future<void> loadPeriodData() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    String? dateString = prefs.getString('lastPeriodDate');
+    int? periodLength = prefs.getInt('periodLength');
+    int? cycleLength = prefs.getInt('cycleLength');
+
+    if (dateString != null) {
+      setState(() {
+        selectedDate = DateTime.parse(dateString);
+        periodLengthController.text = periodLength?.toString() ?? '5';
+        cycleLengthController.text = cycleLength?.toString() ?? '28';
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadPeriodData();
+  }
+
   Future<void> _selectDate() async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
@@ -574,9 +650,10 @@ class _LogCalendarState extends State<LogCalendar> {
                       cycleDay: calc.difference!,
                       cycleLength: calc.cycleLength,
                       periodLength: calc.periodLength,
+
                     );
                     // await calc.calculatePhase();
-
+                    await savePeriodData();
                     widget.onSubmit();
                   
                   },
@@ -1007,6 +1084,7 @@ class DailyTipsPage extends StatelessWidget {
     final difference = calc.difference;
     final phase = calc.phase;
     final dayOfPhase = calc.dayofphase;
+
     final today = DateTime.now();
 
     final cycleData = context.watch<CycleDataProvider>();
