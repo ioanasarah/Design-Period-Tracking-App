@@ -817,15 +817,15 @@ class PlaceholderPage extends StatelessWidget {
                       height: 1.33,
                       ),
                   ),
-                  SizedBox(height: 10),
-                  Positioned(
-                    top: -80,   // Adjust these to get the exact "sit" you want
-                    right: -5,
-                    child: Image.asset(
-                      'assets/girl-pointing.png',
-                      width: 35, // Adjust size based on your asset
-                    ),
-                  ),
+                  // SizedBox(height: 10),
+                  // Positioned(
+                  //   top: -80,   // Adjust these to get the exact "sit" you want
+                  //   right: -5,
+                  //   child: Image.asset(
+                  //     'assets/girl-pointing.png',
+                  //     width: 35, // Adjust size based on your asset
+                  //   ),
+                  // ),
                     ],
                   ),
                 ],
@@ -841,6 +841,8 @@ class PlaceholderPage extends StatelessWidget {
             icon: Icons.calendar_today,
             ),
 
+          
+
           Stack(
           clipBehavior: Clip.none,
           children: [
@@ -852,7 +854,7 @@ class PlaceholderPage extends StatelessWidget {
           ),
             
             Positioned(
-              top: -80,   // Adjust these to get the exact "sit" you want
+              top: -175,   // Adjust these to get the exact "sit" you want
               right: -12,
               child: Image.asset(
                 'assets/girl-sitting.png',
