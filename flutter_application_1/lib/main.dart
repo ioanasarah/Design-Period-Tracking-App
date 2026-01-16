@@ -962,12 +962,14 @@ class PlaceholderPage extends StatelessWidget {
 
   Widget _buildButton(
       BuildContext context, String label, Widget page) {
+    final selectedField = context.watch<CycleDataProvider>().selectedField;
     return Padding(
       padding: const EdgeInsets.only(right: 12),
       child: SizedBox(
         width: 160,
         child: HorizontalScrollButton(
           label: label,
+          isSelected: selectedField == label,
           onPressed: () {
             context.read<CycleDataProvider>().selectField(label);
             // Navigator.push(context,
@@ -1771,12 +1773,14 @@ Align(
   );
 }
   Widget _buildButton(BuildContext context, String label, Widget page) {
+    final selectedField = context.watch<CycleDataProvider>().selectedField;
     return Padding(
       padding: const EdgeInsets.only(right: 12),
       child: SizedBox(
         width: 160, // controls how many buttons fit on screen
         child: HorizontalScrollButton( // make a new class with a different deign for these
           label: label,
+          isSelected: selectedField == label,
           onPressed: () {
             context.read<CycleDataProvider>().selectField(label);
             // Navigator.push();
@@ -2451,12 +2455,14 @@ Future<String> _loadMenstruationInfo(String selectedField) async {
   );
 }
   Widget _buildButton(BuildContext context, String label, Widget page) {
+    final selectedField = context.watch<CycleDataProvider>().selectedField;
     return Padding(
       padding: const EdgeInsets.only(right: 12),
       child: SizedBox(
         width: 160, // controls how many buttons fit on screen
         child: HorizontalScrollButton( // make a new class with a different deign for these
           label: label,
+          isSelected: selectedField == label,
           onPressed: () {
             context.read<CycleDataProvider>().selectField(label);
             // Navigator.push();
@@ -2752,12 +2758,14 @@ final calc = context.watch<Calculate>();
 
 
   Widget _buildButton(BuildContext context, String label, Widget page) {
+    final selectedField = context.watch<CycleDataProvider>().selectedField;
     return Padding(
       padding: const EdgeInsets.only(right: 12),
       child: SizedBox(
         width: 160, // controls how many buttons fit on screen
         child: HorizontalScrollButton( // make a new class with a different deign for these
           label: label,
+          isSelected: selectedField == label,
           onPressed: () {
             context.read<CycleDataProvider>().selectField(label);
             // Navigator.push();
@@ -3034,11 +3042,13 @@ final calc = context.watch<Calculate>();
 
 
   Widget _buildButton(BuildContext context, String label, Widget page) {
+    final selectedField = context.watch<CycleDataProvider>().selectedField;
     return Padding(
       padding: const EdgeInsets.only(right: 12),
       child: SizedBox(
         width: 160, // controls how many buttons fit on screen
-        child: HorizontalScrollButton( // make a new class with a different deign for these
+        child: HorizontalScrollButton( 
+          isSelected: selectedField == label,// make a new class with a different deign for these
           label: label,
           onPressed: () {
             context.read<CycleDataProvider>().selectField(label);
@@ -3053,12 +3063,14 @@ final calc = context.watch<Calculate>();
 }
 
   Widget _buildButton(BuildContext context, String label, Widget page) {
+    final selectedField = context.watch<CycleDataProvider>().selectedField;
     return Padding(
       padding: const EdgeInsets.only(right: 12),
       child: SizedBox(
         width: 160, // controls how many buttons fit on screen
         child: HorizontalScrollButton( // make a new class with a different deign for these
           label: label,
+          isSelected: selectedField == label,
           onPressed: () {
             context.read<CycleDataProvider>().selectField(label);
             // Navigator.push();
@@ -3356,17 +3368,19 @@ final calc = context.watch<Calculate>();
 
 
   Widget _buildButton(BuildContext context, String label, Widget page) {
+    final selectedField = context.watch<CycleDataProvider>().selectedField;
     return Padding(
       padding: const EdgeInsets.only(right: 12),
       child: SizedBox(
         width: 160, // controls how many buttons fit on screen
         child: HorizontalScrollButton( // make a new class with a different deign for these
           label: label,
+          isSelected: selectedField == label,
           onPressed: () {
             context.read<CycleDataProvider>().selectField(label);
-            // Navigator.push();
+            //Navigator.push();
             //MaterialPageRoute(builder: (_) => page),
-            
+
           },
         ),
       ),
@@ -3394,6 +3408,7 @@ class LateLutealPage extends StatelessWidget{
   return data ?? 'No data';
 }
 
+  bool selected = false;
   
   @override
   Widget build(BuildContext context) {
@@ -3666,6 +3681,7 @@ final calc = context.watch<Calculate>();
         width: 160, // controls how many buttons fit on screen
         child: HorizontalScrollButton( // make a new class with a different deign for these
           label: label,
+          isSelected: selected,
           onPressed: () {
             context.read<CycleDataProvider>().selectField(label);
             // Navigator.push();
@@ -3775,15 +3791,19 @@ class TextBox extends StatelessWidget {
 class HorizontalScrollButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
+  final bool isSelected;
 
   const HorizontalScrollButton({
     super.key,
     required this.label,
     required this.onPressed,
+    required this.isSelected,
   });
+
 
   @override
   Widget build(BuildContext context) {
+
     return SizedBox(
       width: 137,
       height: 120,
@@ -3793,7 +3813,9 @@ class HorizontalScrollButton extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: isSelected
+              ? const Color.fromARGB(255, 228, 48, 251)
+              : Colors.white,
             borderRadius: BorderRadius.circular(24),
             boxShadow: const [
               BoxShadow(
