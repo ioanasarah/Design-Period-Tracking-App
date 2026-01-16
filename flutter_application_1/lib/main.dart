@@ -3408,7 +3408,7 @@ class LateLutealPage extends StatelessWidget{
   return data ?? 'No data';
 }
 
-  bool selected = false;
+  final bool selected = false;
   
   @override
   Widget build(BuildContext context) {
@@ -3814,14 +3814,15 @@ class HorizontalScrollButton extends StatelessWidget {
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
             color: isSelected
-              ? const Color.fromARGB(255, 228, 48, 251)
+              ? const Color(0xFFFBE3E4)
               : Colors.white,
             borderRadius: BorderRadius.circular(24),
             boxShadow: const [
               BoxShadow(
                 color: Color(0x0C000000),
-                blurRadius: 40,
+                blurRadius: 20,
                 offset: Offset(4, 6),
+                spreadRadius: 2,
               ),
             ],
           ),
