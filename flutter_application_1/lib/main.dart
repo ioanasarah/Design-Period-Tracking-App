@@ -1961,62 +1961,87 @@ class CalendarPage extends StatefulWidget {
           ),
           centerTitle: true,
         ),
-        body: Column(
-          children: [
-            TableCalendar(
-              firstDay: DateTime.now(),
-              lastDay: DateTime.now().add(const Duration(days: 365 * 5)),
-              focusedDay: _focusedDay,
-
-              selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-
-              onDaySelected: (selectedDay, focusedDay) {
-                setState(() {
-                  _selectedDay = selectedDay;
-                  _focusedDay = focusedDay;
-                });
-              },
-
-              calendarBuilders: CalendarBuilders(
-                defaultBuilder: (context, day, focusedDay) {
-                  //predicted period
-                  if (_isPredictedPeriod(day)) {
-                    return Container(
-                      margin: const EdgeInsets.all(6),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF5757B),
-                        shape: BoxShape.circle,
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        '${day.day}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontFamily: 'DMSans',
-                          fontWeight: FontWeight.w400,
-                          height: 1.40,
-                        ),
-                      ),
-                    );
-                  }
-
-                  final calc = context.read<Calculate>();
-
-                  // for (final periodStart in _predictedPeriodDaysStart) {
-                  //   DateTime ovulation = periodStart.add(Duration(days: calc.cycleLength - 14-1));
-                  //   if (isSameDay(day, ovulation)) {
-                  //     return _buildCircle(day, color: Color(0xFFC1E5FF), textColor: Color(0xFF72777A));
-                  //   }
-                  // }
-
-                  for (final periodStart in _predictedPeriodDaysStart) {
-                    DateTime ovulation = periodStart.add(Duration(days: calc.cycleLength - 14-1));
-                    if (isSameDay(day, ovulation)) {
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              TableCalendar(
+                firstDay: DateTime.now(),
+                lastDay: DateTime.now().add(const Duration(days: 365 * 5)),
+                focusedDay: _focusedDay,
+          
+                selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+          
+                onDaySelected: (selectedDay, focusedDay) {
+                  setState(() {
+                    _selectedDay = selectedDay;
+                    _focusedDay = focusedDay;
+                  });
+                },
+          
+                calendarBuilders: CalendarBuilders(
+                  defaultBuilder: (context, day, focusedDay) {
+                    //predicted period
+                    if (_isPredictedPeriod(day)) {
                       return Container(
                         margin: const EdgeInsets.all(6),
                         decoration: const BoxDecoration(
-                          color: Color(0xFFC1E5FF),
+                          color: Color(0xFFF5757B),
+                          shape: BoxShape.circle,
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          '${day.day}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontFamily: 'DMSans',
+                            fontWeight: FontWeight.w400,
+                            height: 1.40,
+                          ),
+                        ),
+                      );
+                    }
+          
+                    final calc = context.read<Calculate>();
+          
+                    // for (final periodStart in _predictedPeriodDaysStart) {
+                    //   DateTime ovulation = periodStart.add(Duration(days: calc.cycleLength - 14-1));
+                    //   if (isSameDay(day, ovulation)) {
+                    //     return _buildCircle(day, color: Color(0xFFC1E5FF), textColor: Color(0xFF72777A));
+                    //   }
+                    // }
+          
+                    for (final periodStart in _predictedPeriodDaysStart) {
+                      DateTime ovulation = periodStart.add(Duration(days: calc.cycleLength - 14-1));
+                      if (isSameDay(day, ovulation)) {
+                        return Container(
+                          margin: const EdgeInsets.all(6),
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFC1E5FF),
+                            shape: BoxShape.circle,
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            '${day.day}',
+                            style: const TextStyle(
+                              color: Color(0xFF72777A),
+                              fontSize: 16,
+                              fontFamily: 'DMSans',
+                              fontWeight: FontWeight.w400,
+                              height: 1.40,
+                            ),
+                          ),
+                        );
+                      }
+                    }
+          
+                    // uncertainty
+                    if (isWithin5Days(day)) {
+                      return Container(
+                        margin: const EdgeInsets.all(6),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFFBE3E4),
                           shape: BoxShape.circle,
                         ),
                         alignment: Alignment.center,
@@ -2032,79 +2057,57 @@ class CalendarPage extends StatefulWidget {
                         ),
                       );
                     }
-                  }
-
-                  // uncertainty
-                  if (isWithin5Days(day)) {
-                    return Container(
-                      margin: const EdgeInsets.all(6),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFFBE3E4),
-                        shape: BoxShape.circle,
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        '${day.day}',
-                        style: const TextStyle(
-                          color: Color(0xFF72777A),
-                          fontSize: 16,
-                          fontFamily: 'DMSans',
-                          fontWeight: FontWeight.w400,
-                          height: 1.40,
-                        ),
-                      ),
-                    );
-                  }
-
-                  return null;
-                },
-              ),
-
-              calendarStyle: const CalendarStyle(
-                todayDecoration: BoxDecoration(
-                  color: Color(0xFF303437),
-                  shape: BoxShape.circle,
+          
+                    return null;
+                  },
                 ),
-                selectedDecoration: BoxDecoration(
-                  color: Color(0xFF5454CA),
-                  shape: BoxShape.circle,
+          
+                calendarStyle: const CalendarStyle(
+                  todayDecoration: BoxDecoration(
+                    color: Color(0xFF303437),
+                    shape: BoxShape.circle,
+                  ),
+                  selectedDecoration: BoxDecoration(
+                    color: Color(0xFF5454CA),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+          
+                headerStyle: const HeaderStyle(
+                  formatButtonVisible: false,
+                  titleCentered: true,
                 ),
               ),
-
-              headerStyle: const HeaderStyle(
-                formatButtonVisible: false,
-                titleCentered: true,
-              ),
-            ),
-
-            const SizedBox(height: 30),
-
-            if (_selectedDay != null)
+          
+              const SizedBox(height: 30),
+          
+              if (_selectedDay != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 20),
+                  child: Text(
+                    '$selectedPhase',
+                    style: TextStyle(
+                      color: const Color(0xFF303437),
+                      fontSize: 30,
+                      fontFamily: 'DM Sans',
+                      fontWeight: FontWeight.w700,
+                      height: 1.33,
+                      ),
+                  ),
+                ),
+          
+              const SizedBox(height: 10),
+          
               Padding(
-                padding: const EdgeInsets.only(top: 20),
-                child: Text(
-                  '$selectedPhase',
-                  style: TextStyle(
-                    color: const Color(0xFF303437),
-                    fontSize: 30,
-                    fontFamily: 'DM Sans',
-                    fontWeight: FontWeight.w700,
-                    height: 1.33,
-                    ),
-                ),
+                padding: const EdgeInsets.all(18.0),
+                child: _infoTile(
+                title: "Today's Recap",
+                value: Text(info).data!,
+                icon: Icons.analytics,
+                          ),
               ),
-
-            const SizedBox(height: 10),
-
-            Padding(
-              padding: const EdgeInsets.all(18.0),
-              child: _infoTile(
-              title: "Today's Recap",
-              value: Text(info).data!,
-              icon: Icons.analytics,
-                        ),
-            ),
-          ],
+            ],
+          ),
         ),
       );
     }
@@ -3814,8 +3817,8 @@ class HorizontalScrollButton extends StatelessWidget {
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
             color: isSelected
-              ? const Color(0xFFFBE3E4)
-              : Colors.white,
+              ? const Color(0xFFFBE3E4) // color of horizontl scroll button once selected
+              : Colors.white, //color of horizontl scroll button not selected
             borderRadius: BorderRadius.circular(24),
             boxShadow: const [
               BoxShadow(
