@@ -1071,6 +1071,7 @@ class DailyTipsPage extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
+    
     final length = context.read<Calculate>().updateCycleLength;
     // for getting hormone data - add this wherever need graph
     final phasesInOrder = [
@@ -1094,6 +1095,11 @@ class DailyTipsPage extends StatelessWidget {
 
     final cycleData = context.watch<CycleDataProvider>();
     final selectedField = cycleData.selectedField;
+
+// final todayX = difference.toDouble(); // day in cycle
+
+
+
 
     final hormoneGraph = [
       'Effects of Estrogen',
@@ -1234,6 +1240,7 @@ final phaseAnnotations = phaseStartX.containsKey(phase)
         color: (phaseColors[phase] ?? Colors.grey).withOpacity(0.35)
       )
     ] : <VerticalRangeAnnotation>[];
+
 
 
     // design of page 
@@ -1453,6 +1460,7 @@ rangeAnnotations: RangeAnnotations(
   verticalRangeAnnotations: phaseAnnotations,
 ),
 
+
                             titlesData: FlTitlesData(
                               topTitles: AxisTitles(
                                 sideTitles: SideTitles(showTitles: false),
@@ -1495,6 +1503,7 @@ rangeAnnotations: RangeAnnotations(
                               ),
                             ),
                           lineBarsData: [
+                            
                             LineChartBarData(
                               spots: estrogenSpots,
                               isCurved: true,
@@ -2191,31 +2200,191 @@ Future<String> _loadMenstruationInfo(String selectedField) async {
   
   @override
   Widget build(BuildContext context) {
+final length = context.read<Calculate>().updateCycleLength;
+    // for getting hormone data - add this wherever need graph
+    final phasesInOrder = [
+      'Menstruation',
+      'Follicular',
+      'Ovulation',
+      'Early Luteal',
+      'Late Luteal',
+    ];
 
-    // final calc = context.watch<Calculate>();
+const String highlightedPhase = 'Menstruation';
+
+
+
+    // data loaded into page 
+    final calc = context.watch<Calculate>();
     // final nextPeriodDate = calc.nextPeriodDate;
-    // final difference = calc.difference;
+    final difference = calc.difference;
+    final phase = calc.phase;
+    final dayOfPhase = calc.dayofphase;
+
+    final today = DateTime.now();
 
     final cycleData = context.watch<CycleDataProvider>();
-    
+    final selectedField = cycleData.selectedField;
+
+    final hormoneGraph = [
+      'Effects of Estrogen',
+      'Effects of Progesterone',
+      'Effects of LH',
+      'Effects of FSH',
+    ].contains(selectedField);
+
+final energyGraph = ["Energy Levels Info"].contains(selectedField);
+
     if (!cycleData.isLoaded) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    // final phase = calc.phase;
-    // final dayOfPhase = calc.dayofphase;
-    final selectedField = cycleData.selectedField;
+  final info = (phase != null && dayOfPhase != null)
+      ? cycleData.getPhaseInfo(
+          phase: phase,
+          dayOfPhase: dayOfPhase,
+          field: selectedField,
+        )
+      : 'No data';
 
-    // final info = (phase != null && dayOfPhase != null)
-    //   ? cycleData.getPhaseInfo(
-    //       phase: phase,
-    //       dayOfPhase: dayOfPhase,
-    //       field: selectedField,
-    //     )
-    //   : 'No data';
+    // add this wherever need graph 
+
+
+
+final Map<String, double> phaseStartX = {};
+final Map<String, double> phaseEndX = {};
+
+List<FlSpot> estrogenSpots = [];
+double xEstrogen = 0;
+
+for (final phaseName in phasesInOrder) {
+  final days = cycleData.getAllPhaseDays(phaseName);
+
+  if (days.isEmpty) continue;
+
+  phaseStartX[phaseName] = xEstrogen;
+
+  for (final day in days) {
+    final estrogen = day.getDouble('Level of Estrogen');
+    if (estrogen != null) {
+      estrogenSpots.add(FlSpot(xEstrogen, estrogen));
+      xEstrogen += 1;
+    }
+  }
+
+  phaseEndX[phaseName] = xEstrogen - 1;
+}
+
+
+List<FlSpot> progesteroneSpots = [];
+double xProgesterone = 0;
+
+for (final phaseName in phasesInOrder) {
+  final days = cycleData.getAllPhaseDays(phaseName);
+
+  for (final day in days) {
+    final progesterone = day.getDouble('Level of Progesterone');
+    if (progesterone != null) {
+      progesteroneSpots.add(FlSpot(xProgesterone, progesterone));
+      xProgesterone += 1;
+    }
+  }
+}
+
+List<FlSpot> fshSpots = [];
+double xFsh = 0;
+
+for (final phaseName in phasesInOrder) {
+  final days = cycleData.getAllPhaseDays(phaseName);
+
+  for (final day in days) {
+    final fsh = day.getDouble('Level of FSH');
+    if (fsh != null) {
+      fshSpots.add(FlSpot(xFsh, fsh));
+      xFsh += 1;
+    }
+  }
+}
+
+List<FlSpot> lhSpots = [];
+double xLh = 0;
+
+for (final phaseName in phasesInOrder) {
+  final days = cycleData.getAllPhaseDays(phaseName);
+
+  for (final day in days) {
+    final lh = day.getDouble('Level of LH');
+    if (lh != null) {
+      lhSpots.add(FlSpot(xLh, lh));
+      xLh += 1;
+    }
+  }
+}
+final maxX = [
+  estrogenSpots,
+  progesteroneSpots,
+  fshSpots,
+  lhSpots,
+]
+    .where((list) => list.isNotEmpty)
+    .map((list) => list.last.x)
+    .fold<double>(0.0, (prev, x) => x > prev ? x : prev);
+
+
+
+
+List<FlSpot> energySpots = [];
+double xEnergy = 0;
+
+for (final phaseName in phasesInOrder) {
+  final days = cycleData.getAllPhaseDays(phaseName);
+
+  for (final day in days) {
+    final energy = day.getDouble('Energy Levels');
+    if (energy != null) {
+      energySpots.add(FlSpot(xEnergy, energy));
+      xEnergy += 1;
+    }
+  }
+}
+
+final phaseColors = {
+  'Menstruation': const Color.fromARGB(64, 217, 28, 56),
+  'Follicular': const Color.fromRGBO(173, 216, 230, 0.25),
+  'Ovulation': const Color.fromRGBO(144, 238, 144, 0.25), 
+  'Early Luteal': const Color.fromRGBO(221, 160, 221, 0.25),
+  'Late Luteal': const Color.fromRGBO(255, 228, 181, 0.25),
+};
+// design change these to match color scheme
+
+final List<VerticalRangeAnnotation> phaseAnnotations =
+    (phaseStartX.containsKey(highlightedPhase) &&
+     phaseEndX.containsKey(highlightedPhase))
+        ? [
+            VerticalRangeAnnotation(
+              x1: phaseStartX[highlightedPhase]!,
+              x2: phaseEndX[highlightedPhase]!,
+              color: (phaseColors[highlightedPhase] ?? const Color.fromARGB(137, 252, 62, 62))
+                  .withOpacity(0.35),
+            ),
+          ]
+        : [];
+      
+// final todayX = difference!.toDouble(); // day in cycle
+
+// extraLinesData: ExtraLinesData(
+//   verticalLines: [
+//     VerticalLine(
+//       x: todayX,
+//       color: Colors.black54,
+//       strokeWidth: 2,
+//       dashArray: [5, 5],
+//     ),
+//   ],
+// );
+
 
     return Scaffold(
-      backgroundColor: Colors.white, // change to phase color
       body: SafeArea(
       child:
       SingleChildScrollView(
@@ -2233,7 +2402,7 @@ Future<String> _loadMenstruationInfo(String selectedField) async {
               style: TextStyle(
                 color: const Color(0xFF5454CA),
                 fontSize: 36,
-                fontFamily: 'DMSans-Regular',
+                fontFamily: 'DM Sans',
                 fontWeight: FontWeight.w700,
                 height: 0.67,
                 letterSpacing: 1.44,
@@ -2264,17 +2433,17 @@ Future<String> _loadMenstruationInfo(String selectedField) async {
                 children: [
                   _buildButton(
                     context,
-                    "What is happening in each phase",
+                    "Phase Info",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of estrogen",
+                    "Effects of Estrogen",
                     const MenstruationPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of progesterone",
+                    "Effects of Progesterone",
                     const FolicularPage(),
                   ),
                   _buildButton(
@@ -2289,27 +2458,27 @@ Future<String> _loadMenstruationInfo(String selectedField) async {
                   ),
                   _buildButton(
                     context,
-                    "Energy Levels Type",
+                    "Energy Levels Info",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "Type of food",
+                    "What to eat",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "Example of Food",
+                    "Foods and Recipes",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "Health aspect",
+                    "Concentration",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "Concentration Levels",
+                    "Health",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
@@ -2324,48 +2493,252 @@ Future<String> _loadMenstruationInfo(String selectedField) async {
                   ),
                   _buildButton(
                     context,
-                    "What is happening in the Ovaries",
+                    "Insights in the Brain",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "What is happening in the Brain",
+                    "Insights in the Ovaries",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "What is happening in the Uterus",
+                    "Insights in the Uterus",
                     const EarlyLutealPage(),
                   )
-
                 ],
               ),
             ),
-          SizedBox(height:10),
-          Align(
-            alignment: Alignment.centerLeft,
+          SizedBox(height:20),
+        if (hormoneGraph)...[
+              Align(
+                alignment: Alignment.centerLeft,
                 child:
                 Text(
-                'Graph', //change this
+                'Graph',
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                   ),
                   )
               ),
-    Padding(
-  padding: const EdgeInsets.only(top: 20.0),
-  child: Padding(
-  padding: const EdgeInsets.only(top: 20.0),
-  child: _infoTile(
-    title: selectedField,
-    value: 'graph'))
-  ),
- SizedBox(height:10),
 
+              SizedBox(
+                height: 350,
+                // padding: const EdgeInsets.only(top: 20.0),
+                child: SizedBox(height: 300,
+                
+                child: 
+                Column(
+                  children: [
+                    Row(
+                      children: const [ // design
+        _LegendItem(color:  Color.fromARGB(255, 230, 113, 152), label: 'Estrogen'),
+        SizedBox(width: 16),
+        _LegendItem(color: Colors.deepPurple, label: 'Progesterone'),
+        SizedBox(width: 16),
+               _LegendItem(color: Color.fromARGB(255, 114, 243, 107), label: 'FSH'),
+        SizedBox(width: 16),
+        _LegendItem(color: Color.fromARGB(255, 82, 102, 216), label: 'LH'),
+      ],
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height:300,
+                      child: LineChart(
+                      
+                        LineChartData(
+                          minX: 0,
+                          maxX: maxX,
+                          minY: 0,
+
+rangeAnnotations: RangeAnnotations(
+  verticalRangeAnnotations: phaseAnnotations,
+),
+
+                            titlesData: FlTitlesData(
+                              topTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              rightTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              bottomTitles: AxisTitles(
+                                axisNameWidget: const Padding(
+                                  padding: EdgeInsets.only(right: 20),
+                                  child: Text(
+                                    'Cycle Day',
+                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  interval: 5,
+                                  getTitlesWidget: (value, meta) {
+                                    return Text(value.toInt().toString());
+                                  },
+                                ),
+                              ),
+                              leftTitles: AxisTitles(
+                                axisNameWidget: const Padding(
+                                  padding: EdgeInsets.only(right: 20),
+                                  child: Text(
+                                    'Hormone Level',
+                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  interval: 1,
+                                  reservedSize: 40,
+                                  getTitlesWidget: (value, meta) {
+                                    return Text(value.toInt().toString());
+                                  },
+                                ),
+                              ),
+                            ),
+                          lineBarsData: [
+                            LineChartBarData(
+                              spots: estrogenSpots,
+                              isCurved: true,
+                              color: const Color.fromARGB(255, 230, 113, 152),
+                              dotData: FlDotData(show: false),
+                              barWidth: 3,
+                            ),
+                            LineChartBarData(
+                      spots: progesteroneSpots,
+                              isCurved: true,
+                              barWidth: 3,
+                              color: Colors.deepPurple,
+                              dotData: FlDotData(show: false),
+                            ), 
+                            LineChartBarData(
+                              spots: lhSpots,
+                              isCurved: true,
+                              color: const Color.fromARGB(255, 111, 174, 237),
+                              dotData: FlDotData(show: false),
+                              barWidth: 3,
+                            ),
+                            LineChartBarData(
+                              spots: fshSpots,
+                              isCurved: true,
+                              color: const Color.fromARGB(255, 114, 243, 107),
+                              dotData: FlDotData(show: false),
+                              barWidth: 3,
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+                ),
+              ),],
+if (energyGraph)...[
+Align(
+                alignment: Alignment.centerLeft,
+                child:
+                Text(
+                'Graph',
+                style: TextStyle(
+                  color: const Color(0xFF404446),
+                  fontSize: 18,
+                  fontFamily: 'DMSans',
+                  fontWeight: FontWeight.w700,
+                  height: 1.33,
+                  ),
+                  )
+              ),
+
+              SizedBox(
+                height: 350,
+                // padding: const EdgeInsets.only(top: 20.0),
+                child: SizedBox(height: 300,
+                child: 
+                Column(
+                  children: [
+                    Row(
+                      children: const [
+        _LegendItem(color:  Color.fromARGB(255, 40, 71, 227), label: 'Energy Level'),
+        SizedBox(width: 16),
+      ],
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height:300,
+                      child: LineChart(
+                      
+                        LineChartData(
+                          minX: 0,
+                          maxX: maxX,
+                          minY: 0,
+
+                          rangeAnnotations: RangeAnnotations(
+  verticalRangeAnnotations: phaseAnnotations,
+),
+
+                            titlesData: FlTitlesData(
+                              topTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              rightTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              bottomTitles: AxisTitles(
+                                axisNameWidget: const Padding(
+                                  padding: EdgeInsets.only(right: 20),
+                                  child: Text(
+                                    'Cycle Day',
+                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  interval: 5,
+                                  getTitlesWidget: (value, meta) {
+                                    return Text(value.toInt().toString());
+                                  },
+                                ),
+                              ),
+                              leftTitles: AxisTitles(
+                                axisNameWidget: const Padding(
+                                  padding: EdgeInsets.only(right: 20),
+                                  child: Text(
+                                    'Energy Level',
+                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  interval: 1,
+                                  reservedSize: 40,
+                                  getTitlesWidget: (value, meta) {
+                                    return Text(value.toInt().toString());
+                                  },
+                                ),
+                              ),
+                            ),
+                          lineBarsData: [
+                            LineChartBarData(
+                              spots: energySpots,
+                              isCurved: false,
+                              color: const Color.fromARGB(255, 40, 71, 227),
+                              dotData: FlDotData(show: false),
+                              barWidth: 3,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+                ),
+              ),
+],
+ SizedBox(height:20),
 
           Align(
             alignment: Alignment.centerLeft,
@@ -2384,7 +2757,7 @@ Future<String> _loadMenstruationInfo(String selectedField) async {
 
              Padding(
   padding: const EdgeInsets.only(top: 20.0),
-  child:  FutureBuilder<String>(
+  child: FutureBuilder<String>(
       future: _loadMenstruationInfo(selectedField),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -2392,9 +2765,7 @@ Future<String> _loadMenstruationInfo(String selectedField) async {
         }
 
         if (snapshot.hasError) {
-          return _infoTile(
-            title: selectedField,
-            value: 'Error loading data');
+          return _infoTile(title: selectedField, value: 'Error loading data');
         }
 
         return _infoTile(
@@ -2404,7 +2775,7 @@ Future<String> _loadMenstruationInfo(String selectedField) async {
     
       },
       )
-  
+    
   ),
 ]
 )
@@ -2413,7 +2784,7 @@ Future<String> _loadMenstruationInfo(String selectedField) async {
 }
 
 //this one doesnt need an icon
-    Widget _infoTile({
+  Widget _infoTile({
     required String title,
     required String value,
     //required IconData icon,
@@ -2480,7 +2851,7 @@ Future<String> _loadMenstruationInfo(String selectedField) async {
 
 class FolicularPage extends StatelessWidget{
   const FolicularPage({super.key});
-Future<String> _loadMenstruationInfo(String selectedField) async {
+Future<String> _loadFollicularInfo(String selectedField) async {
   final jsonString = await rootBundle.loadString('assets/All_Phases.json');
   final List<dynamic> decoded = json.decode(jsonString);
 
@@ -2499,26 +2870,176 @@ Future<String> _loadMenstruationInfo(String selectedField) async {
   
   @override
   Widget build(BuildContext context) {
-    
-final calc = context.watch<Calculate>();
-    final nextPeriodDate = calc.nextPeriodDate;
+   final length = context.read<Calculate>().updateCycleLength;
+    // for getting hormone data - add this wherever need graph
+    final phasesInOrder = [
+      'Menstruation',
+      'Follicular',
+      'Ovulation',
+      'Early Luteal',
+      'Late Luteal',
+    ];
+
+
+final highlightedPhase = "Follicular";
+
+    // data loaded into page 
+    final calc = context.watch<Calculate>();
+    // final nextPeriodDate = calc.nextPeriodDate;
     final difference = calc.difference;
+    final phase = calc.phase;
+    final dayOfPhase = calc.dayofphase;
+
+    final today = DateTime.now();
 
     final cycleData = context.watch<CycleDataProvider>();
-    
+    final selectedField = cycleData.selectedField;
+
+    final hormoneGraph = [
+      'Effects of Estrogen',
+      'Effects of Progesterone',
+      'Effects of LH',
+      'Effects of FSH',
+    ].contains(selectedField);
+
+final energyGraph = ["Energy Levels Info"].contains(selectedField);
+
     if (!cycleData.isLoaded) {
       return const Center(child: CircularProgressIndicator());
     }
 
-  final phase = calc.phase;
-  final dayOfPhase = calc.dayofphase;
-  final selectedField = cycleData.selectedField;
+  final info = (phase != null && dayOfPhase != null)
+      ? cycleData.getPhaseInfo(
+          phase: phase,
+          dayOfPhase: dayOfPhase,
+          field: selectedField,
+        )
+      : 'No data';
 
-// scaffold inside body safe area, child singlescroll view child padding(20)
-// child of padding column
-// 
-// 
-// 
+    // add this wherever need graph 
+
+
+
+final Map<String, double> phaseStartX = {};
+final Map<String, double> phaseEndX = {};
+
+List<FlSpot> estrogenSpots = [];
+double xEstrogen = 0;
+
+for (final phaseName in phasesInOrder) {
+  final days = cycleData.getAllPhaseDays(phaseName);
+
+  if (days.isEmpty) continue;
+
+  phaseStartX[phaseName] = xEstrogen;
+
+  for (final day in days) {
+    final estrogen = day.getDouble('Level of Estrogen');
+    if (estrogen != null) {
+      estrogenSpots.add(FlSpot(xEstrogen, estrogen));
+      xEstrogen += 1;
+    }
+  }
+
+  phaseEndX[phaseName] = xEstrogen - 1;
+}
+
+
+List<FlSpot> progesteroneSpots = [];
+double xProgesterone = 0;
+
+for (final phaseName in phasesInOrder) {
+  final days = cycleData.getAllPhaseDays(phaseName);
+
+  for (final day in days) {
+    final progesterone = day.getDouble('Level of Progesterone');
+    if (progesterone != null) {
+      progesteroneSpots.add(FlSpot(xProgesterone, progesterone));
+      xProgesterone += 1;
+    }
+  }
+}
+
+List<FlSpot> fshSpots = [];
+double xFsh = 0;
+
+for (final phaseName in phasesInOrder) {
+  final days = cycleData.getAllPhaseDays(phaseName);
+
+  for (final day in days) {
+    final fsh = day.getDouble('Level of FSH');
+    if (fsh != null) {
+      fshSpots.add(FlSpot(xFsh, fsh));
+      xFsh += 1;
+    }
+  }
+}
+
+List<FlSpot> lhSpots = [];
+double xLh = 0;
+
+for (final phaseName in phasesInOrder) {
+  final days = cycleData.getAllPhaseDays(phaseName);
+
+  for (final day in days) {
+    final lh = day.getDouble('Level of LH');
+    if (lh != null) {
+      lhSpots.add(FlSpot(xLh, lh));
+      xLh += 1;
+    }
+  }
+}
+final maxX = [
+  estrogenSpots,
+  progesteroneSpots,
+  fshSpots,
+  lhSpots,
+]
+    .where((list) => list.isNotEmpty)
+    .map((list) => list.last.x)
+    .fold<double>(0.0, (prev, x) => x > prev ? x : prev);
+
+
+
+
+List<FlSpot> energySpots = [];
+double xEnergy = 0;
+
+for (final phaseName in phasesInOrder) {
+  final days = cycleData.getAllPhaseDays(phaseName);
+
+  for (final day in days) {
+    final energy = day.getDouble('Energy Levels');
+    if (energy != null) {
+      energySpots.add(FlSpot(xEnergy, energy));
+      xEnergy += 1;
+    }
+  }
+}
+
+final phaseColors = {
+  'Menstruation': const Color.fromARGB(64, 217, 28, 56),
+  'Follicular': const Color.fromRGBO(173, 216, 230, 0.25),
+  'Ovulation': const Color.fromRGBO(144, 238, 144, 0.25), 
+  'Early Luteal': const Color.fromRGBO(221, 160, 221, 0.25),
+  'Late Luteal': const Color.fromRGBO(255, 228, 181, 0.25),
+};
+// design change these to match color scheme
+
+final List<VerticalRangeAnnotation> phaseAnnotations =
+    (phaseStartX.containsKey(highlightedPhase) &&
+     phaseEndX.containsKey(highlightedPhase))
+        ? [
+            VerticalRangeAnnotation(
+              x1: phaseStartX[highlightedPhase]!,
+              x2: phaseEndX[highlightedPhase]!,
+              color: (phaseColors[highlightedPhase] ?? const Color.fromARGB(141, 65, 226, 244))
+                  .withOpacity(0.35),
+            ),
+          ]
+        : [];
+
+
     return Scaffold(
       body: SafeArea(
       child:
@@ -2568,17 +3089,17 @@ final calc = context.watch<Calculate>();
                 children: [
                   _buildButton(
                     context,
-                    "What is happening in each phase",
+                    "Phase Info",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of estrogen",
+                    "Effects of Estrogen",
                     const MenstruationPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of progesterone",
+                    "Effects of Progesterone",
                     const FolicularPage(),
                   ),
                   _buildButton(
@@ -2593,27 +3114,27 @@ final calc = context.watch<Calculate>();
                   ),
                   _buildButton(
                     context,
-                    "Energy Levels Type",
+                    "Energy Levels Info",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "Type of food",
+                    "What to eat",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "Example of Food",
+                    "Foods and Recipes",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "Health aspect",
+                    "Concentration",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "Concentration Levels",
+                    "Health",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
@@ -2628,47 +3149,252 @@ final calc = context.watch<Calculate>();
                   ),
                   _buildButton(
                     context,
-                    "What is happening in the Ovaries",
+                    "Insights in the Brain",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "What is happening in the Brain",
+                    "Insights in the Ovaries",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "What is happening in the Uterus",
+                    "Insights in the Uterus",
                     const EarlyLutealPage(),
                   )
-
                 ],
               ),
             ),
-          SizedBox(height:10),
-          Align(
-            alignment: Alignment.centerLeft,
+          SizedBox(height:20),
+        if (hormoneGraph)...[
+              Align(
+                alignment: Alignment.centerLeft,
                 child:
                 Text(
-                'Graph', //change this
+                'Graph',
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                   ),
                   )
               ),
-    Padding(
-  padding: const EdgeInsets.only(top: 20.0),
-  child: Padding(
-  padding: const EdgeInsets.only(top: 20.0),
-  child: _infoTile(
-    title: selectedField,
-    value: 'graph'))
-  ),
- SizedBox(height:10),
+
+              SizedBox(
+                height: 350,
+                // padding: const EdgeInsets.only(top: 20.0),
+                child: SizedBox(height: 300,
+                
+                child: 
+                Column(
+                  children: [
+                    Row(
+                      children: const [ // design
+        _LegendItem(color:  Color.fromARGB(255, 230, 113, 152), label: 'Estrogen'),
+        SizedBox(width: 16),
+        _LegendItem(color: Colors.deepPurple, label: 'Progesterone'),
+        SizedBox(width: 16),
+               _LegendItem(color: Color.fromARGB(255, 114, 243, 107), label: 'FSH'),
+        SizedBox(width: 16),
+        _LegendItem(color: Color.fromARGB(255, 82, 102, 216), label: 'LH'),
+      ],
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height:300,
+                      child: LineChart(
+                      
+                        LineChartData(
+                          minX: 0,
+                          maxX: maxX,
+                          minY: 0,
+
+rangeAnnotations: RangeAnnotations(
+  verticalRangeAnnotations: phaseAnnotations,
+),
+
+                            titlesData: FlTitlesData(
+                              topTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              rightTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              bottomTitles: AxisTitles(
+                                axisNameWidget: const Padding(
+                                  padding: EdgeInsets.only(right: 20),
+                                  child: Text(
+                                    'Cycle Day',
+                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  interval: 5,
+                                  getTitlesWidget: (value, meta) {
+                                    return Text(value.toInt().toString());
+                                  },
+                                ),
+                              ),
+                              leftTitles: AxisTitles(
+                                axisNameWidget: const Padding(
+                                  padding: EdgeInsets.only(right: 20),
+                                  child: Text(
+                                    'Hormone Level',
+                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  interval: 1,
+                                  reservedSize: 40,
+                                  getTitlesWidget: (value, meta) {
+                                    return Text(value.toInt().toString());
+                                  },
+                                ),
+                              ),
+                            ),
+                          lineBarsData: [
+                            LineChartBarData(
+                              spots: estrogenSpots,
+                              isCurved: true,
+                              color: const Color.fromARGB(255, 230, 113, 152),
+                              dotData: FlDotData(show: false),
+                              barWidth: 3,
+                            ),
+                            LineChartBarData(
+                      spots: progesteroneSpots,
+                              isCurved: true,
+                              barWidth: 3,
+                              color: Colors.deepPurple,
+                              dotData: FlDotData(show: false),
+                            ), 
+                            LineChartBarData(
+                              spots: lhSpots,
+                              isCurved: true,
+                              color: const Color.fromARGB(255, 111, 174, 237),
+                              dotData: FlDotData(show: false),
+                              barWidth: 3,
+                            ),
+                            LineChartBarData(
+                              spots: fshSpots,
+                              isCurved: true,
+                              color: const Color.fromARGB(255, 114, 243, 107),
+                              dotData: FlDotData(show: false),
+                              barWidth: 3,
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+                ),
+              ),],
+if (energyGraph)...[
+Align(
+                alignment: Alignment.centerLeft,
+                child:
+                Text(
+                'Graph',
+                style: TextStyle(
+                  color: const Color(0xFF404446),
+                  fontSize: 18,
+                  fontFamily: 'DMSans',
+                  fontWeight: FontWeight.w700,
+                  height: 1.33,
+                  ),
+                  )
+              ),
+
+              SizedBox(
+                height: 350,
+                // padding: const EdgeInsets.only(top: 20.0),
+                child: SizedBox(height: 300,
+                child: 
+                Column(
+                  children: [
+                    Row(
+                      children: const [
+        _LegendItem(color:  Color.fromARGB(255, 40, 71, 227), label: 'Energy Level'),
+        SizedBox(width: 16),
+      ],
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height:300,
+                      child: LineChart(
+                      
+                        LineChartData(
+                          minX: 0,
+                          maxX: maxX,
+                          minY: 0,
+
+                          rangeAnnotations: RangeAnnotations(
+  verticalRangeAnnotations: phaseAnnotations,
+),
+
+                            titlesData: FlTitlesData(
+                              topTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              rightTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              bottomTitles: AxisTitles(
+                                axisNameWidget: const Padding(
+                                  padding: EdgeInsets.only(right: 20),
+                                  child: Text(
+                                    'Cycle Day',
+                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  interval: 5,
+                                  getTitlesWidget: (value, meta) {
+                                    return Text(value.toInt().toString());
+                                  },
+                                ),
+                              ),
+                              leftTitles: AxisTitles(
+                                axisNameWidget: const Padding(
+                                  padding: EdgeInsets.only(right: 20),
+                                  child: Text(
+                                    'Energy Level',
+                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  interval: 1,
+                                  reservedSize: 40,
+                                  getTitlesWidget: (value, meta) {
+                                    return Text(value.toInt().toString());
+                                  },
+                                ),
+                              ),
+                            ),
+                          lineBarsData: [
+                            LineChartBarData(
+                              spots: energySpots,
+                              isCurved: false,
+                              color: const Color.fromARGB(255, 40, 71, 227),
+                              dotData: FlDotData(show: false),
+                              barWidth: 3,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+                ),
+              ),
+],
+ SizedBox(height:20),
 
           Align(
             alignment: Alignment.centerLeft,
@@ -2688,7 +3414,7 @@ final calc = context.watch<Calculate>();
              Padding(
   padding: const EdgeInsets.only(top: 20.0),
   child: FutureBuilder<String>(
-      future: _loadMenstruationInfo(selectedField),
+      future: _loadFollicularInfo(selectedField),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -2803,20 +3529,175 @@ Future<String> _loadOvulationInfo(String selectedField) async {
   
   @override
   Widget build(BuildContext context) {
-    
-final calc = context.watch<Calculate>();
-    final nextPeriodDate = calc.nextPeriodDate;
+        final length = context.read<Calculate>().updateCycleLength;
+    // for getting hormone data - add this wherever need graph
+    final phasesInOrder = [
+      'Menstruation',
+      'Follicular',
+      'Ovulation',
+      'Early Luteal',
+      'Late Luteal',
+    ];
+final highlightedPhase = "Ovulation";
+
+
+    // data loaded into page 
+    final calc = context.watch<Calculate>();
+    // final nextPeriodDate = calc.nextPeriodDate;
     final difference = calc.difference;
+    final phase = calc.phase;
+    final dayOfPhase = calc.dayofphase;
+
+    final today = DateTime.now();
 
     final cycleData = context.watch<CycleDataProvider>();
-    
+    final selectedField = cycleData.selectedField;
+
+    final hormoneGraph = [
+      'Effects of Estrogen',
+      'Effects of Progesterone',
+      'Effects of LH',
+      'Effects of FSH',
+    ].contains(selectedField);
+
+final energyGraph = ["Energy Levels Info"].contains(selectedField);
+
     if (!cycleData.isLoaded) {
       return const Center(child: CircularProgressIndicator());
     }
 
-  final phase = calc.phase;
-  final dayOfPhase = calc.dayofphase;
-  final selectedField = cycleData.selectedField;
+  final info = (phase != null && dayOfPhase != null)
+      ? cycleData.getPhaseInfo(
+          phase: phase,
+          dayOfPhase: dayOfPhase,
+          field: selectedField,
+        )
+      : 'No data';
+
+    // add this wherever need graph 
+
+
+
+final Map<String, double> phaseStartX = {};
+final Map<String, double> phaseEndX = {};
+
+List<FlSpot> estrogenSpots = [];
+double xEstrogen = 0;
+
+for (final phaseName in phasesInOrder) {
+  final days = cycleData.getAllPhaseDays(phaseName);
+
+  if (days.isEmpty) continue;
+
+  phaseStartX[phaseName] = xEstrogen;
+
+  for (final day in days) {
+    final estrogen = day.getDouble('Level of Estrogen');
+    if (estrogen != null) {
+      estrogenSpots.add(FlSpot(xEstrogen, estrogen));
+      xEstrogen += 1;
+    }
+  }
+
+  phaseEndX[phaseName] = xEstrogen - 1;
+}
+
+
+List<FlSpot> progesteroneSpots = [];
+double xProgesterone = 0;
+
+for (final phaseName in phasesInOrder) {
+  final days = cycleData.getAllPhaseDays(phaseName);
+
+  for (final day in days) {
+    final progesterone = day.getDouble('Level of Progesterone');
+    if (progesterone != null) {
+      progesteroneSpots.add(FlSpot(xProgesterone, progesterone));
+      xProgesterone += 1;
+    }
+  }
+}
+
+List<FlSpot> fshSpots = [];
+double xFsh = 0;
+
+for (final phaseName in phasesInOrder) {
+  final days = cycleData.getAllPhaseDays(phaseName);
+
+  for (final day in days) {
+    final fsh = day.getDouble('Level of FSH');
+    if (fsh != null) {
+      fshSpots.add(FlSpot(xFsh, fsh));
+      xFsh += 1;
+    }
+  }
+}
+
+List<FlSpot> lhSpots = [];
+double xLh = 0;
+
+for (final phaseName in phasesInOrder) {
+  final days = cycleData.getAllPhaseDays(phaseName);
+
+  for (final day in days) {
+    final lh = day.getDouble('Level of LH');
+    if (lh != null) {
+      lhSpots.add(FlSpot(xLh, lh));
+      xLh += 1;
+    }
+  }
+}
+final maxX = [
+  estrogenSpots,
+  progesteroneSpots,
+  fshSpots,
+  lhSpots,
+]
+    .where((list) => list.isNotEmpty)
+    .map((list) => list.last.x)
+    .fold<double>(0.0, (prev, x) => x > prev ? x : prev);
+
+
+
+
+List<FlSpot> energySpots = [];
+double xEnergy = 0;
+
+for (final phaseName in phasesInOrder) {
+  final days = cycleData.getAllPhaseDays(phaseName);
+
+  for (final day in days) {
+    final energy = day.getDouble('Energy Levels');
+    if (energy != null) {
+      energySpots.add(FlSpot(xEnergy, energy));
+      xEnergy += 1;
+    }
+  }
+}
+
+final phaseColors = {
+  'Menstruation': const Color.fromARGB(64, 217, 28, 56),
+  'Follicular': const Color.fromRGBO(173, 216, 230, 0.25),
+  'Ovulation': const Color.fromRGBO(144, 238, 144, 0.25), 
+  'Early Luteal': const Color.fromRGBO(221, 160, 221, 0.25),
+  'Late Luteal': const Color.fromRGBO(255, 228, 181, 0.25),
+};
+// design change these to match color scheme
+
+final List<VerticalRangeAnnotation> phaseAnnotations =
+    (phaseStartX.containsKey(highlightedPhase) &&
+     phaseEndX.containsKey(highlightedPhase))
+        ? [
+            VerticalRangeAnnotation(
+              x1: phaseStartX[highlightedPhase]!,
+              x2: phaseEndX[highlightedPhase]!,
+              color: (phaseColors[highlightedPhase] ?? const Color.fromARGB(174, 98, 250, 255))
+                  .withOpacity(0.35),
+            ),
+          ]
+        : [];
+
+
 
     return Scaffold(
       body: SafeArea(
@@ -2867,17 +3748,17 @@ final calc = context.watch<Calculate>();
                 children: [
                   _buildButton(
                     context,
-                    "What is happening in each phase",
+                    "Phase Info",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of estrogen",
+                    "Effects of Estrogen",
                     const MenstruationPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of progesterone",
+                    "Effects of Progesterone",
                     const FolicularPage(),
                   ),
                   _buildButton(
@@ -2892,27 +3773,27 @@ final calc = context.watch<Calculate>();
                   ),
                   _buildButton(
                     context,
-                    "Energy Levels Type",
+                    "Energy Levels Info",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "Type of food",
+                    "What to eat",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "Example of Food",
+                    "Foods and Recipes",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "Health aspect",
+                    "Concentration",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "Concentration Levels",
+                    "Health",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
@@ -2927,29 +3808,29 @@ final calc = context.watch<Calculate>();
                   ),
                   _buildButton(
                     context,
-                    "What is happening in the Ovaries",
+                    "Insights in the Brain",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "What is happening in the Brain",
+                    "Insights in the Ovaries",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "What is happening in the Uterus",
+                    "Insights in the Uterus",
                     const EarlyLutealPage(),
                   )
-
                 ],
               ),
             ),
-          SizedBox(height:10),
-          Align(
-            alignment: Alignment.centerLeft,
+          SizedBox(height:20),
+  if (hormoneGraph)...[
+              Align(
+                alignment: Alignment.centerLeft,
                 child:
                 Text(
-                'Graph', //change this
+                'Graph',
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
@@ -2959,12 +3840,219 @@ final calc = context.watch<Calculate>();
                   ),
                   )
               ),
-    Padding(
-  padding: const EdgeInsets.only(top: 20.0),
-  child: Padding(
-  padding: const EdgeInsets.only(top: 20.0),
-  child: _infoTile(value: 'graph'))
-  ),
+
+              SizedBox(
+                height: 350,
+                // padding: const EdgeInsets.only(top: 20.0),
+                child: SizedBox(height: 300,
+                
+                child: 
+                Column(
+                  children: [
+                    Row(
+                      children: const [ // design
+        _LegendItem(color:  Color.fromARGB(255, 230, 113, 152), label: 'Estrogen'),
+        SizedBox(width: 16),
+        _LegendItem(color: Colors.deepPurple, label: 'Progesterone'),
+        SizedBox(width: 16),
+               _LegendItem(color: Color.fromARGB(255, 114, 243, 107), label: 'FSH'),
+        SizedBox(width: 16),
+        _LegendItem(color: Color.fromARGB(255, 82, 102, 216), label: 'LH'),
+      ],
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height:300,
+                      child: LineChart(
+                      
+                        LineChartData(
+                          minX: 0,
+                          maxX: maxX,
+                          minY: 0,
+
+rangeAnnotations: RangeAnnotations(
+  verticalRangeAnnotations: phaseAnnotations,
+),
+
+                            titlesData: FlTitlesData(
+                              topTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              rightTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              bottomTitles: AxisTitles(
+                                axisNameWidget: const Padding(
+                                  padding: EdgeInsets.only(right: 20),
+                                  child: Text(
+                                    'Cycle Day',
+                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  interval: 5,
+                                  getTitlesWidget: (value, meta) {
+                                    return Text(value.toInt().toString());
+                                  },
+                                ),
+                              ),
+                              leftTitles: AxisTitles(
+                                axisNameWidget: const Padding(
+                                  padding: EdgeInsets.only(right: 20),
+                                  child: Text(
+                                    'Hormone Level',
+                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  interval: 1,
+                                  reservedSize: 40,
+                                  getTitlesWidget: (value, meta) {
+                                    return Text(value.toInt().toString());
+                                  },
+                                ),
+                              ),
+                            ),
+                          lineBarsData: [
+                            LineChartBarData(
+                              spots: estrogenSpots,
+                              isCurved: true,
+                              color: const Color.fromARGB(255, 230, 113, 152),
+                              dotData: FlDotData(show: false),
+                              barWidth: 3,
+                            ),
+                            LineChartBarData(
+                      spots: progesteroneSpots,
+                              isCurved: true,
+                              barWidth: 3,
+                              color: Colors.deepPurple,
+                              dotData: FlDotData(show: false),
+                            ), 
+                            LineChartBarData(
+                              spots: lhSpots,
+                              isCurved: true,
+                              color: const Color.fromARGB(255, 111, 174, 237),
+                              dotData: FlDotData(show: false),
+                              barWidth: 3,
+                            ),
+                            LineChartBarData(
+                              spots: fshSpots,
+                              isCurved: true,
+                              color: const Color.fromARGB(255, 114, 243, 107),
+                              dotData: FlDotData(show: false),
+                              barWidth: 3,
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+                ),
+              ),],
+if (energyGraph)...[
+Align(
+                alignment: Alignment.centerLeft,
+                child:
+                Text(
+                'Graph',
+                style: TextStyle(
+                  color: const Color(0xFF404446),
+                  fontSize: 18,
+                  fontFamily: 'DMSans',
+                  fontWeight: FontWeight.w700,
+                  height: 1.33,
+                  ),
+                  )
+              ),
+
+              SizedBox(
+                height: 350,
+                // padding: const EdgeInsets.only(top: 20.0),
+                child: SizedBox(height: 300,
+                child: 
+                Column(
+                  children: [
+                    Row(
+                      children: const [
+        _LegendItem(color:  Color.fromARGB(255, 40, 71, 227), label: 'Energy Level'),
+        SizedBox(width: 16),
+      ],
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height:300,
+                      child: LineChart(
+                      
+                        LineChartData(
+                          minX: 0,
+                          maxX: maxX,
+                          minY: 0,
+
+                          rangeAnnotations: RangeAnnotations(
+  verticalRangeAnnotations: phaseAnnotations,
+),
+
+                            titlesData: FlTitlesData(
+                              topTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              rightTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              bottomTitles: AxisTitles(
+                                axisNameWidget: const Padding(
+                                  padding: EdgeInsets.only(right: 20),
+                                  child: Text(
+                                    'Cycle Day',
+                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  interval: 5,
+                                  getTitlesWidget: (value, meta) {
+                                    return Text(value.toInt().toString());
+                                  },
+                                ),
+                              ),
+                              leftTitles: AxisTitles(
+                                axisNameWidget: const Padding(
+                                  padding: EdgeInsets.only(right: 20),
+                                  child: Text(
+                                    'Energy Level',
+                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  interval: 1,
+                                  reservedSize: 40,
+                                  getTitlesWidget: (value, meta) {
+                                    return Text(value.toInt().toString());
+                                  },
+                                ),
+                              ),
+                            ),
+                          lineBarsData: [
+                            LineChartBarData(
+                              spots: energySpots,
+                              isCurved: false,
+                              color: const Color.fromARGB(255, 40, 71, 227),
+                              dotData: FlDotData(show: false),
+                              barWidth: 3,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+                ),
+              ),
+],
  SizedBox(height:10),
 
           Align(
@@ -3107,26 +4195,176 @@ Future<String> _loadEarlyLutealInfo(String selectedField) async {
   
   @override
   Widget build(BuildContext context) {
-    
-final calc = context.watch<Calculate>();
-    final nextPeriodDate = calc.nextPeriodDate;
+    final length = context.read<Calculate>().updateCycleLength;
+    // for getting hormone data - add this wherever need graph
+    final phasesInOrder = [
+      'Menstruation',
+      'Follicular',
+      'Ovulation',
+      'Early Luteal',
+      'Late Luteal',
+    ];
+
+
+
+    // data loaded into page 
+    final calc = context.watch<Calculate>();
+    // final nextPeriodDate = calc.nextPeriodDate;
     final difference = calc.difference;
+    final phase = calc.phase;
+    final dayOfPhase = calc.dayofphase;
+
+    final today = DateTime.now();
 
     final cycleData = context.watch<CycleDataProvider>();
-    
+    final selectedField = cycleData.selectedField;
+
+    final hormoneGraph = [
+      'Effects of Estrogen',
+      'Effects of Progesterone',
+      'Effects of LH',
+      'Effects of FSH',
+    ].contains(selectedField);
+
+final energyGraph = ["Energy Levels Info"].contains(selectedField);
+
     if (!cycleData.isLoaded) {
       return const Center(child: CircularProgressIndicator());
     }
 
-  final phase = calc.phase;
-  final dayOfPhase = calc.dayofphase;
-  final selectedField = cycleData.selectedField;
+  final info = (phase != null && dayOfPhase != null)
+      ? cycleData.getPhaseInfo(
+          phase: phase,
+          dayOfPhase: dayOfPhase,
+          field: selectedField,
+        )
+      : 'No data';
 
-// scaffold inside body safe area, child singlescroll view child padding(20)
-// child of padding column
-// 
-// 
-// 
+    // add this wherever need graph 
+
+
+
+final Map<String, double> phaseStartX = {};
+final Map<String, double> phaseEndX = {};
+
+List<FlSpot> estrogenSpots = [];
+double xEstrogen = 0;
+
+for (final phaseName in phasesInOrder) {
+  final days = cycleData.getAllPhaseDays(phaseName);
+
+  if (days.isEmpty) continue;
+
+  phaseStartX[phaseName] = xEstrogen;
+
+  for (final day in days) {
+    final estrogen = day.getDouble('Level of Estrogen');
+    if (estrogen != null) {
+      estrogenSpots.add(FlSpot(xEstrogen, estrogen));
+      xEstrogen += 1;
+    }
+  }
+
+  phaseEndX[phaseName] = xEstrogen - 1;
+}
+
+
+List<FlSpot> progesteroneSpots = [];
+double xProgesterone = 0;
+
+for (final phaseName in phasesInOrder) {
+  final days = cycleData.getAllPhaseDays(phaseName);
+
+  for (final day in days) {
+    final progesterone = day.getDouble('Level of Progesterone');
+    if (progesterone != null) {
+      progesteroneSpots.add(FlSpot(xProgesterone, progesterone));
+      xProgesterone += 1;
+    }
+  }
+}
+
+List<FlSpot> fshSpots = [];
+double xFsh = 0;
+
+for (final phaseName in phasesInOrder) {
+  final days = cycleData.getAllPhaseDays(phaseName);
+
+  for (final day in days) {
+    final fsh = day.getDouble('Level of FSH');
+    if (fsh != null) {
+      fshSpots.add(FlSpot(xFsh, fsh));
+      xFsh += 1;
+    }
+  }
+}
+
+List<FlSpot> lhSpots = [];
+double xLh = 0;
+
+for (final phaseName in phasesInOrder) {
+  final days = cycleData.getAllPhaseDays(phaseName);
+
+  for (final day in days) {
+    final lh = day.getDouble('Level of LH');
+    if (lh != null) {
+      lhSpots.add(FlSpot(xLh, lh));
+      xLh += 1;
+    }
+  }
+}
+final maxX = [
+  estrogenSpots,
+  progesteroneSpots,
+  fshSpots,
+  lhSpots,
+]
+    .where((list) => list.isNotEmpty)
+    .map((list) => list.last.x)
+    .fold<double>(0.0, (prev, x) => x > prev ? x : prev);
+
+
+
+
+List<FlSpot> energySpots = [];
+double xEnergy = 0;
+
+for (final phaseName in phasesInOrder) {
+  final days = cycleData.getAllPhaseDays(phaseName);
+
+  for (final day in days) {
+    final energy = day.getDouble('Energy Levels');
+    if (energy != null) {
+      energySpots.add(FlSpot(xEnergy, energy));
+      xEnergy += 1;
+    }
+  }
+}
+
+final phaseColors = {
+  'Menstruation': const Color.fromARGB(64, 217, 28, 56),
+  'Follicular': const Color.fromRGBO(173, 216, 230, 0.25),
+  'Ovulation': const Color.fromRGBO(144, 238, 144, 0.25), 
+  'Early Luteal': const Color.fromRGBO(221, 160, 221, 0.25),
+  'Late Luteal': const Color.fromRGBO(255, 228, 181, 0.25),
+};
+// design change these to match color scheme
+
+final highlightedPhase = "Early Luteal";
+final List<VerticalRangeAnnotation> phaseAnnotations =
+    (phaseStartX.containsKey(highlightedPhase) &&
+     phaseEndX.containsKey(highlightedPhase))
+        ? [
+            VerticalRangeAnnotation(
+              x1: phaseStartX[highlightedPhase]!,
+              x2: phaseEndX[highlightedPhase]!,
+              color: (phaseColors[highlightedPhase] ?? const Color.fromARGB(155, 69, 216, 99))
+                  .withOpacity(0.35),
+            ),
+          ]
+        : [];
+
+
     return Scaffold(
       body: SafeArea(
       child:
@@ -3176,17 +4414,17 @@ final calc = context.watch<Calculate>();
                 children: [
                   _buildButton(
                     context,
-                    "What is happening in each phase",
+                    "Phase Info",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of estrogen",
+                    "Effects of Estrogen",
                     const MenstruationPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of progesterone",
+                    "Effects of Progesterone",
                     const FolicularPage(),
                   ),
                   _buildButton(
@@ -3201,27 +4439,27 @@ final calc = context.watch<Calculate>();
                   ),
                   _buildButton(
                     context,
-                    "Energy Levels Type",
+                    "Energy Levels Info",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "Type of food",
+                    "What to eat",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "Example of Food",
+                    "Foods and Recipes",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "Health aspect",
+                    "Concentration",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "Concentration Levels",
+                    "Health",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
@@ -3236,29 +4474,29 @@ final calc = context.watch<Calculate>();
                   ),
                   _buildButton(
                     context,
-                    "What is happening in the Ovaries",
+                    "Insights in the Brain",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "What is happening in the Brain",
+                    "Insights in the Ovaries",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "What is happening in the Uterus",
+                    "Insights in the Uterus",
                     const EarlyLutealPage(),
                   )
-
                 ],
-              ),
+                ),
             ),
-          SizedBox(height:10),
-          Align(
-            alignment: Alignment.centerLeft,
+          SizedBox(height:20),
+if (hormoneGraph)...[
+              Align(
+                alignment: Alignment.centerLeft,
                 child:
                 Text(
-                'Graph', //change this
+                'Graph',
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
@@ -3268,14 +4506,219 @@ final calc = context.watch<Calculate>();
                   ),
                   )
               ),
-    Padding(
-  padding: const EdgeInsets.only(top: 20.0),
-  child: Padding(
-  padding: const EdgeInsets.only(top: 20.0),
-  child: _infoTile(
-    title: selectedField,
-    value: 'graph'))
-  ),
+
+              SizedBox(
+                height: 350,
+                // padding: const EdgeInsets.only(top: 20.0),
+                child: SizedBox(height: 300,
+                
+                child: 
+                Column(
+                  children: [
+                    Row(
+                      children: const [ // design
+        _LegendItem(color:  Color.fromARGB(255, 230, 113, 152), label: 'Estrogen'),
+        SizedBox(width: 16),
+        _LegendItem(color: Colors.deepPurple, label: 'Progesterone'),
+        SizedBox(width: 16),
+               _LegendItem(color: Color.fromARGB(255, 114, 243, 107), label: 'FSH'),
+        SizedBox(width: 16),
+        _LegendItem(color: Color.fromARGB(255, 82, 102, 216), label: 'LH'),
+      ],
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height:300,
+                      child: LineChart(
+                      
+                        LineChartData(
+                          minX: 0,
+                          maxX: maxX,
+                          minY: 0,
+
+rangeAnnotations: RangeAnnotations(
+  verticalRangeAnnotations: phaseAnnotations,
+),
+
+                            titlesData: FlTitlesData(
+                              topTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              rightTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              bottomTitles: AxisTitles(
+                                axisNameWidget: const Padding(
+                                  padding: EdgeInsets.only(right: 20),
+                                  child: Text(
+                                    'Cycle Day',
+                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  interval: 5,
+                                  getTitlesWidget: (value, meta) {
+                                    return Text(value.toInt().toString());
+                                  },
+                                ),
+                              ),
+                              leftTitles: AxisTitles(
+                                axisNameWidget: const Padding(
+                                  padding: EdgeInsets.only(right: 20),
+                                  child: Text(
+                                    'Hormone Level',
+                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  interval: 1,
+                                  reservedSize: 40,
+                                  getTitlesWidget: (value, meta) {
+                                    return Text(value.toInt().toString());
+                                  },
+                                ),
+                              ),
+                            ),
+                          lineBarsData: [
+                            LineChartBarData(
+                              spots: estrogenSpots,
+                              isCurved: true,
+                              color: const Color.fromARGB(255, 230, 113, 152),
+                              dotData: FlDotData(show: false),
+                              barWidth: 3,
+                            ),
+                            LineChartBarData(
+                      spots: progesteroneSpots,
+                              isCurved: true,
+                              barWidth: 3,
+                              color: Colors.deepPurple,
+                              dotData: FlDotData(show: false),
+                            ), 
+                            LineChartBarData(
+                              spots: lhSpots,
+                              isCurved: true,
+                              color: const Color.fromARGB(255, 111, 174, 237),
+                              dotData: FlDotData(show: false),
+                              barWidth: 3,
+                            ),
+                            LineChartBarData(
+                              spots: fshSpots,
+                              isCurved: true,
+                              color: const Color.fromARGB(255, 114, 243, 107),
+                              dotData: FlDotData(show: false),
+                              barWidth: 3,
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+                ),
+              ),],
+if (energyGraph)...[
+Align(
+                alignment: Alignment.centerLeft,
+                child:
+                Text(
+                'Graph',
+                style: TextStyle(
+                  color: const Color(0xFF404446),
+                  fontSize: 18,
+                  fontFamily: 'DMSans',
+                  fontWeight: FontWeight.w700,
+                  height: 1.33,
+                  ),
+                  )
+              ),
+
+              SizedBox(
+                height: 350,
+                // padding: const EdgeInsets.only(top: 20.0),
+                child: SizedBox(height: 300,
+                child: 
+                Column(
+                  children: [
+                    Row(
+                      children: const [
+        _LegendItem(color:  Color.fromARGB(255, 40, 71, 227), label: 'Energy Level'),
+        SizedBox(width: 16),
+      ],
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height:300,
+                      child: LineChart(
+                      
+                        LineChartData(
+                          minX: 0,
+                          maxX: maxX,
+                          minY: 0,
+
+                          rangeAnnotations: RangeAnnotations(
+  verticalRangeAnnotations: phaseAnnotations,
+),
+
+                            titlesData: FlTitlesData(
+                              topTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              rightTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              bottomTitles: AxisTitles(
+                                axisNameWidget: const Padding(
+                                  padding: EdgeInsets.only(right: 20),
+                                  child: Text(
+                                    'Cycle Day',
+                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  interval: 5,
+                                  getTitlesWidget: (value, meta) {
+                                    return Text(value.toInt().toString());
+                                  },
+                                ),
+                              ),
+                              leftTitles: AxisTitles(
+                                axisNameWidget: const Padding(
+                                  padding: EdgeInsets.only(right: 20),
+                                  child: Text(
+                                    'Energy Level',
+                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  interval: 1,
+                                  reservedSize: 40,
+                                  getTitlesWidget: (value, meta) {
+                                    return Text(value.toInt().toString());
+                                  },
+                                ),
+                              ),
+                            ),
+                          lineBarsData: [
+                            LineChartBarData(
+                              spots: energySpots,
+                              isCurved: false,
+                              color: const Color.fromARGB(255, 40, 71, 227),
+                              dotData: FlDotData(show: false),
+                              barWidth: 3,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+                ),
+              ),
+],
  SizedBox(height:10),
 
           Align(
@@ -3415,26 +4858,175 @@ class LateLutealPage extends StatelessWidget{
   
   @override
   Widget build(BuildContext context) {
-    
-final calc = context.watch<Calculate>();
-    final nextPeriodDate = calc.nextPeriodDate;
+final length = context.read<Calculate>().updateCycleLength;
+    // for getting hormone data - add this wherever need graph
+    final phasesInOrder = [
+      'Menstruation',
+      'Follicular',
+      'Ovulation',
+      'Early Luteal',
+      'Late Luteal',
+    ];
+
+
+
+    // data loaded into page 
+    final calc = context.watch<Calculate>();
+    // final nextPeriodDate = calc.nextPeriodDate;
     final difference = calc.difference;
+    final phase = calc.phase;
+    final dayOfPhase = calc.dayofphase;
+
+    final today = DateTime.now();
 
     final cycleData = context.watch<CycleDataProvider>();
-    
+    final selectedField = cycleData.selectedField;
+
+    final hormoneGraph = [
+      'Effects of Estrogen',
+      'Effects of Progesterone',
+      'Effects of LH',
+      'Effects of FSH',
+    ].contains(selectedField);
+
+final energyGraph = ["Energy Levels Info"].contains(selectedField);
+
     if (!cycleData.isLoaded) {
       return const Center(child: CircularProgressIndicator());
     }
 
-  final phase = calc.phase;
-  final dayOfPhase = calc.dayofphase;
-  final selectedField = cycleData.selectedField;
+  final info = (phase != null && dayOfPhase != null)
+      ? cycleData.getPhaseInfo(
+          phase: phase,
+          dayOfPhase: dayOfPhase,
+          field: selectedField,
+        )
+      : 'No data';
 
-// scaffold inside body safe area, child singlescroll view child padding(20)
-// child of padding column
-// 
-// 
-// 
+    // add this wherever need graph 
+
+
+
+final Map<String, double> phaseStartX = {};
+final Map<String, double> phaseEndX = {};
+
+List<FlSpot> estrogenSpots = [];
+double xEstrogen = 0;
+
+for (final phaseName in phasesInOrder) {
+  final days = cycleData.getAllPhaseDays(phaseName);
+
+  if (days.isEmpty) continue;
+
+  phaseStartX[phaseName] = xEstrogen;
+
+  for (final day in days) {
+    final estrogen = day.getDouble('Level of Estrogen');
+    if (estrogen != null) {
+      estrogenSpots.add(FlSpot(xEstrogen, estrogen));
+      xEstrogen += 1;
+    }
+  }
+
+  phaseEndX[phaseName] = xEstrogen - 1;
+}
+
+
+List<FlSpot> progesteroneSpots = [];
+double xProgesterone = 0;
+
+for (final phaseName in phasesInOrder) {
+  final days = cycleData.getAllPhaseDays(phaseName);
+
+  for (final day in days) {
+    final progesterone = day.getDouble('Level of Progesterone');
+    if (progesterone != null) {
+      progesteroneSpots.add(FlSpot(xProgesterone, progesterone));
+      xProgesterone += 1;
+    }
+  }
+}
+
+List<FlSpot> fshSpots = [];
+double xFsh = 0;
+
+for (final phaseName in phasesInOrder) {
+  final days = cycleData.getAllPhaseDays(phaseName);
+
+  for (final day in days) {
+    final fsh = day.getDouble('Level of FSH');
+    if (fsh != null) {
+      fshSpots.add(FlSpot(xFsh, fsh));
+      xFsh += 1;
+    }
+  }
+}
+
+List<FlSpot> lhSpots = [];
+double xLh = 0;
+
+for (final phaseName in phasesInOrder) {
+  final days = cycleData.getAllPhaseDays(phaseName);
+
+  for (final day in days) {
+    final lh = day.getDouble('Level of LH');
+    if (lh != null) {
+      lhSpots.add(FlSpot(xLh, lh));
+      xLh += 1;
+    }
+  }
+}
+final maxX = [
+  estrogenSpots,
+  progesteroneSpots,
+  fshSpots,
+  lhSpots,
+]
+    .where((list) => list.isNotEmpty)
+    .map((list) => list.last.x)
+    .fold<double>(0.0, (prev, x) => x > prev ? x : prev);
+
+
+
+
+List<FlSpot> energySpots = [];
+double xEnergy = 0;
+
+for (final phaseName in phasesInOrder) {
+  final days = cycleData.getAllPhaseDays(phaseName);
+
+  for (final day in days) {
+    final energy = day.getDouble('Energy Levels');
+    if (energy != null) {
+      energySpots.add(FlSpot(xEnergy, energy));
+      xEnergy += 1;
+    }
+  }
+}
+
+final phaseColors = {
+  'Menstruation': const Color.fromARGB(64, 217, 28, 56),
+  'Follicular': const Color.fromRGBO(173, 216, 230, 0.25),
+  'Ovulation': const Color.fromRGBO(144, 238, 144, 0.25), 
+  'Early Luteal': const Color.fromRGBO(221, 160, 221, 0.25),
+  'Late Luteal': const Color.fromRGBO(255, 228, 181, 0.25),
+};
+// design change these to match color scheme
+
+final highlightedPhase = "Late Luteal";
+final List<VerticalRangeAnnotation> phaseAnnotations =
+    (phaseStartX.containsKey(highlightedPhase) &&
+     phaseEndX.containsKey(highlightedPhase))
+        ? [
+            VerticalRangeAnnotation(
+              x1: phaseStartX[highlightedPhase]!,
+              x2: phaseEndX[highlightedPhase]!,
+              color: (phaseColors[highlightedPhase] ?? const Color.fromARGB(144, 141, 35, 217))
+                  .withOpacity(0.35),
+            ),
+          ]
+        : [];
+
     return Scaffold(
       body: SafeArea(
       child:
@@ -3453,7 +5045,7 @@ final calc = context.watch<Calculate>();
               style: TextStyle(
                 color: const Color(0xFF5454CA),
                 fontSize: 36,
-                fontFamily: 'DMSans',
+                fontFamily: 'DM Sans',
                 fontWeight: FontWeight.w700,
                 height: 0.67,
                 letterSpacing: 1.44,
@@ -3468,7 +5060,7 @@ final calc = context.watch<Calculate>();
                 style: TextStyle(
                   color:  Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DMSans',
+                  fontFamily: 'DM Sans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                 ),
@@ -3484,17 +5076,17 @@ final calc = context.watch<Calculate>();
                 children: [
                   _buildButton(
                     context,
-                    "What is happening in each phase",
+                    "Phase Info",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of estrogen",
+                    "Effects of Estrogen",
                     const MenstruationPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of progesterone",
+                    "Effects of Progesterone",
                     const FolicularPage(),
                   ),
                   _buildButton(
@@ -3509,27 +5101,27 @@ final calc = context.watch<Calculate>();
                   ),
                   _buildButton(
                     context,
-                    "Energy Levels Type",
+                    "Energy Levels Info",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "Type of food",
+                    "What to eat",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "Example of Food",
+                    "Foods and Recipes",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "Health aspect",
+                    "Concentration",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "Concentration Levels",
+                    "Health",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
@@ -3544,29 +5136,29 @@ final calc = context.watch<Calculate>();
                   ),
                   _buildButton(
                     context,
-                    "What is happening in the Ovaries",
+                    "Insights in the Brain",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "What is happening in the Brain",
+                    "Insights in the Ovaries",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "What is happening in the Uterus",
+                    "Insights in the Uterus",
                     const EarlyLutealPage(),
                   )
-
                 ],
               ),
             ),
-          SizedBox(height:10),
-          Align(
-            alignment: Alignment.centerLeft,
+          SizedBox(height:20),
+        if (hormoneGraph)...[
+              Align(
+                alignment: Alignment.centerLeft,
                 child:
                 Text(
-                'Graph', //change this
+                'Graph',
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
@@ -3576,15 +5168,220 @@ final calc = context.watch<Calculate>();
                   ),
                   )
               ),
-    Padding(
-  padding: const EdgeInsets.only(top: 20.0),
-  child: Padding(
-  padding: const EdgeInsets.only(top: 20.0),
-  child: _infoTile(
-    title: selectedField,
-    value: 'graph'))
-  ),
- SizedBox(height:10),
+
+              SizedBox(
+                height: 350,
+                // padding: const EdgeInsets.only(top: 20.0),
+                child: SizedBox(height: 300,
+                
+                child: 
+                Column(
+                  children: [
+                    Row(
+                      children: const [ // design
+        _LegendItem(color:  Color.fromARGB(255, 230, 113, 152), label: 'Estrogen'),
+        SizedBox(width: 16),
+        _LegendItem(color: Colors.deepPurple, label: 'Progesterone'),
+        SizedBox(width: 16),
+               _LegendItem(color: Color.fromARGB(255, 114, 243, 107), label: 'FSH'),
+        SizedBox(width: 16),
+        _LegendItem(color: Color.fromARGB(255, 82, 102, 216), label: 'LH'),
+      ],
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height:300,
+                      child: LineChart(
+                      
+                        LineChartData(
+                          minX: 0,
+                          maxX: maxX,
+                          minY: 0,
+
+rangeAnnotations: RangeAnnotations(
+  verticalRangeAnnotations: phaseAnnotations,
+),
+
+                            titlesData: FlTitlesData(
+                              topTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              rightTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              bottomTitles: AxisTitles(
+                                axisNameWidget: const Padding(
+                                  padding: EdgeInsets.only(right: 20),
+                                  child: Text(
+                                    'Cycle Day',
+                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  interval: 5,
+                                  getTitlesWidget: (value, meta) {
+                                    return Text(value.toInt().toString());
+                                  },
+                                ),
+                              ),
+                              leftTitles: AxisTitles(
+                                axisNameWidget: const Padding(
+                                  padding: EdgeInsets.only(right: 20),
+                                  child: Text(
+                                    'Hormone Level',
+                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  interval: 1,
+                                  reservedSize: 40,
+                                  getTitlesWidget: (value, meta) {
+                                    return Text(value.toInt().toString());
+                                  },
+                                ),
+                              ),
+                            ),
+                          lineBarsData: [
+                            LineChartBarData(
+                              spots: estrogenSpots,
+                              isCurved: true,
+                              color: const Color.fromARGB(255, 230, 113, 152),
+                              dotData: FlDotData(show: false),
+                              barWidth: 3,
+                            ),
+                            LineChartBarData(
+                      spots: progesteroneSpots,
+                              isCurved: true,
+                              barWidth: 3,
+                              color: Colors.deepPurple,
+                              dotData: FlDotData(show: false),
+                            ), 
+                            LineChartBarData(
+                              spots: lhSpots,
+                              isCurved: true,
+                              color: const Color.fromARGB(255, 111, 174, 237),
+                              dotData: FlDotData(show: false),
+                              barWidth: 3,
+                            ),
+                            LineChartBarData(
+                              spots: fshSpots,
+                              isCurved: true,
+                              color: const Color.fromARGB(255, 114, 243, 107),
+                              dotData: FlDotData(show: false),
+                              barWidth: 3,
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+                ),
+              ),],
+if (energyGraph)...[
+Align(
+                alignment: Alignment.centerLeft,
+                child:
+                Text(
+                'Graph',
+                style: TextStyle(
+                  color: const Color(0xFF404446),
+                  fontSize: 18,
+                  fontFamily: 'DMSans',
+                  fontWeight: FontWeight.w700,
+                  height: 1.33,
+                  ),
+                  )
+              ),
+
+              SizedBox(
+                height: 350,
+                // padding: const EdgeInsets.only(top: 20.0),
+                child: SizedBox(height: 300,
+                child: 
+                Column(
+                  children: [
+                    Row(
+                      children: const [
+        _LegendItem(color:  Color.fromARGB(255, 40, 71, 227), label: 'Energy Level'),
+        SizedBox(width: 16),
+      ],
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height:300,
+                      child: LineChart(
+                      
+                        LineChartData(
+                          minX: 0,
+                          maxX: maxX,
+                          minY: 0,
+
+                          rangeAnnotations: RangeAnnotations(
+  verticalRangeAnnotations: phaseAnnotations,
+),
+
+                            titlesData: FlTitlesData(
+                              topTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              rightTitles: AxisTitles(
+                                sideTitles: SideTitles(showTitles: false),
+                              ),
+                              bottomTitles: AxisTitles(
+                                axisNameWidget: const Padding(
+                                  padding: EdgeInsets.only(right: 20),
+                                  child: Text(
+                                    'Cycle Day',
+                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  interval: 5,
+                                  getTitlesWidget: (value, meta) {
+                                    return Text(value.toInt().toString());
+                                  },
+                                ),
+                              ),
+                              leftTitles: AxisTitles(
+                                axisNameWidget: const Padding(
+                                  padding: EdgeInsets.only(right: 20),
+                                  child: Text(
+                                    'Energy Level',
+                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  interval: 1,
+                                  reservedSize: 40,
+                                  getTitlesWidget: (value, meta) {
+                                    return Text(value.toInt().toString());
+                                  },
+                                ),
+                              ),
+                            ),
+                          lineBarsData: [
+                            LineChartBarData(
+                              spots: energySpots,
+                              isCurved: false,
+                              color: const Color.fromARGB(255, 40, 71, 227),
+                              dotData: FlDotData(show: false),
+                              barWidth: 3,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+                ),
+              ),
+],
+ SizedBox(height:20),
 
           Align(
             alignment: Alignment.centerLeft,
@@ -3594,7 +5391,7 @@ final calc = context.watch<Calculate>();
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DMSans',
+                  fontFamily: 'DM Sans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                   ),
@@ -3611,9 +5408,7 @@ final calc = context.watch<Calculate>();
         }
 
         if (snapshot.hasError) {
-          return _infoTile(
-            title: selectedField,
-            value: 'Error loading data');
+          return _infoTile(title: selectedField, value: 'Error loading data');
         }
 
         return _infoTile(
@@ -3623,7 +5418,7 @@ final calc = context.watch<Calculate>();
     
       },
       )
-  
+    
   ),
 ]
 )
@@ -3676,15 +5471,15 @@ final calc = context.watch<Calculate>();
     ),
   );
 }
-
   Widget _buildButton(BuildContext context, String label, Widget page) {
+    final selectedField = context.watch<CycleDataProvider>().selectedField;
     return Padding(
       padding: const EdgeInsets.only(right: 12),
       child: SizedBox(
         width: 160, // controls how many buttons fit on screen
         child: HorizontalScrollButton( // make a new class with a different deign for these
           label: label,
-          isSelected: selected,
+          isSelected: selectedField == label,
           onPressed: () {
             context.read<CycleDataProvider>().selectField(label);
             // Navigator.push();
@@ -3696,6 +5491,7 @@ final calc = context.watch<Calculate>();
     );
   }
 }
+
 // design + functionality for Select Date and Submit buttons 
 class SelectButton extends StatelessWidget {
   final String label; // 
