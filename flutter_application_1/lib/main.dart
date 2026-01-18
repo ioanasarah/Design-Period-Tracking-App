@@ -86,7 +86,7 @@ class CycleDataProvider extends ChangeNotifier {
 
 
 // go through this and understand cause wtf
-  List<PhaseDayInfo> getAllPhaseDays(String phase) {
+List<PhaseDayInfo> getAllPhaseDays(String phase) {
   final phaseData = _data[phase];
   if (phaseData == null || phaseData.isEmpty) return [];
 
@@ -101,8 +101,7 @@ class CycleDataProvider extends ChangeNotifier {
 }
 
 
-
-  Future<void> load() async {
+Future<void> load() async {
     if (_loaded) return;
 
     final Map<String, List<Map<String, dynamic>>> result = {};
@@ -1096,6 +1095,11 @@ class DailyTipsPage extends StatelessWidget {
     final cycleData = context.watch<CycleDataProvider>();
     final selectedField = cycleData.selectedField;
 
+    bool isSelected(String hormoneLabel) {
+  return selectedField == hormoneLabel;
+}
+
+
 // final todayX = difference.toDouble(); // day in cycle
 
 
@@ -1231,15 +1235,20 @@ final phaseColors = {
   'Late Luteal': const Color.fromRGBO(255, 228, 181, 0.25),
 };
 // design change these to match color scheme
-
+const double ovulationHighlightBuffer = 0.5;
 final phaseAnnotations = phaseStartX.containsKey(phase)
     ? <VerticalRangeAnnotation>[
-      VerticalRangeAnnotation(
-        x1: phaseStartX[phase]!,
-        x2: phaseEndX[phase]!,
-        color: (phaseColors[phase] ?? Colors.grey).withOpacity(0.35)
-      )
-    ] : <VerticalRangeAnnotation>[];
+        VerticalRangeAnnotation(
+          x1: phase == 'Ovulation'
+              ? (phaseStartX[phase]! - ovulationHighlightBuffer).clamp(0, maxX)
+              : phaseStartX[phase]!,
+          x2: phase == 'Ovulation'
+              ? (phaseEndX[phase]! + ovulationHighlightBuffer).clamp(0, maxX)
+              : phaseEndX[phase]!,
+          color: (phaseColors[phase] ?? Colors.grey).withOpacity(0.35),
+        )
+      ]
+    : <VerticalRangeAnnotation>[];
 
 
 
@@ -1505,33 +1514,40 @@ rangeAnnotations: RangeAnnotations(
                           lineBarsData: [
                             
                             LineChartBarData(
-                              spots: estrogenSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 230, 113, 152),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            ),
+  spots: estrogenSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 230, 113, 152)
+      .withOpacity(isSelected('Effects of Estrogen') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of Estrogen') ? 2.5 : 2,
+),
                             LineChartBarData(
-                      spots: progesteroneSpots,
-                              isCurved: true,
-                              barWidth: 3,
-                              color: Colors.deepPurple,
-                              dotData: FlDotData(show: false),
-                            ), 
+  spots: progesteroneSpots,
+  isCurved: false,
+  color: Colors.deepPurple
+      .withOpacity(isSelected('Effects of Progesterone') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of Progesterone') ? 2.5 : 2,
+),
+
                             LineChartBarData(
-                              spots: lhSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 111, 174, 237),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            ),
+  spots: lhSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 111, 174, 237)
+      .withOpacity(isSelected('Effects of LH') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of LH') ? 2.5 : 2,
+),
+
                             LineChartBarData(
-                              spots: fshSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 114, 243, 107),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            )
+  spots: fshSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 114, 243, 107)
+      .withOpacity(isSelected('Effects of FSH') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of FSH') ? 2.5 : 2,
+),
+
                           ],
                         ),
                       ),
@@ -2226,6 +2242,10 @@ const String highlightedPhase = 'Menstruation';
     final cycleData = context.watch<CycleDataProvider>();
     final selectedField = cycleData.selectedField;
 
+    bool isSelected(String hormoneLabel) {
+  return selectedField == hormoneLabel;
+}
+
     final hormoneGraph = [
       'Effects of Estrogen',
       'Effects of Progesterone',
@@ -2601,34 +2621,42 @@ rangeAnnotations: RangeAnnotations(
                               ),
                             ),
                           lineBarsData: [
+                            
                             LineChartBarData(
-                              spots: estrogenSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 230, 113, 152),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            ),
+  spots: estrogenSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 230, 113, 152)
+      .withOpacity(isSelected('Effects of Estrogen') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of Estrogen') ? 2.5 : 2,
+),
                             LineChartBarData(
-                      spots: progesteroneSpots,
-                              isCurved: true,
-                              barWidth: 3,
-                              color: Colors.deepPurple,
-                              dotData: FlDotData(show: false),
-                            ), 
+  spots: progesteroneSpots,
+  isCurved: false,
+  color: Colors.deepPurple
+      .withOpacity(isSelected('Effects of Progesterone') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of Progesterone') ? 2.5 : 2,
+),
+
                             LineChartBarData(
-                              spots: lhSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 111, 174, 237),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            ),
+  spots: lhSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 111, 174, 237)
+      .withOpacity(isSelected('Effects of LH') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of LH') ? 2.5 : 2,
+),
+
                             LineChartBarData(
-                              spots: fshSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 114, 243, 107),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            )
+  spots: fshSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 114, 243, 107)
+      .withOpacity(isSelected('Effects of FSH') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of FSH') ? 2.5 : 2,
+),
+
                           ],
                         ),
                       ),
@@ -2894,6 +2922,10 @@ final highlightedPhase = "Follicular";
 
     final cycleData = context.watch<CycleDataProvider>();
     final selectedField = cycleData.selectedField;
+
+  bool isSelected(String hormoneLabel) {
+  return selectedField == hormoneLabel;
+}
 
     final hormoneGraph = [
       'Effects of Estrogen',
@@ -3257,34 +3289,42 @@ rangeAnnotations: RangeAnnotations(
                               ),
                             ),
                           lineBarsData: [
+                            
                             LineChartBarData(
-                              spots: estrogenSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 230, 113, 152),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            ),
+  spots: estrogenSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 230, 113, 152)
+      .withOpacity(isSelected('Effects of Estrogen') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of Estrogen') ? 2.5 : 2,
+),
                             LineChartBarData(
-                      spots: progesteroneSpots,
-                              isCurved: true,
-                              barWidth: 3,
-                              color: Colors.deepPurple,
-                              dotData: FlDotData(show: false),
-                            ), 
+  spots: progesteroneSpots,
+  isCurved: false,
+  color: Colors.deepPurple
+      .withOpacity(isSelected('Effects of Progesterone') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of Progesterone') ? 2.5 : 2,
+),
+
                             LineChartBarData(
-                              spots: lhSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 111, 174, 237),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            ),
+  spots: lhSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 111, 174, 237)
+      .withOpacity(isSelected('Effects of LH') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of LH') ? 2.5 : 2,
+),
+
                             LineChartBarData(
-                              spots: fshSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 114, 243, 107),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            )
+  spots: fshSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 114, 243, 107)
+      .withOpacity(isSelected('Effects of FSH') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of FSH') ? 2.5 : 2,
+),
+
                           ],
                         ),
                       ),
@@ -3552,6 +3592,10 @@ final highlightedPhase = "Ovulation";
 
     final cycleData = context.watch<CycleDataProvider>();
     final selectedField = cycleData.selectedField;
+
+    bool isSelected(String hormoneLabel) {
+  return selectedField == hormoneLabel;
+}
 
     final hormoneGraph = [
       'Effects of Estrogen',
@@ -3916,34 +3960,42 @@ rangeAnnotations: RangeAnnotations(
                               ),
                             ),
                           lineBarsData: [
+                            
                             LineChartBarData(
-                              spots: estrogenSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 230, 113, 152),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            ),
+  spots: estrogenSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 230, 113, 152)
+      .withOpacity(isSelected('Effects of Estrogen') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of Estrogen') ? 2.5 : 2,
+),
                             LineChartBarData(
-                      spots: progesteroneSpots,
-                              isCurved: true,
-                              barWidth: 3,
-                              color: Colors.deepPurple,
-                              dotData: FlDotData(show: false),
-                            ), 
+  spots: progesteroneSpots,
+  isCurved: false,
+  color: Colors.deepPurple
+      .withOpacity(isSelected('Effects of Progesterone') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of Progesterone') ? 2.5 : 2,
+),
+
                             LineChartBarData(
-                              spots: lhSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 111, 174, 237),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            ),
+  spots: lhSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 111, 174, 237)
+      .withOpacity(isSelected('Effects of LH') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of LH') ? 2.5 : 2,
+),
+
                             LineChartBarData(
-                              spots: fshSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 114, 243, 107),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            )
+  spots: fshSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 114, 243, 107)
+      .withOpacity(isSelected('Effects of FSH') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of FSH') ? 2.5 : 2,
+),
+
                           ],
                         ),
                       ),
@@ -4218,6 +4270,10 @@ Future<String> _loadEarlyLutealInfo(String selectedField) async {
 
     final cycleData = context.watch<CycleDataProvider>();
     final selectedField = cycleData.selectedField;
+
+    bool isSelected(String hormoneLabel) {
+  return selectedField == hormoneLabel;
+}
 
     final hormoneGraph = [
       'Effects of Estrogen',
@@ -4582,34 +4638,42 @@ rangeAnnotations: RangeAnnotations(
                               ),
                             ),
                           lineBarsData: [
+                            
                             LineChartBarData(
-                              spots: estrogenSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 230, 113, 152),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            ),
+  spots: estrogenSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 230, 113, 152)
+      .withOpacity(isSelected('Effects of Estrogen') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of Estrogen') ? 2.5 : 2,
+),
                             LineChartBarData(
-                      spots: progesteroneSpots,
-                              isCurved: true,
-                              barWidth: 3,
-                              color: Colors.deepPurple,
-                              dotData: FlDotData(show: false),
-                            ), 
+  spots: progesteroneSpots,
+  isCurved: false,
+  color: Colors.deepPurple
+      .withOpacity(isSelected('Effects of Progesterone') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of Progesterone') ? 2.5 : 2,
+),
+
                             LineChartBarData(
-                              spots: lhSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 111, 174, 237),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            ),
+  spots: lhSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 111, 174, 237)
+      .withOpacity(isSelected('Effects of LH') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of LH') ? 2.5 : 2,
+),
+
                             LineChartBarData(
-                              spots: fshSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 114, 243, 107),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            )
+  spots: fshSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 114, 243, 107)
+      .withOpacity(isSelected('Effects of FSH') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of FSH') ? 2.5 : 2,
+),
+
                           ],
                         ),
                       ),
@@ -4881,6 +4945,10 @@ final length = context.read<Calculate>().updateCycleLength;
 
     final cycleData = context.watch<CycleDataProvider>();
     final selectedField = cycleData.selectedField;
+
+    bool isSelected(String hormoneLabel) {
+  return selectedField == hormoneLabel;
+}
 
     final hormoneGraph = [
       'Effects of Estrogen',
@@ -5244,34 +5312,42 @@ rangeAnnotations: RangeAnnotations(
                               ),
                             ),
                           lineBarsData: [
+                            
                             LineChartBarData(
-                              spots: estrogenSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 230, 113, 152),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            ),
+  spots: estrogenSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 230, 113, 152)
+      .withOpacity(isSelected('Effects of Estrogen') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of Estrogen') ? 2.5 : 2,
+),
                             LineChartBarData(
-                      spots: progesteroneSpots,
-                              isCurved: true,
-                              barWidth: 3,
-                              color: Colors.deepPurple,
-                              dotData: FlDotData(show: false),
-                            ), 
+  spots: progesteroneSpots,
+  isCurved: false,
+  color: Colors.deepPurple
+      .withOpacity(isSelected('Effects of Progesterone') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of Progesterone') ? 2.5 : 2,
+),
+
                             LineChartBarData(
-                              spots: lhSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 111, 174, 237),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            ),
+  spots: lhSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 111, 174, 237)
+      .withOpacity(isSelected('Effects of LH') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of LH') ? 2.5 : 2,
+),
+
                             LineChartBarData(
-                              spots: fshSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 114, 243, 107),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            )
+  spots: fshSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 114, 243, 107)
+      .withOpacity(isSelected('Effects of FSH') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of FSH') ? 2.5 : 2,
+),
+
                           ],
                         ),
                       ),
