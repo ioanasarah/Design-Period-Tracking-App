@@ -323,7 +323,7 @@ class CustomNavigationBar extends StatelessWidget {
           _NavButton(
             label: 'Log Page',
             // icon: 'assets/images/vector.svg',
-            icon: Icons.heart_broken, // icon for tabs design
+            icon: Icons.add, // icon for tabs design
             isSelected: selectedIndex == 0,
             onTap: () => onItemSelected(0),
           ),
@@ -338,14 +338,14 @@ class CustomNavigationBar extends StatelessWidget {
           _NavButton(
             label: 'Daily Tips',
             // icon: 'assets/images/vector.svg',
-            icon: Icons.info,
+            icon: Icons.person,
             isSelected: selectedIndex == 2,
             onTap: () => onItemSelected(2),
           ),
           _NavButton(
             label: 'Calendar',
             // icon: 'assets/images/vector.svg',
-            icon: Icons.calendar_month,
+            icon: Icons.calendar_month_rounded,
             isSelected: selectedIndex == 3,
             onTap: () => onItemSelected(3),
           ),
@@ -1224,11 +1224,11 @@ for (final phaseName in phasesInOrder) {
 }
 
 final phaseColors = {
-  'Menstruation': const Color.fromARGB(64, 217, 28, 56),
-  'Follicular': const Color.fromRGBO(173, 216, 230, 0.25),
-  'Ovulation': const Color.fromRGBO(144, 238, 144, 0.25), 
-  'Early Luteal': const Color.fromRGBO(221, 160, 221, 0.25),
-  'Late Luteal': const Color.fromRGBO(255, 228, 181, 0.25),
+  'Menstruation': const Color(0xFFF6A3A3),
+  'Follicular': const Color(0xFFF9D5FF),
+  'Ovulation': const Color(0xFFC1E5FF), 
+  'Early Luteal': const Color(0xFFFFE6C4),
+  'Late Luteal': const Color(0xFFD0D4FF),
 };
 // design change these to match color scheme
 
