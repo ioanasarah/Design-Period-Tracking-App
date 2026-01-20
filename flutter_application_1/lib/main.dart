@@ -901,6 +901,20 @@ class PlaceholderPage extends StatelessWidget {
           
           const SizedBox(height: 40),
 
+          // _infoTile(
+          //   title: 'Next Expected Period',
+          //   value: nextPeriodDate != null
+          //       ? '${nextPeriodDate.day}/${nextPeriodDate.month}/${nextPeriodDate.year} (+/- 5.3 days)'
+          //       : 'Not calculated',
+          //   icon: Icons.calendar_today,
+          //   ),
+
+          
+
+          Stack(
+          clipBehavior: Clip.none,
+          children: [
+
           _infoTile(
             title: 'Next Expected Period',
             value: nextPeriodDate != null
@@ -908,25 +922,13 @@ class PlaceholderPage extends StatelessWidget {
                 : 'Not calculated',
             icon: Icons.calendar_today,
             ),
-
-          
-
-          Stack(
-          clipBehavior: Clip.none,
-          children: [
-            _infoTile(
-            title: 'Current Phase',
-            value: phase ?? 'Data missing',
-            icon: Icons.home,
-            //isHighlighted: true,
-          ),
             
             Positioned(
-              top: -175,   // Adjust these to get the exact "sit" you want
+              top: -90,   // Adjust these to get the exact "sit" you want
               right: -12,
               child: Image.asset(
                 'assets/girl-sitting.png',
-                width: 100, // Adjust size based on your asset
+                width: 120, // Adjust size based on your asset
               ),
             ),
           ],
@@ -956,12 +958,13 @@ class PlaceholderPage extends StatelessWidget {
           //   //isHighlighted: true,
           // ),
 
-          // _infoTile(
-          //   title: 'Day Of $phase Phase',
-          //   value: dayOfPhase != null ? '$dayOfPhase' : 'Data missing',
-          //   icon: Icons.heart_broken,
-          //   //isHighlighted: true,
-          // ),
+          _infoTile(
+            title: 'Day Of $phase',
+            value: dayOfPhase != null ? '$dayOfPhase' : 'Data missing',
+            icon: Icons.heart_broken,
+            //isHighlighted: true,
+          ),
+
           _infoTile(
             title: "Today's Recap",
             value: Text(info).data!,
