@@ -13,16 +13,16 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // allows async code in main
 
   // 1️ Create Calculate instance
-  final calc = Calculate();
+  //final calc = Calculate();
 
   // 2️ Load saved period data
-  await calc.loadData();
+  //await calc.loadData();
 
   // 3️ Run the app with providers
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => calc),
+        ChangeNotifierProvider(create: (_) => Calculate()..loadData(),),
         ChangeNotifierProvider(
           create: (_) => CycleDataProvider()..load(),
         ),
@@ -86,7 +86,7 @@ class CycleDataProvider extends ChangeNotifier {
 
 
 // go through this and understand cause wtf
-  List<PhaseDayInfo> getAllPhaseDays(String phase) {
+List<PhaseDayInfo> getAllPhaseDays(String phase) {
   final phaseData = _data[phase];
   if (phaseData == null || phaseData.isEmpty) return [];
 
@@ -101,8 +101,7 @@ class CycleDataProvider extends ChangeNotifier {
 }
 
 
-
-  Future<void> load() async {
+Future<void> load() async {
     if (_loaded) return;
 
     final Map<String, List<Map<String, dynamic>>> result = {};
@@ -166,6 +165,8 @@ class Calculate extends ChangeNotifier {
   int cycleLength = 28;
   int periodLength = 5;
 
+  DateTime? lastPeriodDate;
+
   //save data
 
   Future<void> saveData(DateTime lastPeriodDate) async {
@@ -173,30 +174,75 @@ class Calculate extends ChangeNotifier {
     await prefs.setString('lastPeriodDate', lastPeriodDate.toIso8601String());
     await prefs.setInt('cycleLength', cycleLength);
     await prefs.setInt('periodLength', periodLength);
+
+    this.lastPeriodDate = lastPeriodDate;
+
+    // recompute next period & day
+    calculateNextPeriod(lastPeriodDate, cycleLength);
+    calculateDayOfCycle(lastPeriodDate);
+    determinePhase(
+      cycleDay: difference!,
+      cycleLength: cycleLength,
+      periodLength: periodLength,
+    );
+
+    notifyListeners();
+
   }
 
   Future<void> loadData() async {
+  final prefs = await SharedPreferences.getInstance();
+
+  String? dateString = prefs.getString('lastPeriodDate');
+  int? savedCycleLength = prefs.getInt('cycleLength');
+  int? savedPeriodLength = prefs.getInt('periodLength');
+
+  if (dateString != null && savedCycleLength != null && savedPeriodLength != null) {
+    lastPeriodDate = DateTime.parse(dateString);
+    cycleLength = savedCycleLength;
+    periodLength = savedPeriodLength;
+
+    final today = DateTime.now();
+    difference = today.difference(lastPeriodDate!).inDays + 1;
+
+    determinePhase(
+      cycleDay: difference!,
+      cycleLength: cycleLength,
+      periodLength: periodLength,
+    );
+
+    nextPeriodDate = lastPeriodDate!.add(Duration(days: cycleLength));
+
+    notifyListeners();
+  }
+}
+
+  Future<void> updateLastPeriod({
+    required DateTime lastPeriodDate,
+    required int periodLength,
+    required int cycleLength,
+  }) async {
+    // Update provider state
+    this.lastPeriodDate = lastPeriodDate;
+    this.periodLength = periodLength;
+    this.cycleLength = cycleLength;
+
+    // Recompute
+    calculateNextPeriod(lastPeriodDate, cycleLength);
+    calculateDayOfCycle(lastPeriodDate);
+    determinePhase(
+      cycleDay: difference!,
+      cycleLength: cycleLength,
+      periodLength: periodLength,
+    );
+
+    // Save to SharedPreferences
     final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('lastPeriodDate', lastPeriodDate.toIso8601String());
+    await prefs.setInt('periodLength', periodLength);
+    await prefs.setInt('cycleLength', cycleLength);
 
-    String? dateString = prefs.getString('lastPeriodDate');
-    int? savedCycleLength = prefs.getInt('cycleLength');
-    int? savedPeriodLength = prefs.getInt('periodLength');
-
-    if (dateString != null && savedCycleLength != null && savedPeriodLength != null) {
-      final lastPeriodDate = DateTime.parse(dateString);
-      cycleLength = savedCycleLength;
-      periodLength = savedPeriodLength;
-
-      calculateNextPeriod(lastPeriodDate, cycleLength);
-      calculateDayOfCycle(lastPeriodDate);
-      determinePhase(
-        cycleDay: difference!,
-        cycleLength: cycleLength,
-        periodLength: periodLength,
-      );
-
-      notifyListeners();
-    }
+    notifyListeners();
   }
 
   //so the function for the lengths of the phases that changes the length of the cirle is based on the original valyes, 28 and 7
@@ -238,28 +284,55 @@ class Calculate extends ChangeNotifier {
     required int cycleLength,
     required int periodLength,
     // final String? phase,
-}) {
-    int ovulationDay = cycleLength - 14;
+    }) {
+        int ovulationDay = cycleLength - 14;
 
-    if (cycleDay <= periodLength) {
-      phase = 'Menstruation';
-      dayofphase = cycleDay;
-    } else if (cycleDay < ovulationDay) {
-      phase  =  'Follicular';
-      dayofphase = cycleDay - periodLength;
-    } else if (cycleDay == ovulationDay) {
-      phase = 'Ovulation';
-      dayofphase = 1; // shouldnt this be 1
-    } else if (cycleDay <= ovulationDay + 6) {
-      phase = 'Early Luteal';
-      dayofphase = cycleDay - ovulationDay;
-    } else {
-      phase = 'Late Luteal';
-      dayofphase = cycleDay - ovulationDay - 6;
+        if (cycleDay <= periodLength) {
+          phase = 'Menstruation';
+          dayofphase = cycleDay;
+        } else if (cycleDay < ovulationDay) {
+          phase  =  'Follicular';
+          dayofphase = cycleDay - periodLength;
+        } else if (cycleDay == ovulationDay) {
+          phase = 'Ovulation';
+          dayofphase = 1; // shouldnt this be 1
+        } else if (cycleDay <= ovulationDay + 6) {
+          phase = 'Early Luteal';
+          dayofphase = cycleDay - ovulationDay;
+        } else {
+          phase = 'Late Luteal';
+          dayofphase = cycleDay - ovulationDay - 6;
+        }
+        // return phase!;
+        //notifyListeners();
     }
-    // return phase!;
-    //notifyListeners();
-}
+
+    Map<String, int> getPhaseForCycleDay({required int cycleDay}) {
+      int ovulationDay = cycleLength - 14;
+
+      if (cycleDay <= periodLength) {
+        return {"phase": 0, "day": cycleDay}; // Menstruation
+      } else if (cycleDay < ovulationDay) {
+        return {"phase": 1, "day": cycleDay - periodLength}; // Follicular
+      } else if (cycleDay == ovulationDay) {
+        return {"phase": 2, "day": 1}; // Ovulation
+      } else if (cycleDay <= ovulationDay + 6) {
+        return {"phase": 3, "day": cycleDay - ovulationDay}; // Early Luteal
+      } else {
+        return {"phase": 4, "day": cycleDay - ovulationDay - 6}; // Late Luteal
+      }
+    }
+
+    String phaseNameFromIndex(int i) {
+      return [
+        'Menstruation',
+        'Follicular',
+        'Ovulation',
+        'Early Luteal',
+        'Late Luteal',
+      ][i];
+    }
+
 
     List<int> get getUpdatedPhaseLengths {
     int ovulationDay = cycleLength - 14;
@@ -636,28 +709,22 @@ class _LogCalendarState extends State<LogCalendar> {
                     if (selectedDate == null) return;
 
                     final int periodLength =
-                        int.tryParse(periodLengthController.text) ?? 5; // edit based on research
+                        int.tryParse(periodLengthController.text) ?? 5;
                     final int cycleLength =
                         int.tryParse(cycleLengthController.text) ?? 28;
 
                     final calc = context.read<Calculate>();
 
-                    calc.updateCycleLength(cycleLength);
-                    calc.updateperiodLength(periodLength);
-
-                    calc.calculateNextPeriod(selectedDate!, calc.cycleLength);
-                    calc.calculateDayOfCycle(selectedDate!);
-                    calc.determinePhase(
-                      cycleDay: calc.difference!,
-                      cycleLength: calc.cycleLength,
-                      periodLength: calc.periodLength,
-
+                    // Update provider & save data in one call
+                    await calc.updateLastPeriod(
+                      lastPeriodDate: selectedDate!,
+                      periodLength: periodLength,
+                      cycleLength: cycleLength,
                     );
-                    // await calc.calculatePhase();
-                    await savePeriodData();
-                    widget.onSubmit();
-                  
+
+                    widget.onSubmit(); // optional callback
                   },
+
                 ),
           ],
         
@@ -1096,6 +1163,11 @@ class DailyTipsPage extends StatelessWidget {
     final cycleData = context.watch<CycleDataProvider>();
     final selectedField = cycleData.selectedField;
 
+    bool isSelected(String hormoneLabel) {
+  return selectedField == hormoneLabel;
+}
+
+
 // final todayX = difference.toDouble(); // day in cycle
 
 
@@ -1231,15 +1303,20 @@ final phaseColors = {
   'Late Luteal': const Color(0xFFD0D4FF),
 };
 // design change these to match color scheme
-
+const double ovulationHighlightBuffer = 0.5;
 final phaseAnnotations = phaseStartX.containsKey(phase)
     ? <VerticalRangeAnnotation>[
-      VerticalRangeAnnotation(
-        x1: phaseStartX[phase]!,
-        x2: phaseEndX[phase]!,
-        color: (phaseColors[phase] ?? Colors.grey).withOpacity(0.35)
-      )
-    ] : <VerticalRangeAnnotation>[];
+        VerticalRangeAnnotation(
+          x1: phase == 'Ovulation'
+              ? (phaseStartX[phase]! - ovulationHighlightBuffer).clamp(0, maxX)
+              : phaseStartX[phase]!,
+          x2: phase == 'Ovulation'
+              ? (phaseEndX[phase]! + ovulationHighlightBuffer).clamp(0, maxX)
+              : phaseEndX[phase]!,
+          color: (phaseColors[phase] ?? Colors.grey).withOpacity(0.35),
+        )
+      ]
+    : <VerticalRangeAnnotation>[];
 
 
 
@@ -1510,33 +1587,40 @@ rangeAnnotations: RangeAnnotations(
                           lineBarsData: [
                             
                             LineChartBarData(
-                              spots: estrogenSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 230, 113, 152),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            ),
+  spots: estrogenSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 230, 113, 152)
+      .withOpacity(isSelected('Effects of Estrogen') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of Estrogen') ? 2.5 : 2,
+),
                             LineChartBarData(
-                      spots: progesteroneSpots,
-                              isCurved: true,
-                              barWidth: 3,
-                              color: Colors.deepPurple,
-                              dotData: FlDotData(show: false),
-                            ), 
+  spots: progesteroneSpots,
+  isCurved: false,
+  color: Colors.deepPurple
+      .withOpacity(isSelected('Effects of Progesterone') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of Progesterone') ? 2.5 : 2,
+),
+
                             LineChartBarData(
-                              spots: lhSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 111, 174, 237),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            ),
+  spots: lhSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 111, 174, 237)
+      .withOpacity(isSelected('Effects of LH') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of LH') ? 2.5 : 2,
+),
+
                             LineChartBarData(
-                              spots: fshSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 114, 243, 107),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            )
+  spots: fshSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 114, 243, 107)
+      .withOpacity(isSelected('Effects of FSH') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of FSH') ? 2.5 : 2,
+),
+
                           ],
                         ),
                       ),
@@ -1886,15 +1970,28 @@ class CalendarPage extends StatefulWidget {
     void _computeFuturePeriods(Calculate calc) {
     _predictedPeriodDays.clear();
     _predictedPeriodDaysStart.clear();
+    
 
     if (calc.nextPeriodDate == null) return;
 
-    DateTime predictedStart = _dateOnly(calc.nextPeriodDate!);
+    //DateTime predictedStart = _dateOnly(calc.lastPeriodDate!);
     int cycleLength = calc.cycleLength;
     int periodLength = calc.periodLength;
 
-    for (int i = 0; i < 6; i++) {
+    //predictedStart = predictedStart.add(Duration(days: cycleLength));
+
+    DateTime currentStart = _dateOnly(calc.lastPeriodDate!);
+    for (int j = 0; j < periodLength; j++) {
+      _predictedPeriodDays.add(
+        _dateOnly(currentStart.add(Duration(days: j))),
+      );
+    }
+
+    DateTime predictedStart = _dateOnly(calc.lastPeriodDate!);
+
+    for (int i = 0; i < 72; i++) {
       _predictedPeriodDaysStart.add(predictedStart);
+
       for (int j = 0; j < periodLength; j++) {
         _predictedPeriodDays.add(
           _dateOnly(predictedStart.add(Duration(days: j))),
@@ -1927,40 +2024,75 @@ class CalendarPage extends StatefulWidget {
     Widget build(BuildContext context) {
       final calc = context.watch<Calculate>();
 
-    final cycleData = context.watch<CycleDataProvider>();
+      _computeFuturePeriods(calc);
 
-    if (!cycleData.isLoaded) {
-      return const Center(child: CircularProgressIndicator());
-    }
+      final cycleData = context.watch<CycleDataProvider>();
 
-    final phase = calc.phase;
-    final dayOfPhase = calc.dayofphase;
+      if (!cycleData.isLoaded) {
+        return const Center(child: CircularProgressIndicator());
+      }
+
+      // final phase = calc.phase;
+      // final dayOfPhase = calc.dayofphase;
 
 
-      final info = (phase != null && dayOfPhase != null)
-          ? cycleData.getPhaseInfo(
-              phase: phase,
-              dayOfPhase: dayOfPhase,
-              field: "Today's Recap",
-            )
-          : 'No data';
+      //   final info = (phase != null && dayOfPhase != null)
+      //       ? cycleData.getPhaseInfo(
+      //           phase: phase,
+      //           dayOfPhase: dayOfPhase,
+      //           field: "Today's Recap",
+      //         )
+      //       : 'No data';
 
       String selectedPhase = '';
+      int? selectedDayOfPhase;
       if (_selectedDay != null && calc.nextPeriodDate != null) {
         // compute cycle day relative to last period
-        final lastPeriodDate = calc.nextPeriodDate!.subtract(Duration(days: calc.cycleLength));
-        final cycleDay = (_selectedDay!.difference(lastPeriodDate).inDays % calc.cycleLength) + 1;
+        //final lastPeriodDate = calc.nextPeriodDate!.subtract(Duration(days: calc.cycleLength));
+
+        final daysFromLastPeriod =_selectedDay!.difference(calc.lastPeriodDate!).inDays;
+
+        final cycleDay = (daysFromLastPeriod % calc.cycleLength) + 1;
+
+        final result = calc.getPhaseForCycleDay(cycleDay: cycleDay);
+
+        selectedPhase = calc.phaseNameFromIndex(result["phase"]!);
+
+        selectedDayOfPhase = result["day"];
+
+        //final cycleDay = (_selectedDay!.difference(lastPeriodDate).inDays % calc.cycleLength) + 1;
 
         // determine phase for that day
-        calc.determinePhase(
-          cycleDay: cycleDay,
-          cycleLength: calc.cycleLength,
-          periodLength: calc.periodLength,
-        );
+        // calc.determinePhase(
+        //   cycleDay: cycleDay,
+        //   cycleLength: calc.cycleLength,
+        //   periodLength: calc.periodLength,
+        // );
 
-        selectedPhase = calc.phase ?? '';
+        // selectedPhase = calc.phase ?? '';
       }
-      _computeFuturePeriods(calc);
+
+      //what is shown in recap box
+      String info;
+
+      if (_selectedDay != null && selectedDayOfPhase != null) {
+        // recap for selected calendar day
+        info = cycleData.getPhaseInfo(
+          phase: selectedPhase,
+          dayOfPhase: selectedDayOfPhase!,
+          field: "Today's Recap",
+        );
+      } else if (calc.phase != null && calc.dayofphase != null) {
+        // recap for today
+        info = cycleData.getPhaseInfo(
+          phase: calc.phase!,
+          dayOfPhase: calc.dayofphase!,
+          field: "Today's Recap",
+        );
+      } else {
+        info = "Loading...";
+      }
+
       return Scaffold(
         appBar: AppBar(
           title: const Text(
@@ -2116,7 +2248,7 @@ class CalendarPage extends StatefulWidget {
                 padding: const EdgeInsets.all(18.0),
                 child: _infoTile(
                 title: "Today's Recap",
-                value: Text(info).data!,
+                value: info,
                 icon: Icons.analytics,
                           ),
               ),
@@ -2230,6 +2362,10 @@ const String highlightedPhase = 'Menstruation';
 
     final cycleData = context.watch<CycleDataProvider>();
     final selectedField = cycleData.selectedField;
+
+    bool isSelected(String hormoneLabel) {
+  return selectedField == hormoneLabel;
+}
 
     final hormoneGraph = [
       'Effects of Estrogen',
@@ -2606,34 +2742,42 @@ rangeAnnotations: RangeAnnotations(
                               ),
                             ),
                           lineBarsData: [
+                            
                             LineChartBarData(
-                              spots: estrogenSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 230, 113, 152),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            ),
+  spots: estrogenSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 230, 113, 152)
+      .withOpacity(isSelected('Effects of Estrogen') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of Estrogen') ? 2.5 : 2,
+),
                             LineChartBarData(
-                      spots: progesteroneSpots,
-                              isCurved: true,
-                              barWidth: 3,
-                              color: Colors.deepPurple,
-                              dotData: FlDotData(show: false),
-                            ), 
+  spots: progesteroneSpots,
+  isCurved: false,
+  color: Colors.deepPurple
+      .withOpacity(isSelected('Effects of Progesterone') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of Progesterone') ? 2.5 : 2,
+),
+
                             LineChartBarData(
-                              spots: lhSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 111, 174, 237),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            ),
+  spots: lhSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 111, 174, 237)
+      .withOpacity(isSelected('Effects of LH') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of LH') ? 2.5 : 2,
+),
+
                             LineChartBarData(
-                              spots: fshSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 114, 243, 107),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            )
+  spots: fshSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 114, 243, 107)
+      .withOpacity(isSelected('Effects of FSH') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of FSH') ? 2.5 : 2,
+),
+
                           ],
                         ),
                       ),
@@ -2899,6 +3043,10 @@ final highlightedPhase = "Follicular";
 
     final cycleData = context.watch<CycleDataProvider>();
     final selectedField = cycleData.selectedField;
+
+  bool isSelected(String hormoneLabel) {
+  return selectedField == hormoneLabel;
+}
 
     final hormoneGraph = [
       'Effects of Estrogen',
@@ -3262,34 +3410,42 @@ rangeAnnotations: RangeAnnotations(
                               ),
                             ),
                           lineBarsData: [
+                            
                             LineChartBarData(
-                              spots: estrogenSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 230, 113, 152),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            ),
+  spots: estrogenSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 230, 113, 152)
+      .withOpacity(isSelected('Effects of Estrogen') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of Estrogen') ? 2.5 : 2,
+),
                             LineChartBarData(
-                      spots: progesteroneSpots,
-                              isCurved: true,
-                              barWidth: 3,
-                              color: Colors.deepPurple,
-                              dotData: FlDotData(show: false),
-                            ), 
+  spots: progesteroneSpots,
+  isCurved: false,
+  color: Colors.deepPurple
+      .withOpacity(isSelected('Effects of Progesterone') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of Progesterone') ? 2.5 : 2,
+),
+
                             LineChartBarData(
-                              spots: lhSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 111, 174, 237),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            ),
+  spots: lhSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 111, 174, 237)
+      .withOpacity(isSelected('Effects of LH') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of LH') ? 2.5 : 2,
+),
+
                             LineChartBarData(
-                              spots: fshSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 114, 243, 107),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            )
+  spots: fshSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 114, 243, 107)
+      .withOpacity(isSelected('Effects of FSH') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of FSH') ? 2.5 : 2,
+),
+
                           ],
                         ),
                       ),
@@ -3557,6 +3713,10 @@ final highlightedPhase = "Ovulation";
 
     final cycleData = context.watch<CycleDataProvider>();
     final selectedField = cycleData.selectedField;
+
+    bool isSelected(String hormoneLabel) {
+  return selectedField == hormoneLabel;
+}
 
     final hormoneGraph = [
       'Effects of Estrogen',
@@ -3921,34 +4081,42 @@ rangeAnnotations: RangeAnnotations(
                               ),
                             ),
                           lineBarsData: [
+                            
                             LineChartBarData(
-                              spots: estrogenSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 230, 113, 152),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            ),
+  spots: estrogenSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 230, 113, 152)
+      .withOpacity(isSelected('Effects of Estrogen') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of Estrogen') ? 2.5 : 2,
+),
                             LineChartBarData(
-                      spots: progesteroneSpots,
-                              isCurved: true,
-                              barWidth: 3,
-                              color: Colors.deepPurple,
-                              dotData: FlDotData(show: false),
-                            ), 
+  spots: progesteroneSpots,
+  isCurved: false,
+  color: Colors.deepPurple
+      .withOpacity(isSelected('Effects of Progesterone') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of Progesterone') ? 2.5 : 2,
+),
+
                             LineChartBarData(
-                              spots: lhSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 111, 174, 237),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            ),
+  spots: lhSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 111, 174, 237)
+      .withOpacity(isSelected('Effects of LH') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of LH') ? 2.5 : 2,
+),
+
                             LineChartBarData(
-                              spots: fshSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 114, 243, 107),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            )
+  spots: fshSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 114, 243, 107)
+      .withOpacity(isSelected('Effects of FSH') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of FSH') ? 2.5 : 2,
+),
+
                           ],
                         ),
                       ),
@@ -4223,6 +4391,10 @@ Future<String> _loadEarlyLutealInfo(String selectedField) async {
 
     final cycleData = context.watch<CycleDataProvider>();
     final selectedField = cycleData.selectedField;
+
+    bool isSelected(String hormoneLabel) {
+  return selectedField == hormoneLabel;
+}
 
     final hormoneGraph = [
       'Effects of Estrogen',
@@ -4587,34 +4759,42 @@ rangeAnnotations: RangeAnnotations(
                               ),
                             ),
                           lineBarsData: [
+                            
                             LineChartBarData(
-                              spots: estrogenSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 230, 113, 152),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            ),
+  spots: estrogenSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 230, 113, 152)
+      .withOpacity(isSelected('Effects of Estrogen') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of Estrogen') ? 2.5 : 2,
+),
                             LineChartBarData(
-                      spots: progesteroneSpots,
-                              isCurved: true,
-                              barWidth: 3,
-                              color: Colors.deepPurple,
-                              dotData: FlDotData(show: false),
-                            ), 
+  spots: progesteroneSpots,
+  isCurved: false,
+  color: Colors.deepPurple
+      .withOpacity(isSelected('Effects of Progesterone') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of Progesterone') ? 2.5 : 2,
+),
+
                             LineChartBarData(
-                              spots: lhSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 111, 174, 237),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            ),
+  spots: lhSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 111, 174, 237)
+      .withOpacity(isSelected('Effects of LH') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of LH') ? 2.5 : 2,
+),
+
                             LineChartBarData(
-                              spots: fshSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 114, 243, 107),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            )
+  spots: fshSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 114, 243, 107)
+      .withOpacity(isSelected('Effects of FSH') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of FSH') ? 2.5 : 2,
+),
+
                           ],
                         ),
                       ),
@@ -4886,6 +5066,10 @@ final length = context.read<Calculate>().updateCycleLength;
 
     final cycleData = context.watch<CycleDataProvider>();
     final selectedField = cycleData.selectedField;
+
+    bool isSelected(String hormoneLabel) {
+  return selectedField == hormoneLabel;
+}
 
     final hormoneGraph = [
       'Effects of Estrogen',
@@ -5249,34 +5433,42 @@ rangeAnnotations: RangeAnnotations(
                               ),
                             ),
                           lineBarsData: [
+                            
                             LineChartBarData(
-                              spots: estrogenSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 230, 113, 152),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            ),
+  spots: estrogenSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 230, 113, 152)
+      .withOpacity(isSelected('Effects of Estrogen') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of Estrogen') ? 2.5 : 2,
+),
                             LineChartBarData(
-                      spots: progesteroneSpots,
-                              isCurved: true,
-                              barWidth: 3,
-                              color: Colors.deepPurple,
-                              dotData: FlDotData(show: false),
-                            ), 
+  spots: progesteroneSpots,
+  isCurved: false,
+  color: Colors.deepPurple
+      .withOpacity(isSelected('Effects of Progesterone') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of Progesterone') ? 2.5 : 2,
+),
+
                             LineChartBarData(
-                              spots: lhSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 111, 174, 237),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            ),
+  spots: lhSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 111, 174, 237)
+      .withOpacity(isSelected('Effects of LH') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of LH') ? 2.5 : 2,
+),
+
                             LineChartBarData(
-                              spots: fshSpots,
-                              isCurved: true,
-                              color: const Color.fromARGB(255, 114, 243, 107),
-                              dotData: FlDotData(show: false),
-                              barWidth: 3,
-                            )
+  spots: fshSpots,
+  isCurved: false,
+  color: const Color.fromARGB(255, 114, 243, 107)
+      .withOpacity(isSelected('Effects of FSH') ? 1.0 : 0.25),
+  dotData: FlDotData(show: false),
+  barWidth: isSelected('Effects of FSH') ? 2.5 : 2,
+),
+
                           ],
                         ),
                       ),
