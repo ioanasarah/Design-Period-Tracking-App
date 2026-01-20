@@ -1256,6 +1256,10 @@ final phaseAnnotations = phaseStartX.containsKey(phase)
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Stack(
+                 clipBehavior: Clip.none,
+                children: [
+
               Container(
                 width: 3299,
                 height: 89, // size of pink container
@@ -1279,14 +1283,6 @@ final phaseAnnotations = phaseStartX.containsKey(phase)
                           Text(
                             ' $phase',
                             textAlign: TextAlign.right,
-                              style: TextStyle(
-                                color: const Color(0xFF5454CA),
-                                fontSize: 13,
-                                fontFamily: 'DMSans',
-                                fontWeight: FontWeight.w700,
-                                height: 1.20,
-                                letterSpacing: 0.40,
-                                ),
                           ),
                         ],
                       ),
@@ -1306,7 +1302,16 @@ final phaseAnnotations = phaseStartX.containsKey(phase)
                   ),
                 ),
               ),
-
+               Positioned(
+              top: 35,   // Adjust these to get the exact "sit" you want
+              right: 10,
+              child: Image.asset(
+                'assets/woman_in_swimsuit.png',
+                width: 100, // Adjust size based on your asset
+              ),
+            ),
+                ]
+              ),
               SizedBox(height: 30),
 
               Align(
