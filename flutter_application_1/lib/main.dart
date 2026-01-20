@@ -321,7 +321,7 @@ class CustomNavigationBar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _NavButton(
-            label: 'Log Page',
+            label: 'Log Page', //should we just call it log? since the others don't have page in their name
             // icon: 'assets/images/vector.svg',
             icon: Icons.add, // icon for tabs design
             isSelected: selectedIndex == 0,
