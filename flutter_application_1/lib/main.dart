@@ -3733,8 +3733,8 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
      phaseEndX.containsKey(highlightedPhase))
         ? [
             VerticalRangeAnnotation(
-              x1: phaseStartX[highlightedPhase]!,
-              x2: phaseEndX[highlightedPhase]!,
+              x1: (phaseStartX[highlightedPhase]! - 0.5).clamp(0,maxX) ,
+              x2: (phaseEndX[highlightedPhase]! +0.5).clamp(0,maxX),
               color: (phaseColors[highlightedPhase] ?? const Color.fromARGB(174, 98, 250, 255))
                   .withOpacity(0.35),
             ),
