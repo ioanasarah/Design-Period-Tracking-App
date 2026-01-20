@@ -80,6 +80,8 @@ flutter:
     - assets/clip-woman-doing-exercises.png
     - assets/girl-sitting.png
     - assets/girl-pointing.png
+    - assets/woman_in_swimsuit.png
+
 
   fonts:
     - family: DMSans
