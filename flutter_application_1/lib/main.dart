@@ -713,6 +713,7 @@ class _LogCalendarState extends State<LogCalendar> {
               padding: const EdgeInsets.all(8.0),
               child:
             TextBox(
+                  //color: Colors.white,
                   title: "Average cycle length (days):",
                   hint: "Enter number of days",
                   controller: cycleLengthController,
@@ -1023,7 +1024,7 @@ class PlaceholderPage extends StatelessWidget {
                   style: TextStyle(
                     color: const Color(0xFF303437),
                     fontSize: 14,
-                    fontFamily: 'DM Sans',
+                    fontFamily: 'DMSans',
                     fontWeight: FontWeight.w700,
                     height: 1.43,
                     ),
@@ -1034,7 +1035,7 @@ class PlaceholderPage extends StatelessWidget {
                   style: TextStyle(
                     color: const Color(0xFF303437),
                     fontSize: 14,
-                    fontFamily: 'DM Sans',
+                    fontFamily: 'DMSans',
                     fontWeight: FontWeight.w400,
                     height: 1.79,
                     ),
@@ -1551,6 +1552,8 @@ if (hormoneGraph)...[
                   )
               ),
 
+              SizedBox(height: 20),
+
               SizedBox(
                 height: 350,
                 // padding: const EdgeInsets.only(top: 20.0),
@@ -1901,15 +1904,24 @@ Align(
             children: [
               Text(
                 title,
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                style: TextStyle(
+                    color: const Color(0xFF303437),
+                    fontSize: 14,
+                    fontFamily: 'DMSans',
+                    fontWeight: FontWeight.w700,
+                    height: 1.43,
+                    ),
               ),
               const SizedBox(height: 4),
               Text(
                 value,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(
+                    color: const Color(0xFF303437),
+                    fontSize: 14,
+                    fontFamily: 'DMSans',
+                    fontWeight: FontWeight.w700,
+                    height: 1.43,
+                    ),
                 softWrap: true,
                 maxLines: null,
               ),
@@ -2341,7 +2353,7 @@ class CalendarPage extends StatefulWidget {
                   style: TextStyle(
                     color: const Color(0xFF303437),
                     fontSize: 14,
-                    fontFamily: 'DM Sans',
+                    fontFamily: 'DMSans',
                     fontWeight: FontWeight.w700,
                     height: 1.43,
                     ),
@@ -2352,7 +2364,7 @@ class CalendarPage extends StatefulWidget {
                   style: TextStyle(
                     color: const Color(0xFF303437),
                     fontSize: 14,
-                    fontFamily: 'DM Sans',
+                    fontFamily: 'DMSans',
                     fontWeight: FontWeight.w400,
                     height: 1.79,
                     ),
@@ -2952,7 +2964,7 @@ Align(
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                   ),
@@ -3013,15 +3025,24 @@ Align(
             children: [
               Text(
                 title,
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                style: TextStyle(
+                    color: const Color(0xFF303437),
+                    fontSize: 14,
+                    fontFamily: 'DMSans',
+                    fontWeight: FontWeight.w700,
+                    height: 1.43,
+                    ),
               ),
               const SizedBox(height: 4),
               Text(
                 value,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(
+                    color: const Color(0xFF303437),
+                    fontSize: 14,
+                    fontFamily: 'DMSans',
+                    fontWeight: FontWeight.w400,
+                    height: 1.43,
+                    ),
                 softWrap: true,
                 maxLines: null,
               ),
@@ -3267,7 +3288,7 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
               style: TextStyle(
                 color: const Color(0xFF5454CA),
                 fontSize: 36,
-                fontFamily: 'DM Sans',
+                fontFamily: 'DMSans',
                 fontWeight: FontWeight.w700,
                 height: 0.67,
                 letterSpacing: 1.44,
@@ -3282,7 +3303,7 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
                 style: TextStyle(
                   color:  Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                 ),
@@ -3621,7 +3642,7 @@ Align(
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                   ),
@@ -3939,7 +3960,7 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
               style: TextStyle(
                 color: const Color(0xFF5454CA),
                 fontSize: 36,
-                fontFamily: 'DM Sans',
+                fontFamily: 'DMSans',
                 fontWeight: FontWeight.w700,
                 height: 0.67,
                 letterSpacing: 1.44,
@@ -5035,15 +5056,24 @@ Align(
             children: [
               Text(
                 title,
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                style: TextStyle(
+                    color: const Color(0xFF303437),
+                    fontSize: 14,
+                    fontFamily: 'DMSans',
+                    fontWeight: FontWeight.w700,
+                    height: 1.43,
+                    ),
               ),
               const SizedBox(height: 4),
               Text(
                 value,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(
+                    color: const Color(0xFF303437),
+                    fontSize: 14,
+                    fontFamily: 'DMSans',
+                    fontWeight: FontWeight.w400,
+                    height: 1.43,
+                    ),
                 softWrap: true,
                 maxLines: null,
               ),
@@ -5647,7 +5677,7 @@ Align(
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                   ),
@@ -5708,15 +5738,24 @@ Align(
             children: [
               Text(
                 title,
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                style: TextStyle(
+                    color: const Color(0xFF303437),
+                    fontSize: 14,
+                    fontFamily: 'DMSans',
+                    fontWeight: FontWeight.w700,
+                    height: 1.43,
+                    ),
               ),
               const SizedBox(height: 4),
               Text(
                 value,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(
+                    color: const Color(0xFF303437),
+                    fontSize: 14,
+                    fontFamily: 'DMSans',
+                    fontWeight: FontWeight.w400,
+                    height: 1.43,
+                    ),
                 softWrap: true,
                 maxLines: null,
               ),
@@ -5810,7 +5849,8 @@ class TextBox extends StatelessWidget {
   });
 
   Widget build(BuildContext context) {
-    return Column(
+    return 
+    Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(title,
@@ -5829,12 +5869,34 @@ class TextBox extends StatelessWidget {
             ],
             controller: controller,
             decoration: InputDecoration(
-              border: const OutlineInputBorder(),
+              // border: const OutlineInputBorder(
+              //   //borderRadius: BorderRadius.circular(8), // optional corner radius
+              //   borderSide: BorderSide(
+              //     color: Colors.blue, 
+              //     width: 2,          
+              //   ),
+
+              // ),
               hintText: hint,
               hintStyle: TextStyle(
                 color: const Color(0xFF1E1E1E),
-                fontFamily: 'DMSans',)
+                fontFamily: 'DMSans',),
+                filled: true,
+                fillColor: Colors.white,
+
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color.fromARGB(255, 195, 195, 195), width: 1),
+                ),
+
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color.fromARGB(255, 195, 195, 195), width: 1),
+                ),
+
             ),
+            //filled: true,          // background enabled
+            //fillColor: Colors.white,
           ),
         ),
       ],
@@ -5869,7 +5931,7 @@ class HorizontalScrollButton extends StatelessWidget {
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
             color: isSelected
-              ? const Color(0xFF303437) // color of horizontl scroll button once selected
+              ? const Color(0xFFF68C8C)// color of horizontl scroll button once selected
               : Colors.white, //color of horizontl scroll button not selected
             borderRadius: BorderRadius.circular(24),
             boxShadow: const [
