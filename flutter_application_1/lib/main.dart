@@ -1978,13 +1978,13 @@ String _imageForPhase(String phase) {
     case "Menstruation":
       return 'assets/woman_in_swimsuit.png';
     case "Follicular":
-      return 'assets/woman_in_swimsuit.png';
+      return 'assets/folicular.png';
     case "Ovulation":
-      return 'assets/woman_in_swimsuit.png';
+      return 'assets/ovulation.png';
     case "Early Luteal":
-      return 'assets/woman_in_swimsuit.png';
+      return 'assets/early_luteal.png';
     case "Late Luteal":
-      return 'assets/woman_in_swimsuit.png';
+      return 'assets/late_luteal.png';
     default:
       return 'assets/woman_in_swimsuit.png';
   }
