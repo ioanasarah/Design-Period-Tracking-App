@@ -1573,7 +1573,9 @@ if (hormoneGraph)...[
               SizedBox(
                 height: 350,
                 // padding: const EdgeInsets.only(top: 20.0),
-                child: SizedBox(height: 300,
+                child: ColoredBox(
+                  color: Colors.white,  
+                  // height: 300,
                 
                 child: 
                 Column(
@@ -1709,7 +1711,9 @@ Align(
               SizedBox(
                 height: 350,
                 // padding: const EdgeInsets.only(top: 20.0),
-                child: SizedBox(height: 300,
+                child: ColoredBox(
+                  // height: 300,
+                  color: Colors.white,
                 child: 
                 Column(
                   children: [
@@ -2773,7 +2777,9 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
               SizedBox(
                 height: 350,
                 // padding: const EdgeInsets.only(top: 20.0),
-                child: SizedBox(height: 300,
+                child: ColoredBox(
+                  color: Colors.white,
+                  // height: 300,
                 
                 child: 
                 Column(
@@ -2908,7 +2914,8 @@ Align(
               SizedBox(
                 height: 350,
                 // padding: const EdgeInsets.only(top: 20.0),
-                child: SizedBox(height: 300,
+                child: ColoredBox(
+                  color: Colors.white,
                 child: 
                 Column(
                   children: [
@@ -3451,8 +3458,8 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
               SizedBox(
                 height: 350,
                 // padding: const EdgeInsets.only(top: 20.0),
-                child: SizedBox(height: 300,
-                
+                child: ColoredBox(
+                  color: Colors.white,
                 child: 
                 Column(
                   children: [
@@ -3586,7 +3593,8 @@ Align(
               SizedBox(
                 height: 350,
                 // padding: const EdgeInsets.only(top: 20.0),
-                child: SizedBox(height: 300,
+                child: ColoredBox(
+                  color: Colors.white,
                 child: 
                 Column(
                   children: [
@@ -4132,7 +4140,8 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
               SizedBox(
                 height: 350,
                 // padding: const EdgeInsets.only(top: 20.0),
-                child: SizedBox(height: 300,
+                child: ColoredBox(
+                  color: Colors.white,
                 
                 child: 
                 Column(
@@ -4267,7 +4276,8 @@ Align(
               SizedBox(
                 height: 350,
                 // padding: const EdgeInsets.only(top: 20.0),
-                child: SizedBox(height: 300,
+                child: ColoredBox(
+                  color: Colors.white,
                 child: 
                 Column(
                   children: [
@@ -4817,7 +4827,8 @@ if (hormoneGraph)...[
               SizedBox(
                 height: 350,
                 // padding: const EdgeInsets.only(top: 20.0),
-                child: SizedBox(height: 300,
+                child: ColoredBox(
+                  color: Colors.white,
                 
                 child: 
                 Column(
@@ -4952,7 +4963,8 @@ Align(
               SizedBox(
                 height: 350,
                 // padding: const EdgeInsets.only(top: 20.0),
-                child: SizedBox(height: 300,
+                child: ColoredBox(
+                  color: Colors.white,
                 child: 
                 Column(
                   children: [
@@ -5501,7 +5513,8 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
               SizedBox(
                 height: 350,
                 // padding: const EdgeInsets.only(top: 20.0),
-                child: SizedBox(height: 300,
+                child: ColoredBox(
+                  color: Colors.white,
                 
                 child: 
                 Column(
@@ -5636,7 +5649,8 @@ Align(
               SizedBox(
                 height: 350,
                 // padding: const EdgeInsets.only(top: 20.0),
-                child: SizedBox(height: 300,
+                child: ColoredBox(
+                  color: Colors.white,
                 child: 
                 Column(
                   children: [
