@@ -5869,7 +5869,7 @@ class HorizontalScrollButton extends StatelessWidget {
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
             color: isSelected
-              ? const Color(0xFFFBE3E4) // color of horizontl scroll button once selected
+              ? const Color(0xFF303437) // color of horizontl scroll button once selected
               : Colors.white, //color of horizontl scroll button not selected
             borderRadius: BorderRadius.circular(24),
             boxShadow: const [
@@ -5906,8 +5906,11 @@ class HorizontalScrollButton extends StatelessWidget {
               // Label (UNCHANGED)
               Text(
                 label,
-                style: const TextStyle(
-                  color: Color(0xFF303437),
+                style: TextStyle(
+                  //color: Color(0xFF303437),
+                  color: isSelected
+                    ? Colors.white // color of horizontl scroll button once selected
+                    : Colors.black, //color of horizontl scroll button not selected,
                   fontSize: 14,
                   fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
