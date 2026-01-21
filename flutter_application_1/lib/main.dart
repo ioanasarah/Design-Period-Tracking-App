@@ -691,18 +691,26 @@ class _LogCalendarState extends State<LogCalendar> {
                   ),
             ),
             
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child:
             TextBox(
                   title: "Average menstruation length (days):",
                   hint: "Enter number of days",
                   controller: periodLengthController,
                 ),
-
+            ),
+            
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child:
             TextBox(
                   title: "Average cycle length (days):",
                   hint: "Enter number of days",
                   controller: cycleLengthController,
                 ),
-
+            ),
+            
             SelectButton(
                   label: 'Submit',
                   onPressed: () async {
@@ -5717,8 +5725,8 @@ class SelectButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container (
-      width: 190.0,
-      height: 50.0,
+      width: 130.0,
+      height: 43.0,
       child: InkWell(
       onTap: onPressed,
       borderRadius: BorderRadius.circular(8), // design
@@ -5767,7 +5775,7 @@ class TextBox extends StatelessWidget {
 
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(title,
         style: TextStyle(
