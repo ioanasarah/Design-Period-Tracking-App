@@ -1317,6 +1317,22 @@ for (final phaseName in phasesInOrder) {
   }
 }
 
+// String _imageForPhase(String phase) {
+//   switch (phase) {
+//     case "Menstruation":
+//       return 'assets/menstruation.png';
+//     case "Follicular":
+//       return 'assets/follicular.png';
+//     case "Ovulation":
+//       return 'assets/ovulation.png';
+//     case "Luteal":
+//       return 'assets/luteal.png';
+//     default:
+//       return 'assets/default.png';
+//   }
+// }
+
+
 final phaseColors = {
   'Menstruation': const Color(0xFFF6A3A3),
   'Follicular': const Color(0xFFF9D5FF),
@@ -1837,6 +1853,7 @@ Align(
                       context,
                       "Menstruation",
                       const MenstruationPage(),
+                      //imagePath: _imageForPhase("Menstruation"),
                     ),
                     _buildButtonPhases(
                       context,
@@ -1952,6 +1969,24 @@ Align(
   }
 }
 
+String _imageForPhase(String phase) {
+  switch (phase) {
+    case "Menstruation":
+      return 'assets/woman_in_swimsuit.png';
+    case "Follicular":
+      return 'assets/woman_in_swimsuit.png';
+    case "Ovulation":
+      return 'assets/woman_in_swimsuit.png';
+    case "Early Luteal":
+      return 'assets/woman_in_swimsuit.png';
+    case "Late Luteal":
+      return 'assets/woman_in_swimsuit.png';
+    default:
+      return 'assets/woman_in_swimsuit.png';
+  }
+}
+
+
   Widget _buildButtonPhases(BuildContext context, String label, Widget page) {
     return Padding(
       padding: const EdgeInsets.only(right: 12),
@@ -1960,6 +1995,7 @@ Align(
         child: HorizontalScrollButtonPhases(
           label: label,
           colorBox: label,
+          imagePath: _imageForPhase(label),
           onPressed: () {
             Navigator.push(
               context,
@@ -6006,23 +6042,28 @@ class HorizontalScrollButtonPhases extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
   final String colorBox;
+  final String? imagePath;
 
   const HorizontalScrollButtonPhases({
     super.key,
     required this.label,
     required this.onPressed,
     required this.colorBox,
+    this.imagePath,
   });
 
   @override
   Widget build(BuildContext context) {
+
     return SizedBox(
       width: 292,
       height: 75,
       child: InkWell(
         onTap: onPressed,
         borderRadius: BorderRadius.circular(24),
-        child: Container(
+        child: Stack(
+          children:[
+        Container(
           padding: const EdgeInsets.all(15),
           decoration: BoxDecoration(
             color: colorBox == 'Menstruation' ? Color(0xFFFBE3E4) :
@@ -6076,7 +6117,21 @@ class HorizontalScrollButtonPhases extends StatelessWidget {
                   ),
               ),
             ],
-          ),
+          )
+          
+        ),
+
+        if (imagePath != null)
+            Positioned(
+              right: 8,
+              bottom: 0,
+              child: Image.asset(
+                imagePath!,
+                height: 60,
+              ),
+            ),
+
+        ],
         ),
       ),
     );
