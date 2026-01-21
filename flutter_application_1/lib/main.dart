@@ -5913,7 +5913,7 @@ class HorizontalScrollButtonPhases extends StatelessWidget {
                    colorBox == 'Follicular' ? Color(0xFFF9EDFB) :
                    colorBox == 'Ovulation' ? Color(0xFFE4EFF7) :
                    colorBox == 'Early Luteal' ? Color(0xFFFFF3E2) :
-                   colorBox == 'Late Luteal' ? Color(0xFFF5E8F8) :
+                   colorBox == 'Late Luteal' ? Color(0xFFECEEFF) :
                    Colors.white,
             borderRadius: BorderRadius.circular(24),
             boxShadow: const [
