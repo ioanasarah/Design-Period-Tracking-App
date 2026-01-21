@@ -1919,7 +1919,7 @@ Align(
                     color: const Color(0xFF303437),
                     fontSize: 14,
                     fontFamily: 'DMSans',
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w400,
                     height: 1.43,
                     ),
                 softWrap: true,
@@ -3703,15 +3703,24 @@ Align(
             children: [
               Text(
                 title,
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                style: TextStyle(
+                    color: const Color(0xFF303437),
+                    fontSize: 14,
+                    fontFamily: 'DMSans',
+                    fontWeight: FontWeight.w700,
+                    height: 1.43,
+                    ),
               ),
               const SizedBox(height: 4),
               Text(
                 value,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(
+                    color: const Color(0xFF303437),
+                    fontSize: 14,
+                    fontFamily: 'DMSans',
+                    fontWeight: FontWeight.w400,
+                    height: 1.43,
+                    ),
                 softWrap: true,
                 maxLines: null,
               ),
@@ -4373,7 +4382,13 @@ Align(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               //Text(title, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-              Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Text(value, style: TextStyle(
+                    color: const Color(0xFF303437),
+                    fontSize: 14,
+                    fontFamily: 'DMSans',
+                    fontWeight: FontWeight.w400,
+                    height: 1.43,
+                    ),),
             ],
           ),
           ),
