@@ -452,7 +452,7 @@ class _NavButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color.fromRGBO(53, 18, 58, 1)
+              ? const Color(0xFF303437)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(48),
         ),
@@ -691,18 +691,26 @@ class _LogCalendarState extends State<LogCalendar> {
                   ),
             ),
             
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child:
             TextBox(
                   title: "Average menstruation length (days):",
                   hint: "Enter number of days",
                   controller: periodLengthController,
                 ),
-
+            ),
+            
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child:
             TextBox(
                   title: "Average cycle length (days):",
                   hint: "Enter number of days",
                   controller: cycleLengthController,
                 ),
-
+            ),
+            
             SelectButton(
                   label: 'Submit',
                   onPressed: () async {
@@ -920,7 +928,7 @@ class PlaceholderPage extends StatelessWidget {
             value: nextPeriodDate != null
                 ? '${nextPeriodDate.day}/${nextPeriodDate.month}/${nextPeriodDate.year} (+/- 5.3 days)'
                 : 'Not calculated',
-            icon: Icons.calendar_today,
+            icon: Icons.calendar_month_rounded,
             ),
             
             Positioned(
@@ -958,18 +966,20 @@ class PlaceholderPage extends StatelessWidget {
           //   //isHighlighted: true,
           // ),
 
-          _infoTile(
-            title: 'Day Of $phase',
+           _infoTile(
+            title: "Today's Recap",
+            value: Text(info).data!,
+            icon: Icons.favorite,
+          ),
+
+          _infoTile( //do we still need this if it shows in the circle?
+            title: 'Day Of $phase', 
             value: dayOfPhase != null ? '$dayOfPhase' : 'Data missing',
-            icon: Icons.heart_broken,
+            icon: Icons.calendar_today_rounded,
             //isHighlighted: true,
           ),
 
-          _infoTile(
-            title: "Today's Recap",
-            value: Text(info).data!,
-            icon: Icons.analytics,
-          ),
+         
 
         ],
       ),
@@ -987,7 +997,7 @@ class PlaceholderPage extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: isHighlighted
-            ? const Color.fromRGBO(54, 18, 58, 0.05)
+            ? const Color.fromARGB(13, 9, 206, 52)
             : Colors.white,
         borderRadius: BorderRadius.circular(15),
         border: Border.all(color: const Color.fromRGBO(54, 18, 58, 0.1)),
@@ -1357,12 +1367,22 @@ final phaseAnnotations = phaseStartX.containsKey(phase)
                         children: [
                           Text(
                             'Day $difference',
-                            style: TextStyle(fontSize: 25, 
-                            fontWeight: FontWeight.w700,),
+                            style: TextStyle(
+                              color: Color(0xFF202325),
+                              fontSize: 25,
+                              fontWeight: FontWeight.w700,
+                              fontFamily: 'DM Sans',
+                            )
                           ),
                           Text(
                             ' $phase',
                             textAlign: TextAlign.right,
+                            style: TextStyle(
+                            color: Color(0xFF5454CA),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: 'DM Sans'
+                            )
                           ),
                         ],
                       ),
@@ -1372,7 +1392,9 @@ final phaseAnnotations = phaseStartX.containsKey(phase)
                           //  'Today, $today.year, $today.month, $today.day',
                             'Today, ${today.day}/${today.month}/${today.year}',
                             style: TextStyle( // edit text of today within pink container
+                              color: Color(0xFF404446),
                               fontSize: 14,
+                              fontFamily: 'DM Sans',
                               fontWeight: FontWeight.w400,
                           ),
                           ),
@@ -1779,7 +1801,7 @@ Align(
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DMSans-Regular',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                   ),
@@ -1839,7 +1861,7 @@ Align(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isHighlighted ? const Color.fromRGBO(54, 18, 58, 0.05) : Colors.white,
+        color: isHighlighted ? const Color.fromRGBO(54, 18, 58, 0.05) : const Color.fromARGB(255, 255, 255, 255),
         borderRadius: BorderRadius.circular(15),
         border: Border.all(color: const Color.fromRGBO(54, 18, 58, 0.1)),
       ),
@@ -2102,7 +2124,7 @@ class CalendarPage extends StatefulWidget {
             'Calendar',
             style: TextStyle(
               color: Color(0xFF202325),
-              fontSize: 18,
+              fontSize: 24,
               fontFamily: 'DMSans',
               fontWeight: FontWeight.w700,
               height: 1.33,
@@ -2252,7 +2274,7 @@ class CalendarPage extends StatefulWidget {
                 child: _infoTile(
                 title: "Today's Recap",
                 value: info,
-                icon: Icons.analytics,
+                icon: Icons.favorite,
                           ),
               ),
             ],
@@ -5705,8 +5727,8 @@ class SelectButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container (
-      width: 190.0,
-      height: 50.0,
+      width: 130.0,
+      height: 43.0,
       child: InkWell(
       onTap: onPressed,
       borderRadius: BorderRadius.circular(8), // design
@@ -5755,7 +5777,7 @@ class TextBox extends StatelessWidget {
 
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(title,
         style: TextStyle(
@@ -5890,10 +5912,10 @@ class HorizontalScrollButtonPhases extends StatelessWidget {
           padding: const EdgeInsets.all(15),
           decoration: BoxDecoration(
             color: colorBox == 'Menstruation' ? Color(0xFFFBE3E4) :
-                   colorBox == 'Follicular' ? Color(0xFFE3F0FB) :
-                   colorBox == 'Ovulation' ? Color(0xFFFFF3E5) :
-                   colorBox == 'Early Luteal' ? Color(0xFFE8F6E8) :
-                   colorBox == 'Late Luteal' ? Color(0xFFF5E8F8) :
+                   colorBox == 'Follicular' ? Color(0xFFF9EDFB) :
+                   colorBox == 'Ovulation' ? Color(0xFFE4EFF7) :
+                   colorBox == 'Early Luteal' ? Color(0xFFFFF3E2) :
+                   colorBox == 'Late Luteal' ? Color(0xFFECEEFF) :
                    Colors.white,
             borderRadius: BorderRadius.circular(24),
             boxShadow: const [
