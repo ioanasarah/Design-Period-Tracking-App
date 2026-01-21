@@ -540,9 +540,17 @@ class LogPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      //backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text("Log your Period Details!"),
+        //backgroundColor: Colors.white,
+        title: const Text("Log your Period Details!",
+        style: TextStyle(
+          color: const Color(0xFF303437),
+          fontSize: 28,
+          fontFamily: 'DM Sans',
+          fontWeight: FontWeight.w700,
+          height: 1.14,
+          ),)
       ),
       body: SafeArea(child:
       SingleChildScrollView(
@@ -761,6 +769,7 @@ class PlaceholderPage extends StatelessWidget {
     String formattedDate = DateFormat('EEEE, MMM d').format(DateTime.now());
 
 
+
     //final double totalDaysInCycle = calc.cycleLength.toDouble();
 
     // Calculate progress for the white dot
@@ -802,7 +811,6 @@ class PlaceholderPage extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(20.0),
       child: Column(
-        //backgroundColor: Colors.white, - this doesnt work for some reason
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -926,7 +934,7 @@ class PlaceholderPage extends StatelessWidget {
           _infoTile(
             title: 'Next Expected Period',
             value: nextPeriodDate != null
-                ? '${nextPeriodDate.day}/${nextPeriodDate.month}/${nextPeriodDate.year} (+/- 5.3 days)'
+                ? '${DateFormat('EEEE, MMM d').format(nextPeriodDate)}'
                 : 'Not calculated',
             icon: Icons.calendar_month_rounded,
             ),
@@ -1335,14 +1343,23 @@ final phaseAnnotations = phaseStartX.containsKey(phase)
 
     // design of page 
     return Scaffold(
-      // appBar: AppBar(
-      //   title: const Text('Daily Tips'),
-      // ),
-      backgroundColor: Colors.white,
+      appBar: AppBar(
+        centerTitle: false,
+        titleSpacing: 25,
+        title: const Text('Daily Tips',
+          style: TextStyle(
+          color: const Color(0xFF303437),
+          fontSize: 24,
+          fontFamily: 'DMSans',
+          fontWeight: FontWeight.w700,
+          height: 1.33,
+          ),),
+      ),
+      //backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(15),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -1863,7 +1880,15 @@ Align(
       decoration: BoxDecoration(
         color: isHighlighted ? const Color.fromRGBO(54, 18, 58, 0.05) : const Color.fromARGB(255, 255, 255, 255),
         borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: const Color.fromRGBO(54, 18, 58, 0.1)),
+        //border: Border.all(color: const Color.fromRGBO(54, 18, 58, 0.1)),
+        boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.08),
+          blurRadius: 10,
+          spreadRadius: 2,
+          offset: const Offset(0, 4), // x, y
+        ),
+      ],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2119,7 +2144,11 @@ class CalendarPage extends StatefulWidget {
       }
 
       return Scaffold(
+        //backgroundColor: Colors.white,
         appBar: AppBar(
+          //backgroundColor: Colors.white,
+          centerTitle: false,
+          titleSpacing: 25, 
           title: const Text(
             'Calendar',
             style: TextStyle(
@@ -2130,7 +2159,7 @@ class CalendarPage extends StatefulWidget {
               height: 1.33,
             ),
           ),
-          centerTitle: true,
+          //centerTitle: true,
         ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(8.0),
@@ -2551,6 +2580,7 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
 
 
     return Scaffold(
+      backgroundColor: const Color(0xFFFBE3E4),
       body: SafeArea(
       child:
       SingleChildScrollView(
@@ -3219,6 +3249,7 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
 
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF9EDFB),
       body: SafeArea(
       child:
       SingleChildScrollView(
@@ -3890,6 +3921,7 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
 
 
     return Scaffold(
+      backgroundColor: const Color(0xFFE4EFF7),
       body: SafeArea(
       child:
       SingleChildScrollView(
@@ -4568,6 +4600,7 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
 
 
     return Scaffold(
+      backgroundColor: const Color(0xFFFFF3E2),
       body: SafeArea(
       child:
       SingleChildScrollView(
@@ -5242,6 +5275,7 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
         : [];
 
     return Scaffold(
+      backgroundColor: const Color(0xFFECEEFF),
       body: SafeArea(
       child:
       SingleChildScrollView(
@@ -5734,7 +5768,7 @@ class SelectButton extends StatelessWidget {
       borderRadius: BorderRadius.circular(8), // design
       child:Container(
         decoration: BoxDecoration( // design
-          color: Color(0xFF121D41), // design
+          color: Color(0xFF303437), // design
           borderRadius: BorderRadius.circular(8), // design
         ),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
