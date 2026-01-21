@@ -928,7 +928,7 @@ class PlaceholderPage extends StatelessWidget {
             value: nextPeriodDate != null
                 ? '${nextPeriodDate.day}/${nextPeriodDate.month}/${nextPeriodDate.year} (+/- 5.3 days)'
                 : 'Not calculated',
-            icon: Icons.calendar_today,
+            icon: Icons.calendar_month_rounded,
             ),
             
             Positioned(
@@ -966,18 +966,20 @@ class PlaceholderPage extends StatelessWidget {
           //   //isHighlighted: true,
           // ),
 
-          _infoTile(
-            title: 'Day Of $phase',
+           _infoTile(
+            title: "Today's Recap",
+            value: Text(info).data!,
+            icon: Icons.favorite,
+          ),
+
+          _infoTile( //do we still need this if it shows in the circle?
+            title: 'Day Of $phase', 
             value: dayOfPhase != null ? '$dayOfPhase' : 'Data missing',
-            icon: Icons.heart_broken,
+            icon: Icons.calendar_today_rounded,
             //isHighlighted: true,
           ),
 
-          _infoTile(
-            title: "Today's Recap",
-            value: Text(info).data!,
-            icon: Icons.analytics,
-          ),
+         
 
         ],
       ),
@@ -2272,7 +2274,7 @@ class CalendarPage extends StatefulWidget {
                 child: _infoTile(
                 title: "Today's Recap",
                 value: info,
-                icon: Icons.analytics,
+                icon: Icons.favorite,
                           ),
               ),
             ],
