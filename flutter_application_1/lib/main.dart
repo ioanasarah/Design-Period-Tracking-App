@@ -6081,55 +6081,81 @@ class HorizontalScrollButtonPhases extends StatelessWidget {
               ),
             ],
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              // Icon circle
-              Container(
-                width: 32,
-                height: 32,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF2F8FF),
-                  shape: BoxShape.circle,
-                ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.favorite, // replace later if needed
-                  size: 16,
-                  color: Color(0xFF5454CA),
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              // Label 
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: const Color(0xFF5454CA),
-                  fontSize: 18,
-                  fontFamily: 'DMSans',
-                  fontWeight: FontWeight.w700,
-                  height: 0.67,
-                  letterSpacing: 0.72,
+              Expanded(
+                child:
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Icon circle
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFF2F8FF),
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: const Icon(
+                      Icons.favorite, // replace later if needed
+                      size: 16,
+                      color: Color(0xFF5454CA),
+                    ),
                   ),
-              ),
+              
+                  const SizedBox(height: 12),
+              
+                  // Label 
+                  Text(
+                    label,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: const Color(0xFF5454CA),
+                      fontSize: 18,
+                      fontFamily: 'DMSans',
+                      fontWeight: FontWeight.w700,
+                      height: 0.67,
+                      letterSpacing: 0.72,
+                      ),
+                  ),
+              
+                  // if (imagePath != null)
+                  //   Positioned(
+                  //     right: 8,
+                  //     bottom: 0,
+                  //     child: Image.asset(
+                  //       imagePath!,
+                  //       height: 60,
+                  //     ),
+                  //   ),
+              
+                ],
+              ),),
+              if (imagePath != null)
+                    Positioned(
+                      right: 8,
+                      bottom: 0,
+                      child: Image.asset(
+                        imagePath!,
+                        height: 50,
+                      ),
+                    ),
             ],
           )
           
         ),
 
-        if (imagePath != null)
-            Positioned(
-              right: 8,
-              bottom: 0,
-              child: Image.asset(
-                imagePath!,
-                height: 60,
-              ),
-            ),
+        // if (imagePath != null)
+        //     Positioned(
+        //       right: 8,
+        //       bottom: 0,
+        //       child: Image.asset(
+        //         imagePath!,
+        //         height: 60,
+        //       ),
+        //     ),
 
         ],
         ),
