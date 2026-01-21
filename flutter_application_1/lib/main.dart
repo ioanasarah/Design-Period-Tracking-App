@@ -452,7 +452,7 @@ class _NavButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color.fromRGBO(53, 18, 58, 1)
+              ? const Color(0xFF303437)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(48),
         ),
@@ -1357,12 +1357,22 @@ final phaseAnnotations = phaseStartX.containsKey(phase)
                         children: [
                           Text(
                             'Day $difference',
-                            style: TextStyle(fontSize: 25, 
-                            fontWeight: FontWeight.w700,),
+                            style: TextStyle(
+                              color: Color(0xFF202325),
+                              fontSize: 25,
+                              fontWeight: FontWeight.w700,
+                              fontFamily: 'DM Sans',
+                            )
                           ),
                           Text(
                             ' $phase',
                             textAlign: TextAlign.right,
+                            style: TextStyle(
+                            color: Color(0xFF5454CA),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: 'DM Sans'
+                            )
                           ),
                         ],
                       ),
@@ -1372,7 +1382,9 @@ final phaseAnnotations = phaseStartX.containsKey(phase)
                           //  'Today, $today.year, $today.month, $today.day',
                             'Today, ${today.day}/${today.month}/${today.year}',
                             style: TextStyle( // edit text of today within pink container
+                              color: Color(0xFF404446),
                               fontSize: 14,
+                              fontFamily: 'DM Sans',
                               fontWeight: FontWeight.w400,
                           ),
                           ),
@@ -1779,7 +1791,7 @@ Align(
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DMSans-Regular',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                   ),
@@ -1839,7 +1851,7 @@ Align(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isHighlighted ? const Color.fromRGBO(54, 18, 58, 0.05) : Colors.white,
+        color: isHighlighted ? const Color.fromRGBO(54, 18, 58, 0.05) : const Color.fromARGB(255, 255, 255, 255),
         borderRadius: BorderRadius.circular(15),
         border: Border.all(color: const Color.fromRGBO(54, 18, 58, 0.1)),
       ),
@@ -2102,7 +2114,7 @@ class CalendarPage extends StatefulWidget {
             'Calendar',
             style: TextStyle(
               color: Color(0xFF202325),
-              fontSize: 18,
+              fontSize: 24,
               fontFamily: 'DMSans',
               fontWeight: FontWeight.w700,
               height: 1.33,
@@ -5890,9 +5902,9 @@ class HorizontalScrollButtonPhases extends StatelessWidget {
           padding: const EdgeInsets.all(15),
           decoration: BoxDecoration(
             color: colorBox == 'Menstruation' ? Color(0xFFFBE3E4) :
-                   colorBox == 'Follicular' ? Color(0xFFE3F0FB) :
-                   colorBox == 'Ovulation' ? Color(0xFFFFF3E5) :
-                   colorBox == 'Early Luteal' ? Color(0xFFE8F6E8) :
+                   colorBox == 'Follicular' ? Color(0xFFF9EDFB) :
+                   colorBox == 'Ovulation' ? Color(0xFFE4EFF7) :
+                   colorBox == 'Early Luteal' ? Color(0xFFFFF3E2) :
                    colorBox == 'Late Luteal' ? Color(0xFFF5E8F8) :
                    Colors.white,
             borderRadius: BorderRadius.circular(24),
