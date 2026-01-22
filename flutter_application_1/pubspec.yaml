@@ -32,6 +32,7 @@ dependencies:
     sdk: flutter
   flutter_svg: ^2.0.5
   table_calendar: ^3.1.2
+  url_launcher: ^6.3.0
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -81,6 +82,7 @@ flutter:
     - assets/girl-sitting.png
     - assets/girl-pointing.png
     - assets/woman_in_swimsuit.png
+    - assets/menstruation.png
     - assets/folicular.png
     - assets/ovulation.png
     - assets/early_luteal.png

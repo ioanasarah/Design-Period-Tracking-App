@@ -7,6 +7,7 @@ import 'dart:math';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 
 void main() async {
@@ -84,6 +85,36 @@ class CycleDataProvider extends ChangeNotifier {
   bool get isLoaded => _loaded;
   String get selectedField => _selectedField;
 
+  // final Map<String, String> _phaseRecipeUrls = {
+  //   'Menstruation': 'https://example.com/iron-rich-recipes',
+  //   'Follicular': 'https://example.com/energy-boosting-foods',
+  //   'Ovulation': 'https://example.com/ovulation-diet-tips',
+  //   'Early Luteal': 'https://example.com/hormone-balancing-meals',
+  //   'Late Luteal': 'https://example.com/anti-bloating-recipes',
+  // };
+
+  // Inside CycleDataProvider
+  String? getRecipeUrl({
+    required String phase,
+    required int dayOfPhase,
+  }) {
+    final infoPerPhase = _data[phase];
+    if (infoPerPhase == null || infoPerPhase.isEmpty) return null;
+
+    final index = (dayOfPhase - 1).clamp(0, infoPerPhase.length - 1);
+    
+    // This looks into your JSON for the column named 'recipes'
+    final recipe = infoPerPhase[index]['Recipe']?.toString();
+    
+    // Return null if the cell is empty or 'No data'
+    if (recipe == null || recipe.isEmpty || recipe == 'No data') return null;
+    return recipe;
+  }
+
+  // New: Method to retrieve the link for the current phase
+  // String? getRecipeLink(String phase) {
+  //   return _phaseRecipeUrls[phase];
+  // }
 
 // go through this and understand cause wtf
 List<PhaseDayInfo> getAllPhaseDays(String phase) {
@@ -352,69 +383,78 @@ class MainNavigationBar extends StatefulWidget {
 class CustomNavigationBar extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onItemSelected;
+  final Color backgroundColor;
 
   const CustomNavigationBar({
     super.key,
     required this.selectedIndex,
     required this.onItemSelected,
+    this.backgroundColor = Colors.white,
   });
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(child:
-        Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 255, 255, 255),
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 25),
+          child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+          decoration: BoxDecoration(
+            color: backgroundColor.withOpacity(0.3),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+              bottomLeft: Radius.circular(24),
+              bottomRight: Radius.circular(24),
+            ),
+            border: Border.all(
+              color: const Color.fromARGB(255, 195, 195, 195),
+              width: 1.5,
+            ),
+          // boxShadow: const [
+          //   BoxShadow(
+          //     color: Color(0xFFFBE3E4),
+          //     offset: Offset(0, -4),
+          //     blurRadius: 24,
+          //   ),
+          //],
+                ),
+                child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _NavButton(
+              label: 'Log Page', //should we just call it log? since the others don't have page in their name
+              // icon: 'assets/images/vector.svg',
+              icon: Icons.add, // icon for tabs design
+              isSelected: selectedIndex == 0,
+              onTap: () => onItemSelected(0),
+            ),
+            _NavButton(
+              label: 'Home',
+              // icon: 'assets/images/vector.svg',
+              // icon: Icon(Icons.info).toString(),
+              icon: Icons.home,
+              isSelected: selectedIndex == 1,
+              onTap: () => onItemSelected(1),
+            ),
+            _NavButton(
+              label: 'Daily Tips',
+              // icon: 'assets/images/vector.svg',
+              icon: Icons.person,
+              isSelected: selectedIndex == 2,
+              onTap: () => onItemSelected(2),
+            ),
+            _NavButton(
+              label: 'Calendar',
+              // icon: 'assets/images/vector.svg',
+              icon: Icons.calendar_month_rounded,
+              isSelected: selectedIndex == 3,
+              onTap: () => onItemSelected(3),
+            ),
+          ],
+                ),
+              ),
         ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color.fromRGBO(10, 0, 0, 0.358),
-            offset: Offset(0, -4),
-            blurRadius: 24,
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _NavButton(
-            label: 'Log Page', //should we just call it log? since the others don't have page in their name
-            // icon: 'assets/images/vector.svg',
-            icon: Icons.add, // icon for tabs design
-            isSelected: selectedIndex == 0,
-            onTap: () => onItemSelected(0),
-          ),
-          _NavButton(
-            label: 'Home',
-            // icon: 'assets/images/vector.svg',
-            // icon: Icon(Icons.info).toString(),
-            icon: Icons.home,
-            isSelected: selectedIndex == 1,
-            onTap: () => onItemSelected(1),
-          ),
-          _NavButton(
-            label: 'Daily Tips',
-            // icon: 'assets/images/vector.svg',
-            icon: Icons.person,
-            isSelected: selectedIndex == 2,
-            onTap: () => onItemSelected(2),
-          ),
-          _NavButton(
-            label: 'Calendar',
-            // icon: 'assets/images/vector.svg',
-            icon: Icons.calendar_month_rounded,
-            isSelected: selectedIndex == 3,
-            onTap: () => onItemSelected(3),
-          ),
-        ],
-      ),
-    ),
     );
   }
 }
@@ -482,33 +522,99 @@ class _MainNavigationBarState extends State<MainNavigationBar> {
   int _selectedIndex = 1;
 
   // Top-level pages only
-  List<Widget> get _pages => [
-  LogPage(onSubmit: () => _onItemTapped(1)),
-  const HomePage(),
-  const DailyTipsPage(),
-  const CalendarPage(),
-];
+//   List<Widget> get _pages => [
+//   LogPage(onSubmit: () => _onItemTapped(1)),
+//   const HomePage(),
+//   const DailyTipsPage(),
+//   const CalendarPage(),
+// ];
+  // 1. Create a Navigator Key for each of your 4 tabs
+  final List<GlobalKey<NavigatorState>> _navigatorKeys = [
+    GlobalKey<NavigatorState>(),
+    GlobalKey<NavigatorState>(),
+    GlobalKey<NavigatorState>(),
+    GlobalKey<NavigatorState>(),
+  ];
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+    if (index == _selectedIndex) {
+      // If user taps the same tab, pop back to the first page of that tab
+      _navigatorKeys[index].currentState?.popUntil((route) => route.isFirst);
+    } else {
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
   }
 
   @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    //appBar: 
-    // AppBar(
-    // title: const Text("Log your Period Details!"),
-    // ),
-    body: _pages[_selectedIndex],
-    bottomNavigationBar: CustomNavigationBar(
-      selectedIndex: _selectedIndex,
-      onItemSelected: _onItemTapped,
-    ),
+  Widget build(BuildContext context) {
+    return Scaffold(
+      extendBody: true,
+      // 2. Use IndexedStack so pages don't lose their state when switching tabs
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: [
+          _buildNavigator(0),
+          _buildNavigator(1),
+          _buildNavigator(2),
+          _buildNavigator(3),
+        ],
+      ),
+      bottomNavigationBar: CustomNavigationBar(
+        selectedIndex: _selectedIndex,
+        onItemSelected: _onItemTapped,
+
+      ),
+    );
+  }
+
+  // 3. This helper builds a local Navigator for each tab
+  // Widget _buildNavigator(int index) {
+  //   return Navigator(
+  //     key: _navigatorKeys[index],
+  //     onGenerateRoute: (RouteSettings settings) {
+  //       return MaterialPageRoute(
+  //         builder: (context) {
+  //           // Map index to your main pages
+  //           switch (index) {
+  //             case 0: return LogPage(onSubmit: () => _onItemTapped(1));
+  //             case 1: return const HomePage();
+  //             case 2: return const DailyTipsPage();
+  //             case 3: return const CalendarPage();
+  //             default: return const HomePage();
+  //           }
+  //         },
+  //       );
+  //     },
+  //   );
+  // }
+
+  Widget _buildNavigator(int index) {
+  return Navigator(
+    key: _navigatorKeys[index],
+    onGenerateRoute: (RouteSettings settings) {
+      return MaterialPageRoute(
+        builder: (context) {
+          switch (index) {
+            case 0:
+              // For LogPage, we still pass the onSubmit to switch tabs
+              return LogPage(onSubmit: () => _onItemTapped(1));
+            case 1:
+              return const HomePage();
+            case 2:
+              return const DailyTipsPage();
+            case 3:
+              return const CalendarPage();
+            default:
+              return const HomePage();
+          }
+        },
+      );
+    },
   );
 }
+
 }
 
 class NavigationState extends ChangeNotifier {
@@ -720,6 +826,63 @@ class _LogCalendarState extends State<LogCalendar> {
                     final int cycleLength =
                         int.tryParse(cycleLengthController.text) ?? 28;
 
+                    //verifica daca prea lungi/scurte - these are healthy values
+                    bool isUnusual = periodLength > 8 || cycleLength < 21 || cycleLength > 35 || periodLength < 1;
+
+                    if (isUnusual) {
+                      //warning dialog
+                      bool proceed = await showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text("Are these details correct?", style: TextStyle(
+                            color: const Color(0xFF303437),
+                            fontSize: 18,
+                            fontFamily: 'DM Sans',
+                            fontWeight: FontWeight.w700,
+                            height: 1.79,
+                            ),
+                            ),
+                          content: Text(
+                            "You entered a ${periodLength}-day period and a ${cycleLength}-day cycle. "
+                            "These values are outside the typical range. Do you want to save them anyway?"
+                          , style: TextStyle(
+                              color: const Color(0xFF303437),
+                              fontSize: 14,
+                              fontFamily: 'DM Sans',
+                              fontWeight: FontWeight.w600,
+                              height: 1.79,
+                              ),
+                              ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false), // User wants to edit
+                              child: const Text("Edit", style: TextStyle(
+                                  color: const Color(0xFF303437),
+                                  fontSize: 14,
+                                  fontFamily: 'DMSans',
+                                  fontWeight: FontWeight.w400,
+                                  height: 1.79,
+                                  ),
+                                  ),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true), // User confirms
+                              child: const Text("Yes, Save", style: TextStyle(
+                                color: const Color(0xFF303437),
+                                fontSize: 14,
+                                fontFamily: 'DMSans',
+                                fontWeight: FontWeight.w400,
+                                height: 1.79,
+                                ),
+                                ),
+                            ),
+                          ],
+                        ),
+                      ) ?? false;
+
+                      if (!proceed) return; //stop if user clicked edit
+                    }
+                    
                     final calc = context.read<Calculate>();
 
                     // Update provider & save data in one call
@@ -1161,11 +1324,8 @@ class DailyTipsPage extends StatelessWidget {
       'Late Luteal',
     ];
 
-
-
     // data loaded into page 
     final calc = context.watch<Calculate>();
-    // final nextPeriodDate = calc.nextPeriodDate;
     final difference = calc.difference;
     final phase = calc.phase;
     final dayOfPhase = calc.dayofphase;
@@ -1174,6 +1334,18 @@ class DailyTipsPage extends StatelessWidget {
 
     final cycleData = context.watch<CycleDataProvider>();
     final selectedField = cycleData.selectedField;
+
+    final info = (phase != null && dayOfPhase != null)
+    ? cycleData.getPhaseInfo(
+        phase: phase,
+        dayOfPhase: dayOfPhase,
+        field: selectedField,
+      )
+    : 'No data';
+
+    final String? recipeLink = (selectedField == "Foods and Recipes" && phase != null && dayOfPhase != null)
+    ? cycleData.getRecipeUrl(phase: phase, dayOfPhase: dayOfPhase)
+    : null;
 
     bool isSelected(String hormoneLabel) {
   return selectedField == hormoneLabel;
@@ -1198,13 +1370,13 @@ final energyGraph = ["Energy Levels Info"].contains(selectedField);
       return const Center(child: CircularProgressIndicator());
     }
 
-  final info = (phase != null && dayOfPhase != null)
-      ? cycleData.getPhaseInfo(
-          phase: phase,
-          dayOfPhase: dayOfPhase,
-          field: selectedField,
-        )
-      : 'No data';
+  // final info = (phase != null && dayOfPhase != null)
+  //     ? cycleData.getPhaseInfo(
+  //         phase: phase,
+  //         dayOfPhase: dayOfPhase,
+  //         field: selectedField,
+  //       )
+  //     : 'No data';
 
     // add this wherever need graph 
 
@@ -1346,7 +1518,10 @@ final phaseAnnotations = phaseStartX.containsKey(phase)
       ]
     : <VerticalRangeAnnotation>[];
 
-
+  // Inside DailyTipsPage build method
+  // final String? recipeLink = (selectedField == "Foods and Recipes" && phase != null && dayOfPhase != null)
+  //     ? cycleData.getRecipeUrl(phase: phase, dayOfPhase: dayOfPhase)
+  //     : null;
 
     // design of page 
     return Scaffold(
@@ -1804,16 +1979,17 @@ Align(
               ),
 
               Padding(
-                padding: const EdgeInsets.only(top: 20.0),
+                padding: const EdgeInsets.only(top: 20.0, right: 15, left: 15),
                 child: 
                   _infoTile(
                     title: selectedField,
-                    value: 
+                    value: info,
+                    recipeUrl: recipeLink,
                     // cycleData.getPhaseInfo(
                     //     phase: phase,
                     //     dayOfPhase: dayOfPhase,
                     //     field: selectedField,
-                    Text(info).data!,
+                    //Text(info).data!,
                       
                     // : 'No data'), // fallback if phase or dayOfPhase is null
                   ),
@@ -1882,67 +2058,149 @@ Align(
     }
 
   //this one doesnt need an icon
+//   Widget _infoTile({
+//     required String title,
+//     required String value,
+//     //required IconData icon,
+//     bool isHighlighted = false,
+//   }) {
+//     return Container(
+//       margin: const EdgeInsets.only(bottom: 16),
+//       padding: const EdgeInsets.all(16),
+//       decoration: BoxDecoration(
+//         color: isHighlighted ? const Color.fromRGBO(54, 18, 58, 0.05) : const Color.fromARGB(255, 255, 255, 255),
+//         borderRadius: BorderRadius.circular(15),
+//         //border: Border.all(color: const Color.fromRGBO(54, 18, 58, 0.1)),
+//         boxShadow: [
+//         BoxShadow(
+//           color: Colors.black.withOpacity(0.08),
+//           blurRadius: 10,
+//           spreadRadius: 2,
+//           offset: const Offset(0, 4), // x, y
+//         ),
+//       ],
+//       ),
+//       child: Row(
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           //Icon(icon, color: const Color.fromARGB(255, 112, 161, 217)),
+//           // const SizedBox(width: 15),
+//           Expanded(
+//           child: Column(
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: [
+//               Text(
+//                 title,
+//                 style: TextStyle(
+//                     color: const Color(0xFF303437),
+//                     fontSize: 14,
+//                     fontFamily: 'DMSans',
+//                     fontWeight: FontWeight.w700,
+//                     height: 1.43,
+//                     ),
+//               ),
+//               const SizedBox(height: 4),
+//               Text(
+//                 value,
+//                 style: TextStyle(
+//                     color: const Color(0xFF303437),
+//                     fontSize: 14,
+//                     fontFamily: 'DMSans',
+//                     fontWeight: FontWeight.w400,
+//                     height: 1.43,
+//                     ),
+//                 softWrap: true,
+//                 maxLines: null,
+//               ),
+//             ],
+//           ),
+//         ),
+//       ],
+//     ),
+//   );
+// }
+
   Widget _infoTile({
     required String title,
     required String value,
-    //required IconData icon,
+    String? recipeUrl, 
     bool isHighlighted = false,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isHighlighted ? const Color.fromRGBO(54, 18, 58, 0.05) : const Color.fromARGB(255, 255, 255, 255),
+        color: isHighlighted ? const Color.fromRGBO(54, 18, 58, 0.05) : Colors.white,
         borderRadius: BorderRadius.circular(15),
-        //border: Border.all(color: const Color.fromRGBO(54, 18, 58, 0.1)),
         boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.08),
-          blurRadius: 10,
-          spreadRadius: 2,
-          offset: const Offset(0, 4), // x, y
-        ),
-      ],
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 10,
+            spreadRadius: 2,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          //Icon(icon, color: const Color.fromARGB(255, 112, 161, 217)),
-          // const SizedBox(width: 15),
-          Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                    color: const Color(0xFF303437),
-                    fontSize: 14,
-                    fontFamily: 'DMSans',
-                    fontWeight: FontWeight.w700,
-                    height: 1.43,
-                    ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                value,
-                style: TextStyle(
-                    color: const Color(0xFF303437),
-                    fontSize: 14,
-                    fontFamily: 'DMSans',
-                    fontWeight: FontWeight.w400,
-                    height: 1.43,
-                    ),
-                softWrap: true,
-                maxLines: null,
-              ),
-            ],
+          Text(
+            title,
+            style: const TextStyle(
+              color: Color(0xFF303437),
+              fontSize: 14,
+              fontFamily: 'DMSans',
+              fontWeight: FontWeight.w700,
+            ),
           ),
-        ),
-      ],
-    ),
-  );
-}
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: const TextStyle(
+              color: Color(0xFF303437),
+              fontSize: 14,
+              fontFamily: 'DMSans',
+              fontWeight: FontWeight.w400,
+              height: 1.43,
+            ),
+          ),
+          
+          // This part adds the clickable link only when needed
+          if (recipeUrl != null && recipeUrl.isNotEmpty && recipeUrl != 'No data') ...[
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12.0),
+              child: Divider(color: Color(0xFFE5E7EB)),
+            ),
+            InkWell(
+              onTap: () async {
+                final Uri url = Uri.parse(recipeUrl);
+                if (await canLaunchUrl(url)) {
+                  await launchUrl(url, mode: LaunchMode.externalApplication);
+                }
+              },
+              child: Row(
+                children: [
+                  const Icon(Icons.restaurant_menu, color: Color(0xFF5454CA), size: 18),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      "Open Recipe Link",
+                      style: TextStyle(
+                        color: Color(0xFF5454CA),
+                        fontWeight: FontWeight.w600,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   Widget _buildButton(BuildContext context, String label, Widget page) {
     final selectedField = context.watch<CycleDataProvider>().selectedField;
     return Padding(
@@ -1966,7 +2224,7 @@ Align(
 String _imageForPhase(String phase) {
   switch (phase) {
     case "Menstruation":
-      return 'assets/folicular.png';
+      return 'assets/menstruation.png';
     case "Follicular":
       return 'assets/folicular.png';
     case "Ovulation":
@@ -2941,7 +3199,13 @@ Align(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Cycle Day',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                      color: const Color(0xFF303437),
+                                      fontSize: 14,
+                                      fontFamily: 'DM Sans',
+                                      fontWeight: FontWeight.w600,
+                                      height: 1.43,
+                                      ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
@@ -2957,7 +3221,13 @@ Align(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Energy Level',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                      color: const Color(0xFF303437),
+                                      fontSize: 14,
+                                      fontFamily: 'DM Sans',
+                                      fontWeight: FontWeight.w600,
+                                      height: 1.43,
+                                      ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
@@ -3005,7 +3275,7 @@ Align(
               ),
 
              Padding(
-  padding: const EdgeInsets.only(top: 20.0),
+  padding: const EdgeInsets.only(top: 20.0, right: 10, left: 10),
   child: FutureBuilder<String>(
       future: _loadMenstruationInfo(selectedField),
       builder: (context, snapshot) {
@@ -3620,7 +3890,13 @@ Align(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Cycle Day',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                      color: const Color(0xFF303437),
+                                      fontSize: 14,
+                                      fontFamily: 'DM Sans',
+                                      fontWeight: FontWeight.w600,
+                                      height: 1.43,
+                                      ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
@@ -3636,7 +3912,13 @@ Align(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Energy Level',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                      color: const Color(0xFF303437),
+                                      fontSize: 14,
+                                      fontFamily: 'DM Sans',
+                                      fontWeight: FontWeight.w700,
+                                      height: 1.43,
+                                      ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
@@ -3684,7 +3966,7 @@ Align(
               ),
 
              Padding(
-  padding: const EdgeInsets.only(top: 20.0),
+  padding: const EdgeInsets.only(top: 20.0, right: 10, left: 10),
   child: FutureBuilder<String>(
       future: _loadFollicularInfo(selectedField),
       builder: (context, snapshot) {
@@ -4367,7 +4649,7 @@ Align(
               ),
 
              Padding(
-  padding: const EdgeInsets.only(top: 20.0),
+  padding: const EdgeInsets.only(top: 20.0, right: 10, left: 10),
   child: FutureBuilder<String>(
       future: _loadOvulationInfo(selectedField),
       builder: (context, snapshot) {
@@ -4990,7 +5272,13 @@ Align(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Cycle Day',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                      color: const Color(0xFF303437),
+                                      fontSize: 14,
+                                      fontFamily: 'DM Sans',
+                                      fontWeight: FontWeight.w600,
+                                      height: 1.43,
+                                      ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
@@ -5006,7 +5294,13 @@ Align(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Energy Level',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                      color: const Color(0xFF303437),
+                                      fontSize: 14,
+                                      fontFamily: 'DM Sans',
+                                      fontWeight: FontWeight.w600,
+                                      height: 1.43,
+                                      ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
@@ -5054,7 +5348,7 @@ Align(
               ),
 
              Padding(
-  padding: const EdgeInsets.only(top: 20.0),
+  padding: const EdgeInsets.only(top: 20.0, right: 10, left: 10),
   child: FutureBuilder<String>(
       future: _loadEarlyLutealInfo(selectedField),
       builder: (context, snapshot) {
@@ -5546,7 +5840,13 @@ rangeAnnotations: RangeAnnotations(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Cycle Day',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                      color: const Color(0xFF303437),
+                                      fontSize: 14,
+                                      fontFamily: 'DM Sans',
+                                      fontWeight: FontWeight.w600,
+                                      height: 1.43,
+                                      ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
@@ -5562,7 +5862,13 @@ rangeAnnotations: RangeAnnotations(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Hormone Level',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style:TextStyle(
+                                      color: const Color(0xFF303437),
+                                      fontSize: 14,
+                                      fontFamily: 'DM Sans',
+                                      fontWeight: FontWeight.w700,
+                                      height: 1.43,
+                                      ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
@@ -5676,7 +5982,13 @@ Align(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Cycle Day',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DM Sans',
+                                    fontWeight: FontWeight.w600,
+                                    height: 1.43,
+                                    ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
@@ -5692,7 +6004,13 @@ Align(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Energy Level',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                      color: const Color(0xFF303437),
+                                      fontSize: 14,
+                                      fontFamily: 'DM Sans',
+                                      fontWeight: FontWeight.w700,
+                                      height: 1.43,
+                                      ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
@@ -5740,7 +6058,7 @@ Align(
               ),
 
              Padding(
-  padding: const EdgeInsets.only(top: 20.0),
+  padding: const EdgeInsets.only(top: 20.0, right: 10, left: 10),
   child: FutureBuilder<String>(
       future: _loadLateLutealInfo(selectedField),
       builder: (context, snapshot) {
