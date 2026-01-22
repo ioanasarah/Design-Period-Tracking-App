@@ -352,11 +352,13 @@ class MainNavigationBar extends StatefulWidget {
 class CustomNavigationBar extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onItemSelected;
+  final Color backgroundColor;
 
   const CustomNavigationBar({
     super.key,
     required this.selectedIndex,
     required this.onItemSelected,
+    this.backgroundColor = Colors.white,
   });
 
   @override
@@ -367,20 +369,24 @@ class CustomNavigationBar extends StatelessWidget {
           child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
           decoration: BoxDecoration(
-          color: const Color.fromARGB(255, 255, 255, 255).withOpacity(0.7),
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(24),
-            topRight: Radius.circular(24),
-            bottomLeft: Radius.circular(24),
-            bottomRight: Radius.circular(24),
-          ),
-          boxShadow: const [
-            BoxShadow(
-              color: Color.fromRGBO(10, 0, 0, 0.358),
-              offset: Offset(0, -4),
-              blurRadius: 24,
+            color: backgroundColor.withOpacity(0.3),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+              bottomLeft: Radius.circular(24),
+              bottomRight: Radius.circular(24),
             ),
-          ],
+            border: Border.all(
+              color: const Color.fromARGB(255, 195, 195, 195),
+              width: 1.5,
+            ),
+          // boxShadow: const [
+          //   BoxShadow(
+          //     color: Color(0xFFFBE3E4),
+          //     offset: Offset(0, -4),
+          //     blurRadius: 24,
+          //   ),
+          //],
                 ),
                 child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -485,33 +491,99 @@ class _MainNavigationBarState extends State<MainNavigationBar> {
   int _selectedIndex = 1;
 
   // Top-level pages only
-  List<Widget> get _pages => [
-  LogPage(onSubmit: () => _onItemTapped(1)),
-  const HomePage(),
-  const DailyTipsPage(),
-  const CalendarPage(),
-];
+//   List<Widget> get _pages => [
+//   LogPage(onSubmit: () => _onItemTapped(1)),
+//   const HomePage(),
+//   const DailyTipsPage(),
+//   const CalendarPage(),
+// ];
+  // 1. Create a Navigator Key for each of your 4 tabs
+  final List<GlobalKey<NavigatorState>> _navigatorKeys = [
+    GlobalKey<NavigatorState>(),
+    GlobalKey<NavigatorState>(),
+    GlobalKey<NavigatorState>(),
+    GlobalKey<NavigatorState>(),
+  ];
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+    if (index == _selectedIndex) {
+      // If user taps the same tab, pop back to the first page of that tab
+      _navigatorKeys[index].currentState?.popUntil((route) => route.isFirst);
+    } else {
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
   }
 
   @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    //appBar: 
-    // AppBar(
-    // title: const Text("Log your Period Details!"),
-    // ),
-    body: _pages[_selectedIndex],
-    bottomNavigationBar: CustomNavigationBar(
-      selectedIndex: _selectedIndex,
-      onItemSelected: _onItemTapped,
-    ),
+  Widget build(BuildContext context) {
+    return Scaffold(
+      extendBody: true,
+      // 2. Use IndexedStack so pages don't lose their state when switching tabs
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: [
+          _buildNavigator(0),
+          _buildNavigator(1),
+          _buildNavigator(2),
+          _buildNavigator(3),
+        ],
+      ),
+      bottomNavigationBar: CustomNavigationBar(
+        selectedIndex: _selectedIndex,
+        onItemSelected: _onItemTapped,
+
+      ),
+    );
+  }
+
+  // 3. This helper builds a local Navigator for each tab
+  // Widget _buildNavigator(int index) {
+  //   return Navigator(
+  //     key: _navigatorKeys[index],
+  //     onGenerateRoute: (RouteSettings settings) {
+  //       return MaterialPageRoute(
+  //         builder: (context) {
+  //           // Map index to your main pages
+  //           switch (index) {
+  //             case 0: return LogPage(onSubmit: () => _onItemTapped(1));
+  //             case 1: return const HomePage();
+  //             case 2: return const DailyTipsPage();
+  //             case 3: return const CalendarPage();
+  //             default: return const HomePage();
+  //           }
+  //         },
+  //       );
+  //     },
+  //   );
+  // }
+
+  Widget _buildNavigator(int index) {
+  return Navigator(
+    key: _navigatorKeys[index],
+    onGenerateRoute: (RouteSettings settings) {
+      return MaterialPageRoute(
+        builder: (context) {
+          switch (index) {
+            case 0:
+              // For LogPage, we still pass the onSubmit to switch tabs
+              return LogPage(onSubmit: () => _onItemTapped(1));
+            case 1:
+              return const HomePage();
+            case 2:
+              return const DailyTipsPage();
+            case 3:
+              return const CalendarPage();
+            default:
+              return const HomePage();
+          }
+        },
+      );
+    },
   );
 }
+
 }
 
 class NavigationState extends ChangeNotifier {
@@ -1807,7 +1879,7 @@ Align(
               ),
 
               Padding(
-                padding: const EdgeInsets.only(top: 20.0),
+                padding: const EdgeInsets.only(top: 20.0, right: 15, left: 15),
                 child: 
                   _infoTile(
                     title: selectedField,
@@ -2944,7 +3016,13 @@ Align(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Cycle Day',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                      color: const Color(0xFF303437),
+                                      fontSize: 14,
+                                      fontFamily: 'DM Sans',
+                                      fontWeight: FontWeight.w600,
+                                      height: 1.43,
+                                      ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
@@ -2960,7 +3038,13 @@ Align(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Energy Level',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                      color: const Color(0xFF303437),
+                                      fontSize: 14,
+                                      fontFamily: 'DM Sans',
+                                      fontWeight: FontWeight.w600,
+                                      height: 1.43,
+                                      ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
@@ -3008,7 +3092,7 @@ Align(
               ),
 
              Padding(
-  padding: const EdgeInsets.only(top: 20.0),
+  padding: const EdgeInsets.only(top: 20.0, right: 10, left: 10),
   child: FutureBuilder<String>(
       future: _loadMenstruationInfo(selectedField),
       builder: (context, snapshot) {
@@ -3623,7 +3707,13 @@ Align(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Cycle Day',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                      color: const Color(0xFF303437),
+                                      fontSize: 14,
+                                      fontFamily: 'DM Sans',
+                                      fontWeight: FontWeight.w600,
+                                      height: 1.43,
+                                      ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
@@ -3639,7 +3729,13 @@ Align(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Energy Level',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                      color: const Color(0xFF303437),
+                                      fontSize: 14,
+                                      fontFamily: 'DM Sans',
+                                      fontWeight: FontWeight.w700,
+                                      height: 1.43,
+                                      ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
@@ -3687,7 +3783,7 @@ Align(
               ),
 
              Padding(
-  padding: const EdgeInsets.only(top: 20.0),
+  padding: const EdgeInsets.only(top: 20.0, right: 10, left: 10),
   child: FutureBuilder<String>(
       future: _loadFollicularInfo(selectedField),
       builder: (context, snapshot) {
@@ -4370,7 +4466,7 @@ Align(
               ),
 
              Padding(
-  padding: const EdgeInsets.only(top: 20.0),
+  padding: const EdgeInsets.only(top: 20.0, right: 10, left: 10),
   child: FutureBuilder<String>(
       future: _loadOvulationInfo(selectedField),
       builder: (context, snapshot) {
@@ -4993,7 +5089,13 @@ Align(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Cycle Day',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                      color: const Color(0xFF303437),
+                                      fontSize: 14,
+                                      fontFamily: 'DM Sans',
+                                      fontWeight: FontWeight.w600,
+                                      height: 1.43,
+                                      ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
@@ -5009,7 +5111,13 @@ Align(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Energy Level',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                      color: const Color(0xFF303437),
+                                      fontSize: 14,
+                                      fontFamily: 'DM Sans',
+                                      fontWeight: FontWeight.w600,
+                                      height: 1.43,
+                                      ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
@@ -5057,7 +5165,7 @@ Align(
               ),
 
              Padding(
-  padding: const EdgeInsets.only(top: 20.0),
+  padding: const EdgeInsets.only(top: 20.0, right: 10, left: 10),
   child: FutureBuilder<String>(
       future: _loadEarlyLutealInfo(selectedField),
       builder: (context, snapshot) {
@@ -5549,7 +5657,13 @@ rangeAnnotations: RangeAnnotations(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Cycle Day',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                      color: const Color(0xFF303437),
+                                      fontSize: 14,
+                                      fontFamily: 'DM Sans',
+                                      fontWeight: FontWeight.w600,
+                                      height: 1.43,
+                                      ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
@@ -5565,7 +5679,13 @@ rangeAnnotations: RangeAnnotations(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Hormone Level',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style:TextStyle(
+                                      color: const Color(0xFF303437),
+                                      fontSize: 14,
+                                      fontFamily: 'DM Sans',
+                                      fontWeight: FontWeight.w700,
+                                      height: 1.43,
+                                      ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
@@ -5679,7 +5799,13 @@ Align(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Cycle Day',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DM Sans',
+                                    fontWeight: FontWeight.w600,
+                                    height: 1.43,
+                                    ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
@@ -5695,7 +5821,13 @@ Align(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Energy Level',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                      color: const Color(0xFF303437),
+                                      fontSize: 14,
+                                      fontFamily: 'DM Sans',
+                                      fontWeight: FontWeight.w700,
+                                      height: 1.43,
+                                      ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
@@ -5743,7 +5875,7 @@ Align(
               ),
 
              Padding(
-  padding: const EdgeInsets.only(top: 20.0),
+  padding: const EdgeInsets.only(top: 20.0, right: 10, left: 10),
   child: FutureBuilder<String>(
       future: _loadLateLutealInfo(selectedField),
       builder: (context, snapshot) {
