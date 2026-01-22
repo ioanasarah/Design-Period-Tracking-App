@@ -81,6 +81,10 @@ flutter:
     - assets/girl-sitting.png
     - assets/girl-pointing.png
     - assets/woman_in_swimsuit.png
+    - assets/folicular.png
+    - assets/ovulation.png
+    - assets/early_luteal.png
+    - assets/late_luteal.png
 
 
   fonts:

@@ -713,6 +713,7 @@ class _LogCalendarState extends State<LogCalendar> {
               padding: const EdgeInsets.all(8.0),
               child:
             TextBox(
+                  //color: Colors.white,
                   title: "Average cycle length (days):",
                   hint: "Enter number of days",
                   controller: cycleLengthController,
@@ -1023,7 +1024,7 @@ class PlaceholderPage extends StatelessWidget {
                   style: TextStyle(
                     color: const Color(0xFF303437),
                     fontSize: 14,
-                    fontFamily: 'DM Sans',
+                    fontFamily: 'DMSans',
                     fontWeight: FontWeight.w700,
                     height: 1.43,
                     ),
@@ -1034,7 +1035,7 @@ class PlaceholderPage extends StatelessWidget {
                   style: TextStyle(
                     color: const Color(0xFF303437),
                     fontSize: 14,
-                    fontFamily: 'DM Sans',
+                    fontFamily: 'DMSans',
                     fontWeight: FontWeight.w400,
                     height: 1.79,
                     ),
@@ -1316,6 +1317,22 @@ for (final phaseName in phasesInOrder) {
   }
 }
 
+// String _imageForPhase(String phase) {
+//   switch (phase) {
+//     case "Menstruation":
+//       return 'assets/menstruation.png';
+//     case "Follicular":
+//       return 'assets/follicular.png';
+//     case "Ovulation":
+//       return 'assets/ovulation.png';
+//     case "Luteal":
+//       return 'assets/luteal.png';
+//     default:
+//       return 'assets/default.png';
+//   }
+// }
+
+
 final phaseColors = {
   'Menstruation': const Color(0xFFF6A3A3),
   'Follicular': const Color(0xFFF9D5FF),
@@ -1551,6 +1568,8 @@ if (hormoneGraph)...[
                   )
               ),
 
+              SizedBox(height: 20),
+
               SizedBox(
                 height: 350,
                 // padding: const EdgeInsets.only(top: 20.0),
@@ -1567,7 +1586,7 @@ if (hormoneGraph)...[
         SizedBox(width: 16),
         _LegendItem(color: Colors.deepPurple, label: 'Progesterone'),
         SizedBox(width: 16),
-               _LegendItem(color: Color.fromARGB(255, 114, 243, 107), label: 'FSH'),
+               _LegendItem(color: Color.fromARGB(255, 163, 242, 165), label: 'FSH'),
         SizedBox(width: 16),
         _LegendItem(color: Color.fromARGB(255, 82, 102, 216), label: 'LH'),
       ],
@@ -1838,6 +1857,7 @@ Align(
                       context,
                       "Menstruation",
                       const MenstruationPage(),
+                      //imagePath: _imageForPhase("Menstruation"),
                     ),
                     _buildButtonPhases(
                       context,
@@ -1905,15 +1925,24 @@ Align(
             children: [
               Text(
                 title,
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                style: TextStyle(
+                    color: const Color(0xFF303437),
+                    fontSize: 14,
+                    fontFamily: 'DMSans',
+                    fontWeight: FontWeight.w700,
+                    height: 1.43,
+                    ),
               ),
               const SizedBox(height: 4),
               Text(
                 value,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(
+                    color: const Color(0xFF303437),
+                    fontSize: 14,
+                    fontFamily: 'DMSans',
+                    fontWeight: FontWeight.w400,
+                    height: 1.43,
+                    ),
                 softWrap: true,
                 maxLines: null,
               ),
@@ -1944,6 +1973,24 @@ Align(
   }
 }
 
+String _imageForPhase(String phase) {
+  switch (phase) {
+    case "Menstruation":
+      return 'assets/folicular.png';
+    case "Follicular":
+      return 'assets/folicular.png';
+    case "Ovulation":
+      return 'assets/ovulation.png';
+    case "Early Luteal":
+      return 'assets/early_luteal.png';
+    case "Late Luteal":
+      return 'assets/late_luteal.png';
+    default:
+      return 'assets/folicular.png';
+  }
+}
+
+
   Widget _buildButtonPhases(BuildContext context, String label, Widget page) {
     return Padding(
       padding: const EdgeInsets.only(right: 12),
@@ -1952,6 +1999,7 @@ Align(
         child: HorizontalScrollButtonPhases(
           label: label,
           colorBox: label,
+          imagePath: _imageForPhase(label),
           onPressed: () {
             Navigator.push(
               context,
@@ -2345,7 +2393,7 @@ class CalendarPage extends StatefulWidget {
                   style: TextStyle(
                     color: const Color(0xFF303437),
                     fontSize: 14,
-                    fontFamily: 'DM Sans',
+                    fontFamily: 'DMSans',
                     fontWeight: FontWeight.w700,
                     height: 1.43,
                     ),
@@ -2356,7 +2404,7 @@ class CalendarPage extends StatefulWidget {
                   style: TextStyle(
                     color: const Color(0xFF303437),
                     fontSize: 14,
-                    fontFamily: 'DM Sans',
+                    fontFamily: 'DMSans',
                     fontWeight: FontWeight.w400,
                     height: 1.79,
                     ),
@@ -2959,7 +3007,7 @@ Align(
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                   ),
@@ -3020,15 +3068,24 @@ Align(
             children: [
               Text(
                 title,
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                style: TextStyle(
+                    color: const Color(0xFF303437),
+                    fontSize: 14,
+                    fontFamily: 'DMSans',
+                    fontWeight: FontWeight.w700,
+                    height: 1.43,
+                    ),
               ),
               const SizedBox(height: 4),
               Text(
                 value,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(
+                    color: const Color(0xFF303437),
+                    fontSize: 14,
+                    fontFamily: 'DMSans',
+                    fontWeight: FontWeight.w400,
+                    height: 1.43,
+                    ),
                 softWrap: true,
                 maxLines: null,
               ),
@@ -3274,7 +3331,7 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
               style: TextStyle(
                 color: const Color(0xFF5454CA),
                 fontSize: 36,
-                fontFamily: 'DM Sans',
+                fontFamily: 'DMSans',
                 fontWeight: FontWeight.w700,
                 height: 0.67,
                 letterSpacing: 1.44,
@@ -3289,7 +3346,7 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
                 style: TextStyle(
                   color:  Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                 ),
@@ -3629,7 +3686,7 @@ Align(
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                   ),
@@ -3690,15 +3747,24 @@ Align(
             children: [
               Text(
                 title,
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                style: TextStyle(
+                    color: const Color(0xFF303437),
+                    fontSize: 14,
+                    fontFamily: 'DMSans',
+                    fontWeight: FontWeight.w700,
+                    height: 1.43,
+                    ),
               ),
               const SizedBox(height: 4),
               Text(
                 value,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(
+                    color: const Color(0xFF303437),
+                    fontSize: 14,
+                    fontFamily: 'DMSans',
+                    fontWeight: FontWeight.w400,
+                    height: 1.43,
+                    ),
                 softWrap: true,
                 maxLines: null,
               ),
@@ -3947,7 +4013,7 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
               style: TextStyle(
                 color: const Color(0xFF5454CA),
                 fontSize: 36,
-                fontFamily: 'DM Sans',
+                fontFamily: 'DMSans',
                 fontWeight: FontWeight.w700,
                 height: 0.67,
                 letterSpacing: 1.44,
@@ -4362,7 +4428,13 @@ Align(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               //Text(title, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-              Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Text(value, style: TextStyle(
+                    color: const Color(0xFF303437),
+                    fontSize: 14,
+                    fontFamily: 'DMSans',
+                    fontWeight: FontWeight.w400,
+                    height: 1.43,
+                    ),),
             ],
           ),
           ),
@@ -5047,15 +5119,24 @@ Align(
             children: [
               Text(
                 title,
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                style: TextStyle(
+                    color: const Color(0xFF303437),
+                    fontSize: 14,
+                    fontFamily: 'DMSans',
+                    fontWeight: FontWeight.w700,
+                    height: 1.43,
+                    ),
               ),
               const SizedBox(height: 4),
               Text(
                 value,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(
+                    color: const Color(0xFF303437),
+                    fontSize: 14,
+                    fontFamily: 'DMSans',
+                    fontWeight: FontWeight.w400,
+                    height: 1.43,
+                    ),
                 softWrap: true,
                 maxLines: null,
               ),
@@ -5661,7 +5742,7 @@ Align(
                 style: TextStyle(
                   color: const Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                   ),
@@ -5722,15 +5803,24 @@ Align(
             children: [
               Text(
                 title,
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                style: TextStyle(
+                    color: const Color(0xFF303437),
+                    fontSize: 14,
+                    fontFamily: 'DMSans',
+                    fontWeight: FontWeight.w700,
+                    height: 1.43,
+                    ),
               ),
               const SizedBox(height: 4),
               Text(
                 value,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(
+                    color: const Color(0xFF303437),
+                    fontSize: 14,
+                    fontFamily: 'DMSans',
+                    fontWeight: FontWeight.w400,
+                    height: 1.43,
+                    ),
                 softWrap: true,
                 maxLines: null,
               ),
@@ -5824,7 +5914,8 @@ class TextBox extends StatelessWidget {
   });
 
   Widget build(BuildContext context) {
-    return Column(
+    return 
+    Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(title,
@@ -5843,12 +5934,34 @@ class TextBox extends StatelessWidget {
             ],
             controller: controller,
             decoration: InputDecoration(
-              border: const OutlineInputBorder(),
+              // border: const OutlineInputBorder(
+              //   //borderRadius: BorderRadius.circular(8), // optional corner radius
+              //   borderSide: BorderSide(
+              //     color: Colors.blue, 
+              //     width: 2,          
+              //   ),
+
+              // ),
               hintText: hint,
               hintStyle: TextStyle(
                 color: const Color(0xFF1E1E1E),
-                fontFamily: 'DMSans',)
+                fontFamily: 'DMSans',),
+                filled: true,
+                fillColor: Colors.white,
+
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color.fromARGB(255, 195, 195, 195), width: 1),
+                ),
+
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Color.fromARGB(255, 195, 195, 195), width: 1),
+                ),
+
             ),
+            //filled: true,          // background enabled
+            //fillColor: Colors.white,
           ),
         ),
       ],
@@ -5883,7 +5996,7 @@ class HorizontalScrollButton extends StatelessWidget {
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
             color: isSelected
-              ? const Color(0xFF303437) // color of horizontl scroll button once selected
+              ? const Color(0xFFF68C8C)// color of horizontl scroll button once selected
               : Colors.white, //color of horizontl scroll button not selected
             borderRadius: BorderRadius.circular(24),
             boxShadow: const [
@@ -5943,23 +6056,28 @@ class HorizontalScrollButtonPhases extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
   final String colorBox;
+  final String? imagePath;
 
   const HorizontalScrollButtonPhases({
     super.key,
     required this.label,
     required this.onPressed,
     required this.colorBox,
+    this.imagePath,
   });
 
   @override
   Widget build(BuildContext context) {
+
     return SizedBox(
       width: 292,
       height: 75,
       child: InkWell(
         onTap: onPressed,
         borderRadius: BorderRadius.circular(24),
-        child: Container(
+        child: Stack(
+          children:[
+        Container(
           padding: const EdgeInsets.all(15),
           decoration: BoxDecoration(
             color: colorBox == 'Menstruation' ? Color(0xFFFBE3E4) :
@@ -5977,43 +6095,83 @@ class HorizontalScrollButtonPhases extends StatelessWidget {
               ),
             ],
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              // Icon circle
-              Container(
-                width: 32,
-                height: 32,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF2F8FF),
-                  shape: BoxShape.circle,
-                ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.favorite, // replace later if needed
-                  size: 16,
-                  color: Color(0xFF5454CA),
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              // Label 
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: const Color(0xFF5454CA),
-                  fontSize: 18,
-                  fontFamily: 'DMSans',
-                  fontWeight: FontWeight.w700,
-                  height: 0.67,
-                  letterSpacing: 0.72,
+              Expanded(
+                child:
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Icon circle
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFF2F8FF),
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: const Icon(
+                      Icons.favorite, // replace later if needed
+                      size: 16,
+                      color: Color(0xFF5454CA),
+                    ),
                   ),
-              ),
+              
+                  const SizedBox(height: 12),
+              
+                  // Label 
+                  Text(
+                    label,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: const Color(0xFF5454CA),
+                      fontSize: 18,
+                      fontFamily: 'DMSans',
+                      fontWeight: FontWeight.w700,
+                      height: 0.67,
+                      letterSpacing: 0.72,
+                      ),
+                  ),
+              
+                  // if (imagePath != null)
+                  //   Positioned(
+                  //     right: 8,
+                  //     bottom: 0,
+                  //     child: Image.asset(
+                  //       imagePath!,
+                  //       height: 60,
+                  //     ),
+                  //   ),
+              
+                ],
+              ),),
+              if (imagePath != null)
+                    Positioned(
+                      right: 8,
+                      bottom: 0,
+                      child: Image.asset(
+                        imagePath!,
+                        height: 100,
+                      ),
+                    ),
             ],
-          ),
+          )
+          
+        ),
+
+        // if (imagePath != null)
+        //     Positioned(
+        //       right: 8,
+        //       bottom: 0,
+        //       child: Image.asset(
+        //         imagePath!,
+        //         height: 60,
+        //       ),
+        //     ),
+
+        ],
         ),
       ),
     );
