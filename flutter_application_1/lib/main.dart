@@ -796,7 +796,7 @@ class _LogCalendarState extends State<LogCalendar> {
                         int.tryParse(cycleLengthController.text) ?? 28;
 
                     //verifica daca prea lungi/scurte - these are healthy values
-                    bool isUnusual = periodLength > 8 || cycleLength < 21 || cycleLength > 35;
+                    bool isUnusual = periodLength > 8 || cycleLength < 21 || cycleLength > 35 || periodLength < 1;
 
                     if (isUnusual) {
                       //warning dialog
@@ -849,10 +849,8 @@ class _LogCalendarState extends State<LogCalendar> {
                         ),
                       ) ?? false;
 
-                      if (!proceed) return; // Stop if user clicked "Edit"
+                      if (!proceed) return; //stop if user clicked edit
                     }
-                    
-                    
                     
                     final calc = context.read<Calculate>();
 
