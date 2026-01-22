@@ -1586,7 +1586,7 @@ if (hormoneGraph)...[
         SizedBox(width: 16),
         _LegendItem(color: Colors.deepPurple, label: 'Progesterone'),
         SizedBox(width: 16),
-               _LegendItem(color: Color.fromARGB(255, 114, 243, 107), label: 'FSH'),
+               _LegendItem(color: Color.fromARGB(255, 163, 242, 165), label: 'FSH'),
         SizedBox(width: 16),
         _LegendItem(color: Color.fromARGB(255, 82, 102, 216), label: 'LH'),
       ],
