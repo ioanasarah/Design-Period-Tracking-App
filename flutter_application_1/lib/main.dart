@@ -268,16 +268,6 @@ class Calculate extends ChangeNotifier {
     difference = today.difference(lastPeriodDate).inDays + 1;
     notifyListeners();
   }
-  // Future <void> calculatePhase() async {
-  //   if (difference == null) return;
-  //   final cycleData = await loadCycleData();
-  //   final entry = cycleData.firstWhere(
-  //     (e) => e["Day"] == difference,
-  //     orElse: () => {"Phase": "Unknown"},
-  //   );
-  //   phase = entry["Phase"];
-  //   notifyListeners();
-  // }
 
   void determinePhase({
     required int cycleDay,
@@ -494,7 +484,7 @@ class _MainNavigationBarState extends State<MainNavigationBar> {
   // Top-level pages only
   List<Widget> get _pages => [
   LogPage(onSubmit: () => _onItemTapped(1)),
-  const PlaceholderPage(),
+  const HomePage(),
   const DailyTipsPage(),
   const CalendarPage(),
 ];
@@ -755,8 +745,8 @@ class _LogCalendarState extends State<LogCalendar> {
 
 
 
-class PlaceholderPage extends StatelessWidget {
-  const PlaceholderPage({super.key});
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
