@@ -362,59 +362,62 @@ class CustomNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(child:
-        Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 255, 255, 255),
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 25),
+          child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+          decoration: BoxDecoration(
+          color: const Color.fromARGB(255, 255, 255, 255).withOpacity(0.7),
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
+            bottomLeft: Radius.circular(24),
+            bottomRight: Radius.circular(24),
+          ),
+          boxShadow: const [
+            BoxShadow(
+              color: Color.fromRGBO(10, 0, 0, 0.358),
+              offset: Offset(0, -4),
+              blurRadius: 24,
+            ),
+          ],
+                ),
+                child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _NavButton(
+              label: 'Log Page', //should we just call it log? since the others don't have page in their name
+              // icon: 'assets/images/vector.svg',
+              icon: Icons.add, // icon for tabs design
+              isSelected: selectedIndex == 0,
+              onTap: () => onItemSelected(0),
+            ),
+            _NavButton(
+              label: 'Home',
+              // icon: 'assets/images/vector.svg',
+              // icon: Icon(Icons.info).toString(),
+              icon: Icons.home,
+              isSelected: selectedIndex == 1,
+              onTap: () => onItemSelected(1),
+            ),
+            _NavButton(
+              label: 'Daily Tips',
+              // icon: 'assets/images/vector.svg',
+              icon: Icons.person,
+              isSelected: selectedIndex == 2,
+              onTap: () => onItemSelected(2),
+            ),
+            _NavButton(
+              label: 'Calendar',
+              // icon: 'assets/images/vector.svg',
+              icon: Icons.calendar_month_rounded,
+              isSelected: selectedIndex == 3,
+              onTap: () => onItemSelected(3),
+            ),
+          ],
+                ),
+              ),
         ),
-        boxShadow: const [
-          BoxShadow(
-            color: Color.fromRGBO(10, 0, 0, 0.358),
-            offset: Offset(0, -4),
-            blurRadius: 24,
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _NavButton(
-            label: 'Log Page', //should we just call it log? since the others don't have page in their name
-            // icon: 'assets/images/vector.svg',
-            icon: Icons.add, // icon for tabs design
-            isSelected: selectedIndex == 0,
-            onTap: () => onItemSelected(0),
-          ),
-          _NavButton(
-            label: 'Home',
-            // icon: 'assets/images/vector.svg',
-            // icon: Icon(Icons.info).toString(),
-            icon: Icons.home,
-            isSelected: selectedIndex == 1,
-            onTap: () => onItemSelected(1),
-          ),
-          _NavButton(
-            label: 'Daily Tips',
-            // icon: 'assets/images/vector.svg',
-            icon: Icons.person,
-            isSelected: selectedIndex == 2,
-            onTap: () => onItemSelected(2),
-          ),
-          _NavButton(
-            label: 'Calendar',
-            // icon: 'assets/images/vector.svg',
-            icon: Icons.calendar_month_rounded,
-            isSelected: selectedIndex == 3,
-            onTap: () => onItemSelected(3),
-          ),
-        ],
-      ),
-    ),
     );
   }
 }
