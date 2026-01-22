@@ -2486,7 +2486,8 @@ class CalendarPage extends StatefulWidget {
           //centerTitle: true,
         ),
         body: SingleChildScrollView(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.only(top: 16.0, right: 16.0, left: 16.0, bottom: 70),
+          //padding:const EdgeInsets.all(16),
           child: Column(
             children: [
               //aici e chestia de la calendar cu day si phase
@@ -2565,7 +2566,7 @@ class CalendarPage extends StatefulWidget {
               ),
 
               ),
-              SizedBox(height: 30),
+              //SizedBox(height: 30),
               
               TableCalendar(
                 firstDay: DateTime.now(),
@@ -2681,7 +2682,7 @@ class CalendarPage extends StatefulWidget {
                 ),
               ),
           
-              const SizedBox(height: 30),
+              //const SizedBox(height: 10),
           
               if (_selectedDay != null)
                 Padding(
