@@ -9,6 +9,23 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+// "C:\Users\Ioana\Documents\GitHub\Design-Period-Tracking-App\flutter_application_1\build\app\intermediates\packaged_manifests\debug\processDebugManifestForPackage\AndroidManifest.xml"
+// import 'package:url_launcher/url_launcher.dart';
+
+final Uri url = Uri.parse(
+  'https://elara.care/nutrition/menstrual-cycle-food-chart/#late-luteal-phase-recipe'
+);
+
+Future<void> openUrl() async {
+  if (!await launchUrl(
+    url,
+    mode: LaunchMode.externalApplication,
+  )) {
+    throw 'Could not launch $url';
+  }
+}
+
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // allows async code in main
