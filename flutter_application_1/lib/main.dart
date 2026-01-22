@@ -7,6 +7,7 @@ import 'dart:math';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 
 void main() async {
@@ -84,6 +85,36 @@ class CycleDataProvider extends ChangeNotifier {
   bool get isLoaded => _loaded;
   String get selectedField => _selectedField;
 
+  // final Map<String, String> _phaseRecipeUrls = {
+  //   'Menstruation': 'https://example.com/iron-rich-recipes',
+  //   'Follicular': 'https://example.com/energy-boosting-foods',
+  //   'Ovulation': 'https://example.com/ovulation-diet-tips',
+  //   'Early Luteal': 'https://example.com/hormone-balancing-meals',
+  //   'Late Luteal': 'https://example.com/anti-bloating-recipes',
+  // };
+
+  // Inside CycleDataProvider
+  String? getRecipeUrl({
+    required String phase,
+    required int dayOfPhase,
+  }) {
+    final infoPerPhase = _data[phase];
+    if (infoPerPhase == null || infoPerPhase.isEmpty) return null;
+
+    final index = (dayOfPhase - 1).clamp(0, infoPerPhase.length - 1);
+    
+    // This looks into your JSON for the column named 'recipes'
+    final recipe = infoPerPhase[index]['Recipe']?.toString();
+    
+    // Return null if the cell is empty or 'No data'
+    if (recipe == null || recipe.isEmpty || recipe == 'No data') return null;
+    return recipe;
+  }
+
+  // New: Method to retrieve the link for the current phase
+  // String? getRecipeLink(String phase) {
+  //   return _phaseRecipeUrls[phase];
+  // }
 
 // go through this and understand cause wtf
 List<PhaseDayInfo> getAllPhaseDays(String phase) {
@@ -369,7 +400,7 @@ class CustomNavigationBar extends StatelessWidget {
           child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
           decoration: BoxDecoration(
-            color: backgroundColor.withOpacity(0.3),
+            color: backgroundColor.withOpacity(0.9),
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(24),
               topRight: Radius.circular(24),
@@ -806,7 +837,7 @@ class _LogCalendarState extends State<LogCalendar> {
                           title: const Text("Are these details correct?", style: TextStyle(
                             color: const Color(0xFF303437),
                             fontSize: 18,
-                            fontFamily: 'DM Sans',
+                            fontFamily: 'DMSans',
                             fontWeight: FontWeight.w700,
                             height: 1.79,
                             ),
@@ -817,7 +848,7 @@ class _LogCalendarState extends State<LogCalendar> {
                           , style: TextStyle(
                               color: const Color(0xFF303437),
                               fontSize: 14,
-                              fontFamily: 'DM Sans',
+                              fontFamily: 'DMSans',
                               fontWeight: FontWeight.w600,
                               height: 1.79,
                               ),
@@ -1293,11 +1324,8 @@ class DailyTipsPage extends StatelessWidget {
       'Late Luteal',
     ];
 
-
-
     // data loaded into page 
     final calc = context.watch<Calculate>();
-    // final nextPeriodDate = calc.nextPeriodDate;
     final difference = calc.difference;
     final phase = calc.phase;
     final dayOfPhase = calc.dayofphase;
@@ -1306,6 +1334,18 @@ class DailyTipsPage extends StatelessWidget {
 
     final cycleData = context.watch<CycleDataProvider>();
     final selectedField = cycleData.selectedField;
+
+    final info = (phase != null && dayOfPhase != null)
+    ? cycleData.getPhaseInfo(
+        phase: phase,
+        dayOfPhase: dayOfPhase,
+        field: selectedField,
+      )
+    : 'No data';
+
+    final String? recipeLink = (selectedField == "Foods and Recipes" && phase != null && dayOfPhase != null)
+    ? cycleData.getRecipeUrl(phase: phase, dayOfPhase: dayOfPhase)
+    : null;
 
     bool isSelected(String hormoneLabel) {
   return selectedField == hormoneLabel;
@@ -1330,13 +1370,13 @@ final energyGraph = ["Energy Levels Info"].contains(selectedField);
       return const Center(child: CircularProgressIndicator());
     }
 
-  final info = (phase != null && dayOfPhase != null)
-      ? cycleData.getPhaseInfo(
-          phase: phase,
-          dayOfPhase: dayOfPhase,
-          field: selectedField,
-        )
-      : 'No data';
+  // final info = (phase != null && dayOfPhase != null)
+  //     ? cycleData.getPhaseInfo(
+  //         phase: phase,
+  //         dayOfPhase: dayOfPhase,
+  //         field: selectedField,
+  //       )
+  //     : 'No data';
 
     // add this wherever need graph 
 
@@ -1478,9 +1518,15 @@ final phaseAnnotations = phaseStartX.containsKey(phase)
       ]
     : <VerticalRangeAnnotation>[];
 
-
+  // Inside DailyTipsPage build method
+  // final String? recipeLink = (selectedField == "Foods and Recipes" && phase != null && dayOfPhase != null)
+  //     ? cycleData.getRecipeUrl(phase: phase, dayOfPhase: dayOfPhase)
+  //     : null;
 
     // design of page 
+
+
+    
     return Scaffold(
       appBar: AppBar(
         centerTitle: false,
@@ -1511,7 +1557,9 @@ final phaseAnnotations = phaseStartX.containsKey(phase)
                 height: 89, // size of pink container
                 padding: const EdgeInsets.all(14.0),
                 decoration: BoxDecoration( // design of pink container
+                //aici ce trb sa schimbi culoarea
                   color: const Color(0xFFFBE3E4),
+                  //color: const Color(0xFFF68C8C),
                   borderRadius: BorderRadius.circular(24.0),
                 ),
                 child: Padding(
@@ -1525,9 +1573,10 @@ final phaseAnnotations = phaseStartX.containsKey(phase)
                             'Day $difference',
                             style: TextStyle(
                               color: Color(0xFF202325),
+                              //color: Colors.white,
                               fontSize: 25,
                               fontWeight: FontWeight.w700,
-                              fontFamily: 'DM Sans',
+                              fontFamily: 'DMSans',
                             )
                           ),
                           Text(
@@ -1537,7 +1586,7 @@ final phaseAnnotations = phaseStartX.containsKey(phase)
                             color: Color(0xFF5454CA),
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
-                            fontFamily: 'DM Sans'
+                            fontFamily: 'DMSans'
                             )
                           ),
                         ],
@@ -1550,7 +1599,7 @@ final phaseAnnotations = phaseStartX.containsKey(phase)
                             style: TextStyle( // edit text of today within pink container
                               color: Color(0xFF404446),
                               fontSize: 14,
-                              fontFamily: 'DM Sans',
+                              fontFamily: 'DMSans',
                               fontWeight: FontWeight.w400,
                           ),
                           ),
@@ -1601,28 +1650,18 @@ final phaseAnnotations = phaseStartX.containsKey(phase)
                   ),
                   _buildButton(
                     context,
-                    "Effects of Estrogen",
+                    "Energy Levels Info",
                     const MenstruationPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of Progesterone",
+                    "Concentration",
                     const FolicularPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of FSH",
+                    "Mood",
                     const OvulationPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Effects of LH",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Energy Levels Info",
-                    const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
@@ -1636,22 +1675,32 @@ final phaseAnnotations = phaseStartX.containsKey(phase)
                   ),
                   _buildButton(
                     context,
-                    "Concentration",
+                    "Types of Vitamins",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of Estrogen",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of Progesterone",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of FSH",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of LH",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
                     "Health",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Mood",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Types of Vitamins",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
@@ -1940,12 +1989,13 @@ Align(
                 child: 
                   _infoTile(
                     title: selectedField,
-                    value: 
+                    value: info,
+                    recipeUrl: recipeLink,
                     // cycleData.getPhaseInfo(
                     //     phase: phase,
                     //     dayOfPhase: dayOfPhase,
                     //     field: selectedField,
-                    Text(info).data!,
+                    //Text(info).data!,
                       
                     // : 'No data'), // fallback if phase or dayOfPhase is null
                   ),
@@ -2014,67 +2064,149 @@ Align(
     }
 
   //this one doesnt need an icon
+//   Widget _infoTile({
+//     required String title,
+//     required String value,
+//     //required IconData icon,
+//     bool isHighlighted = false,
+//   }) {
+//     return Container(
+//       margin: const EdgeInsets.only(bottom: 16),
+//       padding: const EdgeInsets.all(16),
+//       decoration: BoxDecoration(
+//         color: isHighlighted ? const Color.fromRGBO(54, 18, 58, 0.05) : const Color.fromARGB(255, 255, 255, 255),
+//         borderRadius: BorderRadius.circular(15),
+//         //border: Border.all(color: const Color.fromRGBO(54, 18, 58, 0.1)),
+//         boxShadow: [
+//         BoxShadow(
+//           color: Colors.black.withOpacity(0.08),
+//           blurRadius: 10,
+//           spreadRadius: 2,
+//           offset: const Offset(0, 4), // x, y
+//         ),
+//       ],
+//       ),
+//       child: Row(
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           //Icon(icon, color: const Color.fromARGB(255, 112, 161, 217)),
+//           // const SizedBox(width: 15),
+//           Expanded(
+//           child: Column(
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: [
+//               Text(
+//                 title,
+//                 style: TextStyle(
+//                     color: const Color(0xFF303437),
+//                     fontSize: 14,
+//                     fontFamily: 'DMSans',
+//                     fontWeight: FontWeight.w700,
+//                     height: 1.43,
+//                     ),
+//               ),
+//               const SizedBox(height: 4),
+//               Text(
+//                 value,
+//                 style: TextStyle(
+//                     color: const Color(0xFF303437),
+//                     fontSize: 14,
+//                     fontFamily: 'DMSans',
+//                     fontWeight: FontWeight.w400,
+//                     height: 1.43,
+//                     ),
+//                 softWrap: true,
+//                 maxLines: null,
+//               ),
+//             ],
+//           ),
+//         ),
+//       ],
+//     ),
+//   );
+// }
+
   Widget _infoTile({
     required String title,
     required String value,
-    //required IconData icon,
+    String? recipeUrl, 
     bool isHighlighted = false,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isHighlighted ? const Color.fromRGBO(54, 18, 58, 0.05) : const Color.fromARGB(255, 255, 255, 255),
+        color: isHighlighted ? const Color.fromRGBO(54, 18, 58, 0.05) : Colors.white,
         borderRadius: BorderRadius.circular(15),
-        //border: Border.all(color: const Color.fromRGBO(54, 18, 58, 0.1)),
         boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.08),
-          blurRadius: 10,
-          spreadRadius: 2,
-          offset: const Offset(0, 4), // x, y
-        ),
-      ],
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 10,
+            spreadRadius: 2,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          //Icon(icon, color: const Color.fromARGB(255, 112, 161, 217)),
-          // const SizedBox(width: 15),
-          Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                    color: const Color(0xFF303437),
-                    fontSize: 14,
-                    fontFamily: 'DMSans',
-                    fontWeight: FontWeight.w700,
-                    height: 1.43,
-                    ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                value,
-                style: TextStyle(
-                    color: const Color(0xFF303437),
-                    fontSize: 14,
-                    fontFamily: 'DMSans',
-                    fontWeight: FontWeight.w400,
-                    height: 1.43,
-                    ),
-                softWrap: true,
-                maxLines: null,
-              ),
-            ],
+          Text(
+            title,
+            style: const TextStyle(
+              color: Color(0xFF303437),
+              fontSize: 14,
+              fontFamily: 'DMSans',
+              fontWeight: FontWeight.w700,
+            ),
           ),
-        ),
-      ],
-    ),
-  );
-}
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: const TextStyle(
+              color: Color(0xFF303437),
+              fontSize: 14,
+              fontFamily: 'DMSans',
+              fontWeight: FontWeight.w400,
+              height: 1.43,
+            ),
+          ),
+          
+          // This part adds the clickable link only when needed
+          if (recipeUrl != null && recipeUrl.isNotEmpty && recipeUrl != 'No data') ...[
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12.0),
+              child: Divider(color: Color(0xFFE5E7EB)),
+            ),
+            InkWell(
+              onTap: () async {
+                final Uri url = Uri.parse(recipeUrl);
+                if (await canLaunchUrl(url)) {
+                  await launchUrl(url, mode: LaunchMode.externalApplication);
+                }
+              },
+              child: Row(
+                children: [
+                  const Icon(Icons.restaurant_menu, color: Color(0xFF5454CA), size: 18),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      "Open Recipe Link",
+                      style: TextStyle(
+                        color: Color(0xFF5454CA),
+                        fontWeight: FontWeight.w600,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   Widget _buildButton(BuildContext context, String label, Widget page) {
     final selectedField = context.watch<CycleDataProvider>().selectedField;
     return Padding(
@@ -2317,6 +2449,24 @@ class CalendarPage extends StatefulWidget {
         info = "Loading...";
       }
 
+      //final calc = context.watch<Calculate>();
+    final difference = calc.difference;
+    final phase = calc.phase;
+    final dayOfPhase = calc.dayofphase;
+
+    final today = DateTime.now();
+
+    //final cycleData = context.watch<CycleDataProvider>();
+    final selectedField = cycleData.selectedField;
+
+    // final info = (phase != null && dayOfPhase != null)
+    // ? cycleData.getPhaseInfo(
+    //     phase: phase,
+    //     dayOfPhase: dayOfPhase,
+    //     field: selectedField,
+    //   )
+    // : 'No data';
+
       return Scaffold(
         //backgroundColor: Colors.white,
         appBar: AppBar(
@@ -2339,6 +2489,84 @@ class CalendarPage extends StatefulWidget {
           padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
+              //aici e chestia de la calendar cu day si phase
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Stack(
+                 clipBehavior: Clip.none,
+                children: [
+
+              Container(
+                width: 3299,
+                height: 89, // size of pink container
+                padding: const EdgeInsets.all(14.0),
+                decoration: BoxDecoration( // design of pink container
+                //aici ce trb sa schimbi culoarea
+                  color: const Color(0xFFFBE3E4),
+                  //color: const Color(0xFFF68C8C),
+                  borderRadius: BorderRadius.circular(24.0),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 61.0, left: 24.0),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Day $difference',
+                            style: TextStyle(
+                              color: Color(0xFF202325),
+                              //color: Colors.white,
+                              fontSize: 25,
+                              fontWeight: FontWeight.w700,
+                              fontFamily: 'DMSans',
+                            )
+                          ),
+                          Text(
+                            ' $phase',
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                            color: Color(0xFF5454CA),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: 'DMSans'
+                            )
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                          //  'Today, $today.year, $today.month, $today.day',
+                            'Today, ${today.day}/${today.month}/${today.year}',
+                            style: TextStyle( // edit text of today within pink container
+                              color: Color(0xFF404446),
+                              fontSize: 14,
+                              fontFamily: 'DMSans',
+                              fontWeight: FontWeight.w400,
+                          ),
+                          ),
+                        ],
+                        )
+                    ],
+                  ),
+                ),
+              ),
+               Positioned(
+              top: 35,   // Adjust these to get the exact "sit" you want
+              right: 10,
+              child: Image.asset(
+                'assets/woman_in_swimsuit.png',
+                width: 100, // Adjust size based on your asset
+              ),
+            ),
+                ]
+              ),
+
+              ),
+              SizedBox(height: 30),
+              
               TableCalendar(
                 firstDay: DateTime.now(),
                 lastDay: DateTime.now().add(const Duration(days: 365 * 5)),
@@ -2718,11 +2946,11 @@ for (final phaseName in phasesInOrder) {
 }
 
 final phaseColors = {
-  'Menstruation': const Color.fromARGB(64, 217, 28, 56),
-  'Follicular': const Color.fromRGBO(173, 216, 230, 0.25),
-  'Ovulation': const Color.fromRGBO(144, 238, 144, 0.25), 
-  'Early Luteal': const Color.fromRGBO(221, 160, 221, 0.25),
-  'Late Luteal': const Color.fromRGBO(255, 228, 181, 0.25),
+  'Menstruation': const Color(0xFFF6A3A3),
+  'Follicular': const Color(0xFFF9D5FF),
+  'Ovulation': const Color(0xFFC1E5FF), 
+  'Early Luteal': const Color(0xFFFFE6C4),
+  'Late Luteal': const Color(0xFFD0D4FF),
 };
 // design change these to match color scheme
 
@@ -2801,25 +3029,55 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 children: [
-                  _buildButton(
+                   _buildButton(
                     context,
                     "Phase Info",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of Estrogen",
+                    "Energy Levels Info",
                     const MenstruationPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of Progesterone",
+                    "Concentration",
                     const FolicularPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of FSH",
+                    "Mood",
                     const OvulationPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "What to eat",
+                    const EarlyLutealPage(),
+                  ),
+                  // _buildButton(
+                  //   context,
+                  //   "Foods and Recipes",
+                  //   const EarlyLutealPage(),
+                  // ),
+                  _buildButton(
+                    context,
+                    "Types of Vitamins",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of Estrogen",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of Progesterone",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of FSH",
+                    const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
@@ -2828,37 +3086,7 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
                   ),
                   _buildButton(
                     context,
-                    "Energy Levels Info",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "What to eat",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Foods and Recipes",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Concentration",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
                     "Health",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Mood",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Types of Vitamins",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
@@ -2943,14 +3171,26 @@ rangeAnnotations: RangeAnnotations(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Cycle Day',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
                                   showTitles: true,
                                   interval: 5,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -2959,7 +3199,13 @@ rangeAnnotations: RangeAnnotations(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Hormone Level',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
@@ -2967,7 +3213,13 @@ rangeAnnotations: RangeAnnotations(
                                   interval: 1,
                                   reservedSize: 40,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -3076,7 +3328,7 @@ Align(
                                     style: TextStyle(
                                       color: const Color(0xFF303437),
                                       fontSize: 14,
-                                      fontFamily: 'DM Sans',
+                                      fontFamily: 'DMSans',
                                       fontWeight: FontWeight.w600,
                                       height: 1.43,
                                       ),
@@ -3086,7 +3338,13 @@ Align(
                                   showTitles: true,
                                   interval: 5,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -3098,7 +3356,7 @@ Align(
                                     style: TextStyle(
                                       color: const Color(0xFF303437),
                                       fontSize: 14,
-                                      fontFamily: 'DM Sans',
+                                      fontFamily: 'DMSans',
                                       fontWeight: FontWeight.w600,
                                       height: 1.43,
                                       ),
@@ -3109,7 +3367,13 @@ Align(
                                   interval: 1,
                                   reservedSize: 40,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -3424,11 +3688,11 @@ for (final phaseName in phasesInOrder) {
 }
 
 final phaseColors = {
-  'Menstruation': const Color.fromARGB(64, 217, 28, 56),
-  'Follicular': const Color.fromRGBO(173, 216, 230, 0.25),
-  'Ovulation': const Color.fromRGBO(144, 238, 144, 0.25), 
-  'Early Luteal': const Color.fromRGBO(221, 160, 221, 0.25),
-  'Late Luteal': const Color.fromRGBO(255, 228, 181, 0.25),
+  'Menstruation': const Color(0xFFF6A3A3),
+  'Follicular': const Color(0xFFF9D5FF),
+  'Ovulation': const Color(0xFFC1E5FF), 
+  'Early Luteal': const Color(0xFFFFE6C4),
+  'Late Luteal': const Color(0xFFD0D4FF),
 };
 // design change these to match color scheme
 
@@ -3501,18 +3765,48 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
                   ),
                   _buildButton(
                     context,
-                    "Effects of Estrogen",
+                    "Energy Levels Info",
                     const MenstruationPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of Progesterone",
+                    "Concentration",
                     const FolicularPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of FSH",
+                    "Mood",
                     const OvulationPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "What to eat",
+                    const EarlyLutealPage(),
+                  ),
+                  // _buildButton(
+                  //   context,
+                  //   "Foods and Recipes",
+                  //   const EarlyLutealPage(),
+                  // ),
+                  _buildButton(
+                    context,
+                    "Types of Vitamins",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of Estrogen",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of Progesterone",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of FSH",
+                    const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
@@ -3521,37 +3815,7 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
                   ),
                   _buildButton(
                     context,
-                    "Energy Levels Info",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "What to eat",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Foods and Recipes",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Concentration",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
                     "Health",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Mood",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Types of Vitamins",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
@@ -3568,8 +3832,7 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
                     context,
                     "Insights in the Uterus",
                     const EarlyLutealPage(),
-                  )
-                ],
+                  )],
               ),
             ),
           SizedBox(height:20),
@@ -3634,14 +3897,26 @@ rangeAnnotations: RangeAnnotations(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Cycle Day',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
                                   showTitles: true,
                                   interval: 5,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -3650,7 +3925,13 @@ rangeAnnotations: RangeAnnotations(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Hormone Level',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
@@ -3658,7 +3939,13 @@ rangeAnnotations: RangeAnnotations(
                                   interval: 1,
                                   reservedSize: 40,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -3767,7 +4054,7 @@ Align(
                                     style: TextStyle(
                                       color: const Color(0xFF303437),
                                       fontSize: 14,
-                                      fontFamily: 'DM Sans',
+                                      fontFamily: 'DMSans',
                                       fontWeight: FontWeight.w600,
                                       height: 1.43,
                                       ),
@@ -3777,7 +4064,13 @@ Align(
                                   showTitles: true,
                                   interval: 5,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -3789,7 +4082,7 @@ Align(
                                     style: TextStyle(
                                       color: const Color(0xFF303437),
                                       fontSize: 14,
-                                      fontFamily: 'DM Sans',
+                                      fontFamily: 'DMSans',
                                       fontWeight: FontWeight.w700,
                                       height: 1.43,
                                       ),
@@ -3800,7 +4093,13 @@ Align(
                                   interval: 1,
                                   reservedSize: 40,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -4117,11 +4416,11 @@ for (final phaseName in phasesInOrder) {
 }
 
 final phaseColors = {
-  'Menstruation': const Color.fromARGB(64, 217, 28, 56),
-  'Follicular': const Color.fromRGBO(173, 216, 230, 0.25),
-  'Ovulation': const Color.fromRGBO(144, 238, 144, 0.25), 
-  'Early Luteal': const Color.fromRGBO(221, 160, 221, 0.25),
-  'Late Luteal': const Color.fromRGBO(255, 228, 181, 0.25),
+  'Menstruation': const Color(0xFFF6A3A3),
+  'Follicular': const Color(0xFFF9D5FF),
+  'Ovulation': const Color(0xFFC1E5FF), 
+  'Early Luteal': const Color(0xFFFFE6C4),
+  'Late Luteal': const Color(0xFFD0D4FF),
 };
 // design change these to match color scheme
 
@@ -4188,25 +4487,55 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 children: [
-                  _buildButton(
+                   _buildButton(
                     context,
                     "Phase Info",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of Estrogen",
+                    "Energy Levels Info",
                     const MenstruationPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of Progesterone",
+                    "Concentration",
                     const FolicularPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of FSH",
+                    "Mood",
                     const OvulationPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "What to eat",
+                    const EarlyLutealPage(),
+                  ),
+                  // _buildButton(
+                  //   context,
+                  //   "Foods and Recipes",
+                  //   const EarlyLutealPage(),
+                  // ),
+                  _buildButton(
+                    context,
+                    "Types of Vitamins",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of Estrogen",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of Progesterone",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of FSH",
+                    const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
@@ -4215,37 +4544,7 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
                   ),
                   _buildButton(
                     context,
-                    "Energy Levels Info",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "What to eat",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Foods and Recipes",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Concentration",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
                     "Health",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Mood",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Types of Vitamins",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
@@ -4329,14 +4628,26 @@ rangeAnnotations: RangeAnnotations(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Cycle Day',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
                                   showTitles: true,
                                   interval: 5,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -4345,7 +4656,13 @@ rangeAnnotations: RangeAnnotations(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Hormone Level',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
@@ -4353,7 +4670,13 @@ rangeAnnotations: RangeAnnotations(
                                   interval: 1,
                                   reservedSize: 40,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -4459,14 +4782,26 @@ Align(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Cycle Day',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
                                   showTitles: true,
                                   interval: 5,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -4475,7 +4810,13 @@ Align(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Energy Level',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
@@ -4483,7 +4824,13 @@ Align(
                                   interval: 1,
                                   reservedSize: 40,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -4804,11 +5151,11 @@ for (final phaseName in phasesInOrder) {
 }
 
 final phaseColors = {
-  'Menstruation': const Color.fromARGB(64, 217, 28, 56),
-  'Follicular': const Color.fromRGBO(173, 216, 230, 0.25),
-  'Ovulation': const Color.fromRGBO(144, 238, 144, 0.25), 
-  'Early Luteal': const Color.fromRGBO(221, 160, 221, 0.25),
-  'Late Luteal': const Color.fromRGBO(255, 228, 181, 0.25),
+  'Menstruation': const Color(0xFFF6A3A3),
+  'Follicular': const Color(0xFFF9D5FF),
+  'Ovulation': const Color(0xFFC1E5FF), 
+  'Early Luteal': const Color(0xFFFFE6C4),
+  'Late Luteal': const Color(0xFFD0D4FF),
 };
 // design change these to match color scheme
 
@@ -4875,25 +5222,55 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 children: [
-                  _buildButton(
+                   _buildButton(
                     context,
                     "Phase Info",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of Estrogen",
+                    "Energy Levels Info",
                     const MenstruationPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of Progesterone",
+                    "Concentration",
                     const FolicularPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of FSH",
+                    "Mood",
                     const OvulationPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "What to eat",
+                    const EarlyLutealPage(),
+                  ),
+                  // _buildButton(
+                  //   context,
+                  //   "Foods and Recipes",
+                  //   const EarlyLutealPage(),
+                  // ),
+                  _buildButton(
+                    context,
+                    "Types of Vitamins",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of Estrogen",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of Progesterone",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of FSH",
+                    const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
@@ -4902,37 +5279,7 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
                   ),
                   _buildButton(
                     context,
-                    "Energy Levels Info",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "What to eat",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Foods and Recipes",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Concentration",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
                     "Health",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Mood",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Types of Vitamins",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
@@ -5016,14 +5363,26 @@ rangeAnnotations: RangeAnnotations(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Cycle Day',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
                                   showTitles: true,
                                   interval: 5,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -5032,7 +5391,13 @@ rangeAnnotations: RangeAnnotations(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Hormone Level',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
@@ -5040,7 +5405,13 @@ rangeAnnotations: RangeAnnotations(
                                   interval: 1,
                                   reservedSize: 40,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -5149,7 +5520,7 @@ Align(
                                     style: TextStyle(
                                       color: const Color(0xFF303437),
                                       fontSize: 14,
-                                      fontFamily: 'DM Sans',
+                                      fontFamily: 'DMSans',
                                       fontWeight: FontWeight.w600,
                                       height: 1.43,
                                       ),
@@ -5159,7 +5530,13 @@ Align(
                                   showTitles: true,
                                   interval: 5,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -5171,7 +5548,7 @@ Align(
                                     style: TextStyle(
                                       color: const Color(0xFF303437),
                                       fontSize: 14,
-                                      fontFamily: 'DM Sans',
+                                      fontFamily: 'DMSans',
                                       fontWeight: FontWeight.w600,
                                       height: 1.43,
                                       ),
@@ -5182,7 +5559,13 @@ Align(
                                   interval: 1,
                                   reservedSize: 40,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -5503,11 +5886,11 @@ for (final phaseName in phasesInOrder) {
 }
 
 final phaseColors = {
-  'Menstruation': const Color.fromARGB(64, 217, 28, 56),
-  'Follicular': const Color.fromRGBO(173, 216, 230, 0.25),
-  'Ovulation': const Color.fromRGBO(144, 238, 144, 0.25), 
-  'Early Luteal': const Color.fromRGBO(221, 160, 221, 0.25),
-  'Late Luteal': const Color.fromRGBO(255, 228, 181, 0.25),
+  'Menstruation': const Color(0xFFF6A3A3),
+  'Follicular': const Color(0xFFF9D5FF),
+  'Ovulation': const Color(0xFFC1E5FF), 
+  'Early Luteal': const Color(0xFFFFE6C4),
+  'Late Luteal': const Color(0xFFD0D4FF),
 };
 // design change these to match color scheme
 
@@ -5544,7 +5927,7 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
               style: TextStyle(
                 color: const Color(0xFF5454CA),
                 fontSize: 36,
-                fontFamily: 'DM Sans',
+                fontFamily: 'DMSans',
                 fontWeight: FontWeight.w700,
                 height: 0.67,
                 letterSpacing: 1.44,
@@ -5559,7 +5942,7 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
                 style: TextStyle(
                   color:  Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                 ),
@@ -5573,25 +5956,55 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 children: [
-                  _buildButton(
+                   _buildButton(
                     context,
                     "Phase Info",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of Estrogen",
+                    "Energy Levels Info",
                     const MenstruationPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of Progesterone",
+                    "Concentration",
                     const FolicularPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of FSH",
+                    "Mood",
                     const OvulationPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "What to eat",
+                    const EarlyLutealPage(),
+                  ),
+                  // _buildButton(
+                  //   context,
+                  //   "Foods and Recipes",
+                  //   const EarlyLutealPage(),
+                  // ),
+                  _buildButton(
+                    context,
+                    "Types of Vitamins",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of Estrogen",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of Progesterone",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of FSH",
+                    const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
@@ -5600,37 +6013,7 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
                   ),
                   _buildButton(
                     context,
-                    "Energy Levels Info",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "What to eat",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Foods and Recipes",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Concentration",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
                     "Health",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Mood",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Types of Vitamins",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
@@ -5717,7 +6100,7 @@ rangeAnnotations: RangeAnnotations(
                                     style: TextStyle(
                                       color: const Color(0xFF303437),
                                       fontSize: 14,
-                                      fontFamily: 'DM Sans',
+                                      fontFamily: 'DMSans',
                                       fontWeight: FontWeight.w600,
                                       height: 1.43,
                                       ),
@@ -5727,7 +6110,13 @@ rangeAnnotations: RangeAnnotations(
                                   showTitles: true,
                                   interval: 5,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -5739,7 +6128,7 @@ rangeAnnotations: RangeAnnotations(
                                     style:TextStyle(
                                       color: const Color(0xFF303437),
                                       fontSize: 14,
-                                      fontFamily: 'DM Sans',
+                                      fontFamily: 'DMSans',
                                       fontWeight: FontWeight.w700,
                                       height: 1.43,
                                       ),
@@ -5750,7 +6139,13 @@ rangeAnnotations: RangeAnnotations(
                                   interval: 1,
                                   reservedSize: 40,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -5859,7 +6254,7 @@ Align(
                                     style: TextStyle(
                                     color: const Color(0xFF303437),
                                     fontSize: 14,
-                                    fontFamily: 'DM Sans',
+                                    fontFamily: 'DMSans',
                                     fontWeight: FontWeight.w600,
                                     height: 1.43,
                                     ),
@@ -5869,7 +6264,13 @@ Align(
                                   showTitles: true,
                                   interval: 5,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -5881,7 +6282,7 @@ Align(
                                     style: TextStyle(
                                       color: const Color(0xFF303437),
                                       fontSize: 14,
-                                      fontFamily: 'DM Sans',
+                                      fontFamily: 'DMSans',
                                       fontWeight: FontWeight.w700,
                                       height: 1.43,
                                       ),
@@ -5892,7 +6293,13 @@ Align(
                                   interval: 1,
                                   reservedSize: 40,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -6382,7 +6789,13 @@ class _LegendItem extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 6),
-        Text(label),
+        Text(label, style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),),
       ],
     );
   }
