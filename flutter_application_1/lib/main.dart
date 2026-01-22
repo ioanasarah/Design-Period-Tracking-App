@@ -837,7 +837,7 @@ class _LogCalendarState extends State<LogCalendar> {
                           title: const Text("Are these details correct?", style: TextStyle(
                             color: const Color(0xFF303437),
                             fontSize: 18,
-                            fontFamily: 'DM Sans',
+                            fontFamily: 'DMSans',
                             fontWeight: FontWeight.w700,
                             height: 1.79,
                             ),
@@ -848,7 +848,7 @@ class _LogCalendarState extends State<LogCalendar> {
                           , style: TextStyle(
                               color: const Color(0xFF303437),
                               fontSize: 14,
-                              fontFamily: 'DM Sans',
+                              fontFamily: 'DMSans',
                               fontWeight: FontWeight.w600,
                               height: 1.79,
                               ),
@@ -1554,7 +1554,9 @@ final phaseAnnotations = phaseStartX.containsKey(phase)
                 height: 89, // size of pink container
                 padding: const EdgeInsets.all(14.0),
                 decoration: BoxDecoration( // design of pink container
+                //aici ce trb sa schimbi culoarea
                   color: const Color(0xFFFBE3E4),
+                  //color: const Color(0xFFF68C8C),
                   borderRadius: BorderRadius.circular(24.0),
                 ),
                 child: Padding(
@@ -1568,9 +1570,10 @@ final phaseAnnotations = phaseStartX.containsKey(phase)
                             'Day $difference',
                             style: TextStyle(
                               color: Color(0xFF202325),
+                              //color: Colors.white,
                               fontSize: 25,
                               fontWeight: FontWeight.w700,
-                              fontFamily: 'DM Sans',
+                              fontFamily: 'DMSans',
                             )
                           ),
                           Text(
@@ -1580,7 +1583,7 @@ final phaseAnnotations = phaseStartX.containsKey(phase)
                             color: Color(0xFF5454CA),
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
-                            fontFamily: 'DM Sans'
+                            fontFamily: 'DMSans'
                             )
                           ),
                         ],
@@ -1593,7 +1596,7 @@ final phaseAnnotations = phaseStartX.containsKey(phase)
                             style: TextStyle( // edit text of today within pink container
                               color: Color(0xFF404446),
                               fontSize: 14,
-                              fontFamily: 'DM Sans',
+                              fontFamily: 'DMSans',
                               fontWeight: FontWeight.w400,
                           ),
                           ),
@@ -3069,14 +3072,26 @@ rangeAnnotations: RangeAnnotations(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Cycle Day',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
                                   showTitles: true,
                                   interval: 5,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -3085,7 +3100,13 @@ rangeAnnotations: RangeAnnotations(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Hormone Level',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
@@ -3093,7 +3114,13 @@ rangeAnnotations: RangeAnnotations(
                                   interval: 1,
                                   reservedSize: 40,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -3202,7 +3229,7 @@ Align(
                                     style: TextStyle(
                                       color: const Color(0xFF303437),
                                       fontSize: 14,
-                                      fontFamily: 'DM Sans',
+                                      fontFamily: 'DMSans',
                                       fontWeight: FontWeight.w600,
                                       height: 1.43,
                                       ),
@@ -3212,7 +3239,13 @@ Align(
                                   showTitles: true,
                                   interval: 5,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -3224,7 +3257,7 @@ Align(
                                     style: TextStyle(
                                       color: const Color(0xFF303437),
                                       fontSize: 14,
-                                      fontFamily: 'DM Sans',
+                                      fontFamily: 'DMSans',
                                       fontWeight: FontWeight.w600,
                                       height: 1.43,
                                       ),
@@ -3235,7 +3268,13 @@ Align(
                                   interval: 1,
                                   reservedSize: 40,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -3759,14 +3798,26 @@ rangeAnnotations: RangeAnnotations(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Cycle Day',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
                                   showTitles: true,
                                   interval: 5,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -3775,7 +3826,13 @@ rangeAnnotations: RangeAnnotations(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Hormone Level',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
@@ -3783,7 +3840,13 @@ rangeAnnotations: RangeAnnotations(
                                   interval: 1,
                                   reservedSize: 40,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -3892,7 +3955,7 @@ Align(
                                     style: TextStyle(
                                       color: const Color(0xFF303437),
                                       fontSize: 14,
-                                      fontFamily: 'DM Sans',
+                                      fontFamily: 'DMSans',
                                       fontWeight: FontWeight.w600,
                                       height: 1.43,
                                       ),
@@ -3902,7 +3965,13 @@ Align(
                                   showTitles: true,
                                   interval: 5,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -3914,7 +3983,7 @@ Align(
                                     style: TextStyle(
                                       color: const Color(0xFF303437),
                                       fontSize: 14,
-                                      fontFamily: 'DM Sans',
+                                      fontFamily: 'DMSans',
                                       fontWeight: FontWeight.w700,
                                       height: 1.43,
                                       ),
@@ -3925,7 +3994,13 @@ Align(
                                   interval: 1,
                                   reservedSize: 40,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -4454,14 +4529,26 @@ rangeAnnotations: RangeAnnotations(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Cycle Day',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
                                   showTitles: true,
                                   interval: 5,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -4470,7 +4557,13 @@ rangeAnnotations: RangeAnnotations(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Hormone Level',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
@@ -4478,7 +4571,13 @@ rangeAnnotations: RangeAnnotations(
                                   interval: 1,
                                   reservedSize: 40,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -4584,14 +4683,26 @@ Align(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Cycle Day',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
                                   showTitles: true,
                                   interval: 5,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -4600,7 +4711,13 @@ Align(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Energy Level',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
@@ -4608,7 +4725,13 @@ Align(
                                   interval: 1,
                                   reservedSize: 40,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -5141,14 +5264,26 @@ rangeAnnotations: RangeAnnotations(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Cycle Day',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
                                   showTitles: true,
                                   interval: 5,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -5157,7 +5292,13 @@ rangeAnnotations: RangeAnnotations(
                                   padding: EdgeInsets.only(right: 20),
                                   child: Text(
                                     'Hormone Level',
-                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                    style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),
                                   ),
                                 ),
                                 sideTitles: SideTitles(
@@ -5165,7 +5306,13 @@ rangeAnnotations: RangeAnnotations(
                                   interval: 1,
                                   reservedSize: 40,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -5274,7 +5421,7 @@ Align(
                                     style: TextStyle(
                                       color: const Color(0xFF303437),
                                       fontSize: 14,
-                                      fontFamily: 'DM Sans',
+                                      fontFamily: 'DMSans',
                                       fontWeight: FontWeight.w600,
                                       height: 1.43,
                                       ),
@@ -5284,7 +5431,13 @@ Align(
                                   showTitles: true,
                                   interval: 5,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -5296,7 +5449,7 @@ Align(
                                     style: TextStyle(
                                       color: const Color(0xFF303437),
                                       fontSize: 14,
-                                      fontFamily: 'DM Sans',
+                                      fontFamily: 'DMSans',
                                       fontWeight: FontWeight.w600,
                                       height: 1.43,
                                       ),
@@ -5307,7 +5460,13 @@ Align(
                                   interval: 1,
                                   reservedSize: 40,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -5669,7 +5828,7 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
               style: TextStyle(
                 color: const Color(0xFF5454CA),
                 fontSize: 36,
-                fontFamily: 'DM Sans',
+                fontFamily: 'DMSans',
                 fontWeight: FontWeight.w700,
                 height: 0.67,
                 letterSpacing: 1.44,
@@ -5684,7 +5843,7 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
                 style: TextStyle(
                   color:  Color(0xFF404446),
                   fontSize: 18,
-                  fontFamily: 'DM Sans',
+                  fontFamily: 'DMSans',
                   fontWeight: FontWeight.w700,
                   height: 1.33,
                 ),
@@ -5842,7 +6001,7 @@ rangeAnnotations: RangeAnnotations(
                                     style: TextStyle(
                                       color: const Color(0xFF303437),
                                       fontSize: 14,
-                                      fontFamily: 'DM Sans',
+                                      fontFamily: 'DMSans',
                                       fontWeight: FontWeight.w600,
                                       height: 1.43,
                                       ),
@@ -5852,7 +6011,13 @@ rangeAnnotations: RangeAnnotations(
                                   showTitles: true,
                                   interval: 5,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -5864,7 +6029,7 @@ rangeAnnotations: RangeAnnotations(
                                     style:TextStyle(
                                       color: const Color(0xFF303437),
                                       fontSize: 14,
-                                      fontFamily: 'DM Sans',
+                                      fontFamily: 'DMSans',
                                       fontWeight: FontWeight.w700,
                                       height: 1.43,
                                       ),
@@ -5875,7 +6040,13 @@ rangeAnnotations: RangeAnnotations(
                                   interval: 1,
                                   reservedSize: 40,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -5984,7 +6155,7 @@ Align(
                                     style: TextStyle(
                                     color: const Color(0xFF303437),
                                     fontSize: 14,
-                                    fontFamily: 'DM Sans',
+                                    fontFamily: 'DMSans',
                                     fontWeight: FontWeight.w600,
                                     height: 1.43,
                                     ),
@@ -5994,7 +6165,13 @@ Align(
                                   showTitles: true,
                                   interval: 5,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -6006,7 +6183,7 @@ Align(
                                     style: TextStyle(
                                       color: const Color(0xFF303437),
                                       fontSize: 14,
-                                      fontFamily: 'DM Sans',
+                                      fontFamily: 'DMSans',
                                       fontWeight: FontWeight.w700,
                                       height: 1.43,
                                       ),
@@ -6017,7 +6194,13 @@ Align(
                                   interval: 1,
                                   reservedSize: 40,
                                   getTitlesWidget: (value, meta) {
-                                    return Text(value.toInt().toString());
+                                    return Text(value.toInt().toString(), style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),);
                                   },
                                 ),
                               ),
@@ -6507,7 +6690,13 @@ class _LegendItem extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 6),
-        Text(label),
+        Text(label, style: TextStyle(
+                                    color: const Color(0xFF303437),
+                                    fontSize: 14,
+                                    fontFamily: 'DMSans',
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.79,
+                                    ),),
       ],
     );
   }
