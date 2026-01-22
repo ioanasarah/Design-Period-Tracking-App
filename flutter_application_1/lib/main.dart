@@ -400,7 +400,7 @@ class CustomNavigationBar extends StatelessWidget {
           child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
           decoration: BoxDecoration(
-            color: backgroundColor.withOpacity(0.3),
+            color: backgroundColor.withOpacity(0.9),
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(24),
               topRight: Radius.circular(24),
@@ -1524,6 +1524,9 @@ final phaseAnnotations = phaseStartX.containsKey(phase)
   //     : null;
 
     // design of page 
+
+
+    
     return Scaffold(
       appBar: AppBar(
         centerTitle: false,
@@ -2446,6 +2449,24 @@ class CalendarPage extends StatefulWidget {
         info = "Loading...";
       }
 
+      //final calc = context.watch<Calculate>();
+    final difference = calc.difference;
+    final phase = calc.phase;
+    final dayOfPhase = calc.dayofphase;
+
+    final today = DateTime.now();
+
+    //final cycleData = context.watch<CycleDataProvider>();
+    final selectedField = cycleData.selectedField;
+
+    // final info = (phase != null && dayOfPhase != null)
+    // ? cycleData.getPhaseInfo(
+    //     phase: phase,
+    //     dayOfPhase: dayOfPhase,
+    //     field: selectedField,
+    //   )
+    // : 'No data';
+
       return Scaffold(
         //backgroundColor: Colors.white,
         appBar: AppBar(
@@ -2468,6 +2489,84 @@ class CalendarPage extends StatefulWidget {
           padding: const EdgeInsets.all(8.0),
           child: Column(
             children: [
+              //aici e chestia de la calendar cu day si phase
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Stack(
+                 clipBehavior: Clip.none,
+                children: [
+
+              Container(
+                width: 3299,
+                height: 89, // size of pink container
+                padding: const EdgeInsets.all(14.0),
+                decoration: BoxDecoration( // design of pink container
+                //aici ce trb sa schimbi culoarea
+                  color: const Color(0xFFFBE3E4),
+                  //color: const Color(0xFFF68C8C),
+                  borderRadius: BorderRadius.circular(24.0),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 61.0, left: 24.0),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Day $difference',
+                            style: TextStyle(
+                              color: Color(0xFF202325),
+                              //color: Colors.white,
+                              fontSize: 25,
+                              fontWeight: FontWeight.w700,
+                              fontFamily: 'DMSans',
+                            )
+                          ),
+                          Text(
+                            ' $phase',
+                            textAlign: TextAlign.right,
+                            style: TextStyle(
+                            color: Color(0xFF5454CA),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: 'DMSans'
+                            )
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                          //  'Today, $today.year, $today.month, $today.day',
+                            'Today, ${today.day}/${today.month}/${today.year}',
+                            style: TextStyle( // edit text of today within pink container
+                              color: Color(0xFF404446),
+                              fontSize: 14,
+                              fontFamily: 'DMSans',
+                              fontWeight: FontWeight.w400,
+                          ),
+                          ),
+                        ],
+                        )
+                    ],
+                  ),
+                ),
+              ),
+               Positioned(
+              top: 35,   // Adjust these to get the exact "sit" you want
+              right: 10,
+              child: Image.asset(
+                'assets/woman_in_swimsuit.png',
+                width: 100, // Adjust size based on your asset
+              ),
+            ),
+                ]
+              ),
+
+              ),
+              SizedBox(height: 30),
+              
               TableCalendar(
                 firstDay: DateTime.now(),
                 lastDay: DateTime.now().add(const Duration(days: 365 * 5)),
