@@ -1644,28 +1644,18 @@ final phaseAnnotations = phaseStartX.containsKey(phase)
                   ),
                   _buildButton(
                     context,
-                    "Effects of Estrogen",
+                    "Energy Levels Info",
                     const MenstruationPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of Progesterone",
+                    "Concentration",
                     const FolicularPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of FSH",
+                    "Mood",
                     const OvulationPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Effects of LH",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Energy Levels Info",
-                    const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
@@ -1679,22 +1669,32 @@ final phaseAnnotations = phaseStartX.containsKey(phase)
                   ),
                   _buildButton(
                     context,
-                    "Concentration",
+                    "Types of Vitamins",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of Estrogen",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of Progesterone",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of FSH",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of LH",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
                     "Health",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Mood",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Types of Vitamins",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
@@ -2844,11 +2844,11 @@ for (final phaseName in phasesInOrder) {
 }
 
 final phaseColors = {
-  'Menstruation': const Color.fromARGB(64, 217, 28, 56),
-  'Follicular': const Color.fromRGBO(173, 216, 230, 0.25),
-  'Ovulation': const Color.fromRGBO(144, 238, 144, 0.25), 
-  'Early Luteal': const Color.fromRGBO(221, 160, 221, 0.25),
-  'Late Luteal': const Color.fromRGBO(255, 228, 181, 0.25),
+  'Menstruation': const Color(0xFFF6A3A3),
+  'Follicular': const Color(0xFFF9D5FF),
+  'Ovulation': const Color(0xFFC1E5FF), 
+  'Early Luteal': const Color(0xFFFFE6C4),
+  'Late Luteal': const Color(0xFFD0D4FF),
 };
 // design change these to match color scheme
 
@@ -2927,25 +2927,55 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 children: [
-                  _buildButton(
+                   _buildButton(
                     context,
                     "Phase Info",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of Estrogen",
+                    "Energy Levels Info",
                     const MenstruationPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of Progesterone",
+                    "Concentration",
                     const FolicularPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of FSH",
+                    "Mood",
                     const OvulationPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "What to eat",
+                    const EarlyLutealPage(),
+                  ),
+                  // _buildButton(
+                  //   context,
+                  //   "Foods and Recipes",
+                  //   const EarlyLutealPage(),
+                  // ),
+                  _buildButton(
+                    context,
+                    "Types of Vitamins",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of Estrogen",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of Progesterone",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of FSH",
+                    const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
@@ -2954,37 +2984,7 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
                   ),
                   _buildButton(
                     context,
-                    "Energy Levels Info",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "What to eat",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Foods and Recipes",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Concentration",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
                     "Health",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Mood",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Types of Vitamins",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
@@ -3550,11 +3550,11 @@ for (final phaseName in phasesInOrder) {
 }
 
 final phaseColors = {
-  'Menstruation': const Color.fromARGB(64, 217, 28, 56),
-  'Follicular': const Color.fromRGBO(173, 216, 230, 0.25),
-  'Ovulation': const Color.fromRGBO(144, 238, 144, 0.25), 
-  'Early Luteal': const Color.fromRGBO(221, 160, 221, 0.25),
-  'Late Luteal': const Color.fromRGBO(255, 228, 181, 0.25),
+  'Menstruation': const Color(0xFFF6A3A3),
+  'Follicular': const Color(0xFFF9D5FF),
+  'Ovulation': const Color(0xFFC1E5FF), 
+  'Early Luteal': const Color(0xFFFFE6C4),
+  'Late Luteal': const Color(0xFFD0D4FF),
 };
 // design change these to match color scheme
 
@@ -3627,18 +3627,48 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
                   ),
                   _buildButton(
                     context,
-                    "Effects of Estrogen",
+                    "Energy Levels Info",
                     const MenstruationPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of Progesterone",
+                    "Concentration",
                     const FolicularPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of FSH",
+                    "Mood",
                     const OvulationPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "What to eat",
+                    const EarlyLutealPage(),
+                  ),
+                  // _buildButton(
+                  //   context,
+                  //   "Foods and Recipes",
+                  //   const EarlyLutealPage(),
+                  // ),
+                  _buildButton(
+                    context,
+                    "Types of Vitamins",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of Estrogen",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of Progesterone",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of FSH",
+                    const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
@@ -3647,37 +3677,7 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
                   ),
                   _buildButton(
                     context,
-                    "Energy Levels Info",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "What to eat",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Foods and Recipes",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Concentration",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
                     "Health",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Mood",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Types of Vitamins",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
@@ -3694,8 +3694,7 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
                     context,
                     "Insights in the Uterus",
                     const EarlyLutealPage(),
-                  )
-                ],
+                  )],
               ),
             ),
           SizedBox(height:20),
@@ -4243,11 +4242,11 @@ for (final phaseName in phasesInOrder) {
 }
 
 final phaseColors = {
-  'Menstruation': const Color.fromARGB(64, 217, 28, 56),
-  'Follicular': const Color.fromRGBO(173, 216, 230, 0.25),
-  'Ovulation': const Color.fromRGBO(144, 238, 144, 0.25), 
-  'Early Luteal': const Color.fromRGBO(221, 160, 221, 0.25),
-  'Late Luteal': const Color.fromRGBO(255, 228, 181, 0.25),
+  'Menstruation': const Color(0xFFF6A3A3),
+  'Follicular': const Color(0xFFF9D5FF),
+  'Ovulation': const Color(0xFFC1E5FF), 
+  'Early Luteal': const Color(0xFFFFE6C4),
+  'Late Luteal': const Color(0xFFD0D4FF),
 };
 // design change these to match color scheme
 
@@ -4314,25 +4313,55 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 children: [
-                  _buildButton(
+                   _buildButton(
                     context,
                     "Phase Info",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of Estrogen",
+                    "Energy Levels Info",
                     const MenstruationPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of Progesterone",
+                    "Concentration",
                     const FolicularPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of FSH",
+                    "Mood",
                     const OvulationPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "What to eat",
+                    const EarlyLutealPage(),
+                  ),
+                  // _buildButton(
+                  //   context,
+                  //   "Foods and Recipes",
+                  //   const EarlyLutealPage(),
+                  // ),
+                  _buildButton(
+                    context,
+                    "Types of Vitamins",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of Estrogen",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of Progesterone",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of FSH",
+                    const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
@@ -4341,37 +4370,7 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
                   ),
                   _buildButton(
                     context,
-                    "Energy Levels Info",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "What to eat",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Foods and Recipes",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Concentration",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
                     "Health",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Mood",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Types of Vitamins",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
@@ -4930,11 +4929,11 @@ for (final phaseName in phasesInOrder) {
 }
 
 final phaseColors = {
-  'Menstruation': const Color.fromARGB(64, 217, 28, 56),
-  'Follicular': const Color.fromRGBO(173, 216, 230, 0.25),
-  'Ovulation': const Color.fromRGBO(144, 238, 144, 0.25), 
-  'Early Luteal': const Color.fromRGBO(221, 160, 221, 0.25),
-  'Late Luteal': const Color.fromRGBO(255, 228, 181, 0.25),
+  'Menstruation': const Color(0xFFF6A3A3),
+  'Follicular': const Color(0xFFF9D5FF),
+  'Ovulation': const Color(0xFFC1E5FF), 
+  'Early Luteal': const Color(0xFFFFE6C4),
+  'Late Luteal': const Color(0xFFD0D4FF),
 };
 // design change these to match color scheme
 
@@ -5001,25 +5000,55 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 children: [
-                  _buildButton(
+                   _buildButton(
                     context,
                     "Phase Info",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of Estrogen",
+                    "Energy Levels Info",
                     const MenstruationPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of Progesterone",
+                    "Concentration",
                     const FolicularPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of FSH",
+                    "Mood",
                     const OvulationPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "What to eat",
+                    const EarlyLutealPage(),
+                  ),
+                  // _buildButton(
+                  //   context,
+                  //   "Foods and Recipes",
+                  //   const EarlyLutealPage(),
+                  // ),
+                  _buildButton(
+                    context,
+                    "Types of Vitamins",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of Estrogen",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of Progesterone",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of FSH",
+                    const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
@@ -5028,37 +5057,7 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
                   ),
                   _buildButton(
                     context,
-                    "Energy Levels Info",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "What to eat",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Foods and Recipes",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Concentration",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
                     "Health",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Mood",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Types of Vitamins",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
@@ -5629,11 +5628,11 @@ for (final phaseName in phasesInOrder) {
 }
 
 final phaseColors = {
-  'Menstruation': const Color.fromARGB(64, 217, 28, 56),
-  'Follicular': const Color.fromRGBO(173, 216, 230, 0.25),
-  'Ovulation': const Color.fromRGBO(144, 238, 144, 0.25), 
-  'Early Luteal': const Color.fromRGBO(221, 160, 221, 0.25),
-  'Late Luteal': const Color.fromRGBO(255, 228, 181, 0.25),
+  'Menstruation': const Color(0xFFF6A3A3),
+  'Follicular': const Color(0xFFF9D5FF),
+  'Ovulation': const Color(0xFFC1E5FF), 
+  'Early Luteal': const Color(0xFFFFE6C4),
+  'Late Luteal': const Color(0xFFD0D4FF),
 };
 // design change these to match color scheme
 
@@ -5699,25 +5698,55 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 children: [
-                  _buildButton(
+                   _buildButton(
                     context,
                     "Phase Info",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of Estrogen",
+                    "Energy Levels Info",
                     const MenstruationPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of Progesterone",
+                    "Concentration",
                     const FolicularPage(),
                   ),
                   _buildButton(
                     context,
-                    "Effects of FSH",
+                    "Mood",
                     const OvulationPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "What to eat",
+                    const EarlyLutealPage(),
+                  ),
+                  // _buildButton(
+                  //   context,
+                  //   "Foods and Recipes",
+                  //   const EarlyLutealPage(),
+                  // ),
+                  _buildButton(
+                    context,
+                    "Types of Vitamins",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of Estrogen",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of Progesterone",
+                    const EarlyLutealPage(),
+                  ),
+                  _buildButton(
+                    context,
+                    "Effects of FSH",
+                    const EarlyLutealPage(),
                   ),
                   _buildButton(
                     context,
@@ -5726,37 +5755,7 @@ final List<VerticalRangeAnnotation> phaseAnnotations =
                   ),
                   _buildButton(
                     context,
-                    "Energy Levels Info",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "What to eat",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Foods and Recipes",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Concentration",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
                     "Health",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Mood",
-                    const EarlyLutealPage(),
-                  ),
-                  _buildButton(
-                    context,
-                    "Types of Vitamins",
                     const EarlyLutealPage(),
                   ),
                   _buildButton(
