@@ -795,6 +795,65 @@ class _LogCalendarState extends State<LogCalendar> {
                     final int cycleLength =
                         int.tryParse(cycleLengthController.text) ?? 28;
 
+                    //verifica daca prea lungi/scurte - these are healthy values
+                    bool isUnusual = periodLength > 8 || cycleLength < 21 || cycleLength > 35;
+
+                    if (isUnusual) {
+                      //warning dialog
+                      bool proceed = await showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text("Are these details correct?", style: TextStyle(
+                            color: const Color(0xFF303437),
+                            fontSize: 18,
+                            fontFamily: 'DM Sans',
+                            fontWeight: FontWeight.w700,
+                            height: 1.79,
+                            ),
+                            ),
+                          content: Text(
+                            "You entered a ${periodLength}-day period and a ${cycleLength}-day cycle. "
+                            "These values are outside the typical range. Do you want to save them anyway?"
+                          , style: TextStyle(
+                              color: const Color(0xFF303437),
+                              fontSize: 14,
+                              fontFamily: 'DM Sans',
+                              fontWeight: FontWeight.w600,
+                              height: 1.79,
+                              ),
+                              ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false), // User wants to edit
+                              child: const Text("Edit", style: TextStyle(
+                                  color: const Color(0xFF303437),
+                                  fontSize: 14,
+                                  fontFamily: 'DMSans',
+                                  fontWeight: FontWeight.w400,
+                                  height: 1.79,
+                                  ),
+                                  ),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true), // User confirms
+                              child: const Text("Yes, Save", style: TextStyle(
+                                color: const Color(0xFF303437),
+                                fontSize: 14,
+                                fontFamily: 'DMSans',
+                                fontWeight: FontWeight.w400,
+                                height: 1.79,
+                                ),
+                                ),
+                            ),
+                          ],
+                        ),
+                      ) ?? false;
+
+                      if (!proceed) return; // Stop if user clicked "Edit"
+                    }
+                    
+                    
+                    
                     final calc = context.read<Calculate>();
 
                     // Update provider & save data in one call
