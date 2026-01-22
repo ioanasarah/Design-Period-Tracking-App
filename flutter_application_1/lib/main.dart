@@ -1966,7 +1966,7 @@ Align(
 String _imageForPhase(String phase) {
   switch (phase) {
     case "Menstruation":
-      return 'assets/folicular.png';
+      return 'assets/menstruation.png';
     case "Follicular":
       return 'assets/folicular.png';
     case "Ovulation":
