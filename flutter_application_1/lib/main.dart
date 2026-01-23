@@ -2486,7 +2486,7 @@ class CalendarPage extends StatefulWidget {
           //centerTitle: true,
         ),
         body: SingleChildScrollView(
-          padding: const EdgeInsets.only(top: 16.0, right: 16.0, left: 16.0, bottom: 70),
+          padding: const EdgeInsets.only(top: 16.0, right: 16.0, left: 16.0, bottom: 0),
           //padding:const EdgeInsets.all(16),
           child: Column(
             children: [
