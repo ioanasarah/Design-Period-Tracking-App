@@ -1,0 +1,11 @@
+# Designing a smart period-tracking application
+
+Women's health has been historically marginalised in medical research, with the male body frequently being the default model. To this day, scientific research on the menstrual cycle remains limited. This project aimed to develop an application in which students can access scientific information about their menstrual cycle to better understand its influence on their daily life. The application was developed using the Flutter framework and coded in the Dart programming language. Figma was then used to create the app's design, integrating the researched information in an accessible way. The resulting product combines menstrual cycle tracking with day- and phase-specific content. This app includes details on energy and hormone levels, concentration, and nutritional suggestions, allowing the user to implement routines that align with their cycle. This project highlights that the use of digital tools can mitigate knowledge gaps by providing accessible scientific information for women and students.
+
+
+ 
+[View the full report here](Smart_Period_App_Report.pdf)
+
+## Files 
+- [`main.dart`](./flutter_application_1/lib/main.dart)
+This is the file which creates all of the classes which are used in the implementation of the app. Running this file opens a simulator of the app. Because Dart is an object-oriented programming language, the code of the app was split into classes that fall under 3 categories: algorithms, classes for each page in the app, and helper classes, which include designs for buttons or text boxes.
